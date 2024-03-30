@@ -1,22 +1,18 @@
-import { AuthData } from '../types/AuthData';
+import axios from "axios";
+import {AuthData} from "../types/AuthData";
 
-const API_URL = process.env.REACT_APP_API_URL;
+const URL_API = process.env.REACT_APP_API_URL;
 
-export const login = async (data: AuthData): Promise<void> => {
-    try {
-        const response = await fetch(`${API_URL}/users/auth`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
+const api = axios.create({
+    baseURL: URL_API,
+});
 
-        if (!response.ok) {
-            throw new Error('Erro ao fazer login.');
-        }
-    } catch (error) {
+export const login = async (data : AuthData) => {
+    return api.post('/users/auth', data).then((result) => {
+        console.log(result);
+        return result;
+    }).catch((error) => {
         console.log(error);
-        throw new Error('Erro ao fazer login.');
-    }
+        return error.response;
+    });
 };

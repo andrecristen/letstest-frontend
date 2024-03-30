@@ -16,10 +16,13 @@ const Login: React.FC = () => {
         try {
             setValidatingLogin(true);
             const data: AuthData = { email, password };
-            await login(data);
+            const response = await login(data);
+            console.log(response);
+            navigate("/");
             // Login bem-sucedido, redirecionar...
         } catch (error) {
             alert('Email ou senha incorretos.');
+            console.log(error);
         }
     };
 
