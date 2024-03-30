@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/authService';
+import { auth } from '../services/authService';
 import { AuthData } from '../types/AuthData';
 import logo from '../assets/logo-transparente.png'
 
-const Login: React.FC = () => {
+const Login = () => {
 
     const navigate = useNavigate();
 
@@ -14,15 +14,17 @@ const Login: React.FC = () => {
 
     const handleLogin = async () => {
         try {
+            debugger;
             setValidatingLogin(true);
             const data: AuthData = { email, password };
-            const response = await login(data);
+            const response = await auth(data);
             console.log(response);
+            alert("sucesso");
             navigate("/");
             // Login bem-sucedido, redirecionar...
         } catch (error) {
-            alert('Email ou senha incorretos.');
             console.log(error);
+            alert('Email ou senha incorretos.');
         }
     };
 
