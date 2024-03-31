@@ -6,7 +6,8 @@ const api = axios.create({
     headers: {
         "Accept": "*/*",
         "Connection": "keep-alive",
-        "Accept-Encoding": "gzip, deflate, br"
+        "Accept-Encoding": "gzip, deflate, br",
+        "Content-Type": "application/json"
     }
 });
 
