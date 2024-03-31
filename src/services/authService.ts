@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { AuthData } from "../types/AuthData";
 
 const api = axios.create({
@@ -14,11 +14,11 @@ const api = axios.create({
 
 export const auth = async (data: AuthData) => {
     try {
-        const response = await api.post('/users/auth', data);
-        console.log(response);
-        return response;
+        return await api.post('/users/auth', data);
     } catch (err) {
-        console.error(err);
+        if (axios.isAxiosError(err) && err.response) {
+            return err.response;
+        }
         return null;
     }
 };

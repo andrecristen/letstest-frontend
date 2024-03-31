@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/authService';
+import notifyService from '../services/notifyService';
+import tokenService from '../services/tokenService';
 import { AuthData } from '../types/AuthData';
 import logo from '../assets/logo-transparente.png'
 
@@ -18,13 +20,21 @@ const Login = () => {
             setValidatingLogin(true);
             const data: AuthData = { email, password };
             const response = await auth(data);
-            console.log(response);
-            alert("sucesso");
-            navigate("/");
-            // Login bem-sucedido, redirecionar...
+            if (response?.status == 200) {
+                tokenService.setSession(response.data.token, response.data.userId);
+                notifyService.success("Login realizado com sucesso");
+                navigate("/painel");
+                return;
+            } else if (response?.data.error) {
+                notifyService.error(response?.data.error);
+            } else {
+                notifyService.error('Erro ao realizar login');
+            } 
+            setEmail("");   
+            setPassword("");   
+            setValidatingLogin(false);
         } catch (error) {
-            console.log(error);
-            alert('Email ou senha incorretos.');
+            notifyService.error('Erro ao realizar login');
         }
     };
 
