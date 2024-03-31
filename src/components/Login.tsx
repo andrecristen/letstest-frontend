@@ -23,7 +23,7 @@ const Login = () => {
             if (response?.status == 200) {
                 tokenService.setSession(response.data.token, response.data.userId);
                 notifyService.success("Login realizado com sucesso");
-                navigate("/painel");
+                navigate("/dashboard");
                 return;
             } else if (response?.data.error) {
                 notifyService.error(response?.data.error);
