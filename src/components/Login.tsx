@@ -12,9 +12,9 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [validatingLogin, setValidatingLogin] = useState(false);
 
-    const handleLogin = async () => {
+    const handleLogin = async (event : any) => {
         try {
-            debugger;
+            event.preventDefault();
             setValidatingLogin(true);
             const data: AuthData = { email, password };
             const response = await auth(data);
