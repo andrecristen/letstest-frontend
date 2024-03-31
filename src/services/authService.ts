@@ -14,7 +14,7 @@ const api = axios.create({
 
 export const auth = async (data: AuthData) => {
     try {
-        const response = await api.post('/users/auth', { email: data.email, password: data.password });
+        const response = await api.post('/users/auth', data);
         console.log(response);
         return response;
     } catch (err) {
