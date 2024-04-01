@@ -1,9 +1,9 @@
-import PainelContainer from "./PainelContainer";
+import PainelContainer from "../base/PainelContainer";
 import { FiActivity, FiEdit } from 'react-icons/fi';
-import { getMyProjects } from '../services/projectService';
-import { useEffect, useState } from "react";
+import { getMyProjects } from '../../services/projectService';
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from '../assets/logo-transparente.png'
+import logo from '../../assets/logo-transparente.png'
 
 function ProjectsOwnerList() {
 
@@ -11,6 +11,8 @@ function ProjectsOwnerList() {
 
     const [selectedSituation, setSelectedSituation] = useState(1);
     const [projects, setProjects] = useState([]);
+
+    const formDialogRef = useRef(null);
 
     const situations = [
         { name: "Testando", id: 1 },

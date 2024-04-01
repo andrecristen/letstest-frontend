@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../services/authService';
-import notifyService from '../services/notifyService';
-import tokenService from '../services/tokenService';
-import { AuthData } from '../types/AuthData';
-import logo from '../assets/logo-transparente.png'
+import { auth } from '../../services/authService';
+import notifyService from '../../services/notifyService';
+import tokenService from '../../services/tokenService';
+import { AuthData } from '../../types/AuthData';
+import logo from '../../assets/logo-transparente.png'
 
 const Login = () => {
 

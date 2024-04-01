@@ -1,4 +1,4 @@
-import PainelContainer from "./PainelContainer";
+import PainelContainer from "./base/PainelContainer";
 
 function Dashboard() {
     return (

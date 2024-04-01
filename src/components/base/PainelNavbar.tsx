@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FiMenu, FiBell, FiUser, FiGitPullRequest, FiPlay, FiSearch, FiPieChart } from 'react-icons/fi';
-import logo from '../assets/logo-transparente.png'
+import logo from '../../assets/logo-transparente.png'
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const PainelNavbar = (props: any) => {

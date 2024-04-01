@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PainelNavbar from './PainelNavbar';
-import tokenService from '../services/tokenService';
-import notifyService from '../services/notifyService';
+import tokenService from '../../services/tokenService';
+import notifyService from '../../services/notifyService';
 
 const PainelContainer = (props: any) => {
 
