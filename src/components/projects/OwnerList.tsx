@@ -1,6 +1,7 @@
 import PainelContainer from "../base/PainelContainer";
 import { FiActivity, FiEdit } from 'react-icons/fi';
 import { getMyProjects } from '../../services/projectService';
+import { getProjectSituationList } from '../../types/ProjectSituationEnum';
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from '../../assets/logo-transparente.png'
@@ -14,19 +15,8 @@ function ProjectsOwnerList() {
 
     const formDialogRef = useRef(null);
 
-    const situations = [
-        { name: "Testando", id: 1 },
-        { name: "Finalizado", id: 2 },
-        { name: "Cancelado", id: 3 },
-        { name: "Todos", id: null },
-    ];
-
-    const applications = [
-        { name: "Web", id: 1 },
-        { name: "Desktop", id: 2 },
-        { name: "App", id: 3 },
-        { name: "Híbrido", id: 4 },
-    ];
+    const situations = getProjectSituationList();
+    situations.push({name: "Todos", id: null});
 
     useEffect(() => {
         load();
