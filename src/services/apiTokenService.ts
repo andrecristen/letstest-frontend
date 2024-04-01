@@ -4,16 +4,15 @@ import tokenService from "./tokenService";
 import notifyService from "./notifyService";
 import { useNavigate } from "react-router-dom";
 
-const EXTRA_CONFIGS = {
-    headers: {
-        Authorization: 'Bearer ' + tokenService.getSessionToken()
+const getExtraConfigs = () => {
+    return {
+        headers: {
+            Authorization: 'Bearer ' + tokenService.getSessionToken()
+        }
     }
 };
 
-console.log(EXTRA_CONFIGS);
-
 const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigate>) => {
-    debugger;
     if (error.response?.status == 401) {
         tokenService.removeSession();
         notifyService.info("Sua sessão é inválida, por favor efetue login novamente.");
@@ -24,7 +23,7 @@ const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigat
 const apiTokenService = {
     get: async (path: string) => {
         try {
-            return await api.get(path, EXTRA_CONFIGS);
+            return await api.get(path, getExtraConfigs());
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
@@ -36,7 +35,7 @@ const apiTokenService = {
 
     post: async (path: string, body: any) => {
         try {
-            return await api.post(path, body, EXTRA_CONFIGS);
+            return await api.post(path, body, getExtraConfigs());
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
@@ -48,7 +47,7 @@ const apiTokenService = {
 
     put: async (path: string, body: any) => {
         try {
-            return await api.put(path, body, EXTRA_CONFIGS);
+            return await api.put(path, body, getExtraConfigs());
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
