@@ -10,6 +10,7 @@ const EXTRA_CONFIGS = {
     }
 };
 
+console.log(EXTRA_CONFIGS);
 
 const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigate>) => {
     if (error.response?.status == 401) {
