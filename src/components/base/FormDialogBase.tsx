@@ -14,6 +14,12 @@ export interface FormDialogBaseRef {
     closeDialog: () => void;
 }
 
+export interface FormDialogBaseExtendsRef {
+    getDialogBase: () => {
+        current: FormDialogBaseRef
+    }
+}
+
 const FormDialogBase = React.forwardRef<FormDialogBaseRef, FormDialogBaseProps>((props, ref) => {
     const [dialogVisible, setDialogVisible] = useState<boolean>(props.initialOpen ?? false);
     const cancelButtonRef = useRef<HTMLButtonElement>(null);
