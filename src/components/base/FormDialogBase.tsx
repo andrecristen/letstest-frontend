@@ -3,14 +3,18 @@ import { Dialog, Transition } from "@headlessui/react";
 
 interface FormDialogBaseProps {
     initialOpen?: boolean;
-    defineRef: RefObject<HTMLElement>;
-    //useRef?: ForwardedRef<{ openDialog: () => void; closeDialog: () => void; }>; 
     submit: (event: React.FormEvent) => void;
+    cancel?: (event: React.FormEvent) => void;
     title: React.ReactNode;
     children?: React.ReactNode;
 }
 
-const FormDialogBase = React.forwardRef<{ openDialog: () => void; closeDialog: () => void; }, FormDialogBaseProps>((props, ref) => {
+export interface FormDialogBaseRef {
+    openDialog: () => void;
+    closeDialog: () => void;
+}
+
+const FormDialogBase = React.forwardRef<FormDialogBaseRef, FormDialogBaseProps>((props, ref) => {
     const [dialogVisible, setDialogVisible] = useState<boolean>(props.initialOpen ?? false);
     const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -23,8 +27,15 @@ const FormDialogBase = React.forwardRef<{ openDialog: () => void; closeDialog: (
         },
     }));
 
+    const handleCancel = (event: any) => {
+        setDialogVisible(false);
+        if (props.cancel) {
+            props.cancel(event);
+        }
+    }
+
     return (
-        <Transition.Root show={dialogVisible} as={Fragment} ref={props.defineRef}>
+        <Transition.Root show={dialogVisible} as={Fragment}>
             <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={(value: boolean) => { setDialogVisible(value) }}>
                 <Transition.Child
                     as={Fragment}
@@ -69,8 +80,7 @@ const FormDialogBase = React.forwardRef<{ openDialog: () => void; closeDialog: (
                                         <button
                                             type="button"
                                             className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                                            onClick={() => { setDialogVisible(false) }}
-                                            ref={cancelButtonRef}
+                                            onClick={handleCancel}
                                         >
                                             Cancelar
                                         </button>

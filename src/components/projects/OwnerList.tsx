@@ -5,6 +5,7 @@ import { getProjectSituationList } from '../../types/ProjectSituationEnum';
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from '../../assets/logo-transparente.png'
+import FormDialogBase, { FormDialogBaseRef } from "../base/FormDialogBase";
 
 function ProjectsOwnerList() {
 
@@ -13,10 +14,10 @@ function ProjectsOwnerList() {
     const [selectedSituation, setSelectedSituation] = useState(1);
     const [projects, setProjects] = useState([]);
 
-    const formDialogRef = useRef(null);
+    const formDialogRef = useRef<FormDialogBaseRef>(null);
 
     const situations = getProjectSituationList();
-    situations.push({name: "Todos", id: null});
+    situations.push({ name: "Todos", id: null });
 
     useEffect(() => {
         load();
@@ -28,7 +29,18 @@ function ProjectsOwnerList() {
     }
 
     const handleClickNewProject = () => {
+        if (formDialogRef.current && formDialogRef.current.openDialog) {
+            formDialogRef.current.openDialog();
+        }
+    }
 
+    const handleCancelNewProject = (event: any) => {
+        alert("cancelou");
+    }
+
+    const handleSubmitNewProject = (event: any) => {
+        event.stopPropagation();
+        alert("enviou");
     }
 
     const handleClickManageProject = (event: any, project: any) => {
@@ -135,6 +147,9 @@ function ProjectsOwnerList() {
                     </div>
                 </div>
             </>
+            <FormDialogBase ref={formDialogRef} submit={handleSubmitNewProject} cancel={handleCancelNewProject} title="Cadastro">
+                <span>Testes</span>
+            </FormDialogBase>
         </PainelContainer>
     );
 }
