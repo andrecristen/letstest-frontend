@@ -13,6 +13,7 @@ const EXTRA_CONFIGS = {
 console.log(EXTRA_CONFIGS);
 
 const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigate>) => {
+    debugger;
     if (error.response?.status == 401) {
         tokenService.removeSession();
         notifyService.info("Sua sessão é inválida, por favor efetue login novamente.");
