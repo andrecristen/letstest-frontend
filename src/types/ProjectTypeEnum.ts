@@ -5,7 +5,7 @@ export enum ProjectTypeEnum {
     Híbrido = 4,
 }
 
-export const getProjectSituationList = () => {
+export const getProjectTypeList = () => {
     return Object.keys(ProjectTypeEnum)
         .filter(key => isNaN(Number(key)))
         .map(key => ({ name: key, id: ProjectTypeEnum[key as keyof typeof ProjectTypeEnum]}));
