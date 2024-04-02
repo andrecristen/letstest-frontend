@@ -1,5 +1,6 @@
 import React, { Fragment, useRef, useState, useImperativeHandle, ForwardedRef, RefObject } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useForm } from "react-hook-form"
 
 interface FormDialogBaseProps {
     initialOpen?: boolean;
@@ -17,7 +18,8 @@ export interface FormDialogBaseRef {
 export interface FormDialogBaseExtendsRef {
     getDialogBase: () => {
         current: FormDialogBaseRef
-    }
+    },
+    setData: (data: any) => void;
 }
 
 const FormDialogBase = React.forwardRef<FormDialogBaseRef, FormDialogBaseProps>((props, ref) => {

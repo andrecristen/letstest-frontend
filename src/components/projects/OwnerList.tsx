@@ -5,7 +5,7 @@ import { getProjectSituationList } from '../../types/ProjectSituationEnum';
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from '../../assets/logo-transparente.png'
-import FormDialogBase, { FormDialogBaseExtendsRef, FormDialogBaseRef } from "../base/FormDialogBase";
+import { FormDialogBaseExtendsRef } from "../base/FormDialogBase";
 import ProjectsForm from "./Form";
 
 function ProjectsOwnerList() {
@@ -42,6 +42,8 @@ function ProjectsOwnerList() {
     const handleClickEditProject = (event: any, project: any) => {
         event.preventDefault();
         event.stopPropagation();
+        formDialogRef.current?.setData(project);
+        formDialogRef.current?.getDialogBase().current.openDialog();
     }
 
     return (

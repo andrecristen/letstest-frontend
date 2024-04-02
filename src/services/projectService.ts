@@ -10,3 +10,14 @@ export const createProject = async (body: ProjectData) => {
     body.situation = ProjectSituationEnum.Testando;
     return await apiTokenService.post('/projects', body);
 };
+
+export const getProjectById = async (id: number) => {
+    return await apiTokenService.get("/projects/" + id);
+}
+
+export const updateProject = async (body: ProjectData) => {
+    if (!body.id) {
+        throw Error("Necessário 'id'");
+    }
+    return await apiTokenService.put("/projects/" + body.id, body);
+}
