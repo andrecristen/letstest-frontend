@@ -55,7 +55,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
         <input
           {...register("name")}
           required
-          className="rounded w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+          className="form-input"
           placeholder="Nome"
         />
       </div>
@@ -64,7 +64,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
           {...register("description")}
           rows={5}
           required
-          className="rounded w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+          className="form-input"
           placeholder="Descrição"
         />
       </div>
@@ -72,7 +72,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
         <select
           {...register("visibility")}
           required
-          className="rounded w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+          className="form-input"
         >
           <option disabled value="null">Selecione a visibilidade do projeto</option>
           {getProjectVisibilityList().map((visibility) => {
@@ -86,7 +86,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
         <select
           {...register("situation")}
           required
-          className="rounded w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
+          className="form-input"
         >
           <option disabled value="null">Selecione a situação do projeto</option>
           {getProjectSituationList().map((situation) => {
