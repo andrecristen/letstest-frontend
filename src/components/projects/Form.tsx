@@ -27,7 +27,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
     data.visibility = parseInt(data.visibility.toString());
     if (data.id) {
       const response = await updateProject(data);
-      if (response?.status == 201) {
+      if (response?.status == 200) {
         notifyService.success("Projeto alterado com sucesso");
       } else {
         notifyService.error("Erro ao alterar projeto, tente novamente");
@@ -41,7 +41,6 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
       }
     }
     formDialogRef.current?.closeDialog();
-    window.location.reload();
   }
 
   const handleCancel = () => {
