@@ -55,6 +55,18 @@ const apiTokenService = {
             }
             return null;
         }
+    },
+
+    delete: async (path: string) => {
+        try {
+            return await api.delete(path, getExtraConfigs());
+        } catch (err) {
+            if (axios.isAxiosError(err) && err.response) {
+                validateToken(err, useNavigate);
+                return err.response;
+            }
+            return null;
+        }
     }
 }
 

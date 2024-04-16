@@ -13,3 +13,7 @@ export const accept = async (involvementId: number) => {
 export const reject = async (involvementId: number) => {
     return await apiTokenService.put('/involvement/reject/'+ involvementId, {});
 };
+
+export const remove = async (involvementId: number) => {
+    return await apiTokenService.delete('/involvement/'+ involvementId);
+};

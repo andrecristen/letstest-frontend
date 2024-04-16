@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getByProjectAndSituation, accept, reject } from '../../services/involvementService';
+import { getByProjectAndSituation, accept, reject, remove } from '../../services/involvementService';
 import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList } from '../../types/InvolvementData';
 import PainelContainer from "../base/PainelContainer";
 import logo from '../../assets/logo-transparente.png';
-import { FiCheckCircle, FiSkipBack, FiUser, FiUserX } from "react-icons/fi";
+import { FiCheckCircle, FiSkipBack, FiTrash, FiUser, FiUserX } from "react-icons/fi";
 import notifyService from "../../services/notifyService";
 
 interface InvolvementManagementListProps {
@@ -58,7 +58,18 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
         } else {
             notifyService.error("Erro ao aceitar candidatura, tente novamente");
         }
+    }
 
+    const handleClickDelete = async (event: any, involvementId: number) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const response = await remove(involvementId);
+        if (response?.status == 200) {
+            notifyService.success("Envolvimento com projeto excluído");
+            load();
+        } else {
+            notifyService.error("Erro ao excluir envolvimento, tente novamente");
+        }
     }
 
     return (
@@ -97,6 +108,14 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
                                     </button>
                                     <button onClick={(event) => { handleClickAccept(event, involvement.id) }} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" title="Confirmar">
                                         <FiCheckCircle />
+                                    </button>
+                                </div>
+                            ) : ""}
+
+                            {involvement.situation != InvolvementSituationEnum.Recebido ? (
+                                <div className="ml-auto flex">
+                                    <button onClick={(event) => { handleClickDelete(event, involvement.id) }} className="mr-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" title="Excluir">
+                                        <FiTrash />
                                     </button>
                                 </div>
                             ) : ""}
