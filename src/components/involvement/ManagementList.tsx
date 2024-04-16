@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getByProjectAndSituation } from '../../services/involvementService';
-import { InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList } from '../../types/InvolvementData';
+import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList } from '../../types/InvolvementData';
 import PainelContainer from "../base/PainelContainer";
 import logo from '../../assets/logo-transparente.png';
-import { FiSkipBack } from "react-icons/fi";
+import { FiSkipBack, FiUser } from "react-icons/fi";
 
 interface InvolvementManagementListProps {
     type: InvolvementTypeEnum;
@@ -15,7 +15,7 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
 
     const navigate = useNavigate();
     const [selectedSituation, setSelectedSituation] = useState(InvolvementSituationEnum.Aceito);
-    const [involvements, setInvolvements] = useState([]);
+    const [involvements, setInvolvements] = useState<InvolvementData[]>([]);
     let { projectId } = useParams();
 
     const situations = getInvolvementSituationList();
@@ -53,6 +53,26 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
                     </li>
                 ))}
             </ul>
+            {involvements.length ? (
+                <ul className="divide-y divide-gray-200">
+                {involvements.map((involvement) => (
+                    <li key={involvement.id} className="py-4 flex">
+                        <div className="flex-shrink-0">
+                            <FiUser />
+                        </div>
+                        <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-900">ID do Envolvimento: {involvement.id}</p>
+                            <p className="text-sm text-gray-500">Situação: {involvement.situation}</p>
+                            <p className="text-sm text-gray-500">Tipo: {involvement.type}</p>
+                            <p className="text-sm text-gray-500">ID do Usuário: {involvement.userId}</p>
+                            <p className="text-sm text-gray-500">ID do Projeto: {involvement.projectId}</p>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+            ) : (
+                <div className="text-center text-lg m-20 text-purple-600">Carregando informações do projeto...</div>
+            )}
         </PainelContainer>
     );
 }
