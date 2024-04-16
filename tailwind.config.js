@@ -7,4 +7,13 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  purge: {
+    options: {
+      safelist: [
+        'bg-blue-500',
+        'bg-green-700',
+        'bg-red-500'
+      ],
+    }
+  }
 }
