@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getByProjectAndSituation } from '../../services/involvementService';
+import { getByProjectAndSituation, accept, reject } from '../../services/involvementService';
 import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList } from '../../types/InvolvementData';
 import PainelContainer from "../base/PainelContainer";
 import logo from '../../assets/logo-transparente.png';
-import { FiSkipBack, FiUser } from "react-icons/fi";
+import { FiCheckCircle, FiSkipBack, FiUser, FiUserX } from "react-icons/fi";
+import notifyService from "../../services/notifyService";
 
 interface InvolvementManagementListProps {
     type: InvolvementTypeEnum;
@@ -35,10 +36,29 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
         setloadingInvolvements(false);
     }
 
-    const handleClickManageProject = (event: any, project: any) => {
+    const handleClickReject = async (event: any, involvementId: number) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate('/project/detail/' + project.id);
+        const response = await reject(involvementId);
+        if (response?.status == 200) {
+            notifyService.success("Candidatura rejeitada");
+            setSelectedSituation(InvolvementSituationEnum.Rejeitado);
+        } else {
+            notifyService.error("Erro ao rejeitar candidatura, tente novamente");
+        }
+    }
+
+    const handleClickAccept = async (event: any, involvementId: number) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const response = await accept(involvementId);
+        if (response?.status == 200) {
+            notifyService.success("Candidatura aceita");
+            setSelectedSituation(InvolvementSituationEnum.Aceito);
+        } else {
+            notifyService.error("Erro ao aceitar candidatura, tente novamente");
+        }
+
     }
 
     return (
@@ -61,7 +81,7 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
                     {involvements.map((involvement) => (
                         <li key={involvement.id} className="py-4 flex">
                             <div className="flex-shrink-0">
-                                <FiUser className="text-lg"/>
+                                <FiUser className="text-lg" />
                             </div>
                             <div className="ml-3">
                                 <p className="text-sm font-medium text-purple-900">ID do Envolvimento: {involvement.id}</p>
@@ -70,6 +90,16 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
                                 <p className="text-sm text-purple-500">ID do Usuário: {involvement.userId}</p>
                                 <p className="text-sm text-purple-500">ID do Projeto: {involvement.projectId}</p>
                             </div>
+                            {involvement.situation == InvolvementSituationEnum.Recebido ? (
+                                <div className="ml-auto flex">
+                                    <button onClick={(event) => { handleClickReject(event, involvement.id) }} className="mr-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" title="Rejeitar">
+                                        <FiUserX />
+                                    </button>
+                                    <button onClick={(event) => { handleClickAccept(event, involvement.id) }} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" title="Confirmar">
+                                        <FiCheckCircle />
+                                    </button>
+                                </div>
+                            ) : ""}
                         </li>
                     ))}
                 </ul>
