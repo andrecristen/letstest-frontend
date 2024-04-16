@@ -7,13 +7,21 @@ export const getByProjectAndSituation = async (projectId: number, situation: num
 };
 
 export const accept = async (involvementId: number) => {
-    return await apiTokenService.put('/involvement/accept/'+ involvementId, {});
+    return await apiTokenService.put('/involvement/accept/' + involvementId, {});
 };
 
 export const reject = async (involvementId: number) => {
-    return await apiTokenService.put('/involvement/reject/'+ involvementId, {});
+    return await apiTokenService.put('/involvement/reject/' + involvementId, {});
 };
 
 export const remove = async (involvementId: number) => {
-    return await apiTokenService.delete('/involvement/'+ involvementId);
+    return await apiTokenService.delete('/involvement/' + involvementId);
 };
+
+export const invite = async (projectId: number, email: string, type: InvolvementTypeEnum) => {
+    return await apiTokenService.post('/involvement/invite', {
+        "project": projectId,
+        "email": email,
+        "type": type
+    });
+}

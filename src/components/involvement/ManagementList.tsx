@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getByProjectAndSituation, accept, reject, remove } from '../../services/involvementService';
+import { getByProjectAndSituation, accept, reject, remove, invite } from '../../services/involvementService';
 import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList } from '../../types/InvolvementData';
 import PainelContainer from "../base/PainelContainer";
 import logo from '../../assets/logo-transparente.png';
-import { FiCheckCircle, FiSkipBack, FiTrash, FiUser, FiUserX } from "react-icons/fi";
+import { FiCheckCircle, FiMail, FiSkipBack, FiTrash, FiUser, FiUserX } from "react-icons/fi";
 import notifyService from "../../services/notifyService";
 
 interface InvolvementManagementListProps {
@@ -18,6 +18,8 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
     const [selectedSituation, setSelectedSituation] = useState(InvolvementSituationEnum.Aceito);
     const [involvements, setInvolvements] = useState<InvolvementData[]>([]);
     const [loadingInvolvements, setloadingInvolvements] = useState<boolean>(false);
+    const [inviting, setInviting] = useState<boolean>(false);
+    const [email, setEmail] = useState<string>("");
     let { projectId } = useParams();
 
     const situations = getInvolvementSituationList();
@@ -74,6 +76,27 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
         }
     }
 
+    const handleClickInvite = async () => {
+        setInviting(true);
+        if (email) {
+            const response = await invite(parseInt(projectId ? projectId : "0"), email, type);
+            if (response?.status == 201) {
+                notifyService.success("Convite enviado");
+                load();
+            } else {
+                if (response && response.data) {
+                    notifyService.error(response.data);
+                } else {
+                    notifyService.error("Erro ao enviar convite, tente novamente");
+                }
+            }
+        } else {
+            notifyService.info("Preencha o e-mail do usuário que deseja convidar");
+        }
+        setEmail("");
+        setInviting(false);
+    }
+
     return (
         <PainelContainer>
             <div className="bg-purple-600 rounded-lg h-16 m-4 p-4">
@@ -89,6 +112,28 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
                     </li>
                 ))}
             </ul>
+            {selectedSituation === InvolvementSituationEnum.Enviado ? (
+
+                <div className="w-full flex items-center mt-4">
+                    <input
+                        type="email"
+                        disabled={inviting}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="E-mail do usuário a ser convidado ao projeto"
+                        className="h-12 w-10/12 border border-purple-400 rounded-l py-2 px-3 focus:outline-none focus:border-purple-500"
+                    />
+                    <button
+                        disabled={inviting}
+                        className="h-12 w-2/12 bg-purple-600 text-white py-2 px-3 rounded-r hover:bg-purple-700 focus:outline-none flex items-center justify-center"
+                        onClick={() => handleClickInvite()}
+                    >
+                        <FiMail className="w-8 h-8" />
+                    </button>
+                </div>
+
+
+            ) : ""}
             {involvements.length ? (
                 <ul className="divide-y divide-purple-200">
                     {involvements.map((involvement) => (

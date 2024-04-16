@@ -80,6 +80,14 @@ const ProjectsDetailView = () => {
                     Operações
                 </h2>
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div onClick={callListManagers} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
+                        <FiUserPlus className="w-20 h-20 mx-auto mb-4" />
+                        <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Gerentes</h3>
+                    </div>
+                    <div onClick={callListTesters} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
+                        <FiUser className="w-20 h-20 mx-auto mb-4" />
+                        <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Testadores</h3>
+                    </div>
                     <div onClick={callListTestCases} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
                         <FiFileText className="w-20 h-20 mx-auto mb-4" />
                         <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Casos de Teste</h3>
@@ -87,14 +95,6 @@ const ProjectsDetailView = () => {
                     <div onClick={callListKanban} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
                         <FiTrello className="w-20 h-20 mx-auto mb-4" />
                         <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Kanban</h3>
-                    </div>
-                    <div onClick={callListTesters} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
-                        <FiUser className="w-20 h-20 mx-auto mb-4" />
-                        <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Testadores</h3>
-                    </div>
-                    <div onClick={callListManagers} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
-                        <FiUserPlus className="w-20 h-20 mx-auto mb-4" />
-                        <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Gerentes</h3>
                     </div>
                     <div onClick={callListEnvironments} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
                         <FiSmartphone className="w-20 h-20 mx-auto mb-4" />
