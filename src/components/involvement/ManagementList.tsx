@@ -57,18 +57,18 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
                 ))}
             </ul>
             {involvements.length ? (
-                <ul className="divide-y divide-gray-200">
+                <ul className="divide-y divide-purple-200">
                     {involvements.map((involvement) => (
                         <li key={involvement.id} className="py-4 flex">
                             <div className="flex-shrink-0">
-                                <FiUser />
+                                <FiUser className="text-lg"/>
                             </div>
                             <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-900">ID do Envolvimento: {involvement.id}</p>
-                                <p className="text-sm text-gray-500">Situação: {involvement.situation}</p>
-                                <p className="text-sm text-gray-500">Tipo: {involvement.type}</p>
-                                <p className="text-sm text-gray-500">ID do Usuário: {involvement.userId}</p>
-                                <p className="text-sm text-gray-500">ID do Projeto: {involvement.projectId}</p>
+                                <p className="text-sm font-medium text-purple-900">ID do Envolvimento: {involvement.id}</p>
+                                <p className="text-sm text-purple-500">Situação: {involvement.situation}</p>
+                                <p className="text-sm text-purple-500">Tipo: {involvement.type}</p>
+                                <p className="text-sm text-purple-500">ID do Usuário: {involvement.userId}</p>
+                                <p className="text-sm text-purple-500">ID do Projeto: {involvement.projectId}</p>
                             </div>
                         </li>
                     ))}
