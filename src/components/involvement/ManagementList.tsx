@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getByProjectAndSituation } from '../../services/involvementService';
 import { InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList } from '../../types/InvolvementData';
 import PainelContainer from "../base/PainelContainer";
@@ -16,6 +16,7 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
     const navigate = useNavigate();
     const [selectedSituation, setSelectedSituation] = useState(InvolvementSituationEnum.Aceito);
     const [involvements, setInvolvements] = useState([]);
+    let { projectId } = useParams();
 
     const situations = getInvolvementSituationList();
 
@@ -26,7 +27,7 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
     const load = async () => {
         setInvolvements([]);
         if (selectedSituation) {
-            const response = await getByProjectAndSituation(1, selectedSituation);
+            const response = await getByProjectAndSituation(parseInt(projectId ? projectId : "0"), selectedSituation);
             setInvolvements(response?.data);
         }
     }
