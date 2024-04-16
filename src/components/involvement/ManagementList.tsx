@@ -16,6 +16,7 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
     const navigate = useNavigate();
     const [selectedSituation, setSelectedSituation] = useState(InvolvementSituationEnum.Aceito);
     const [involvements, setInvolvements] = useState<InvolvementData[]>([]);
+    const [loadingInvolvements, setloadingInvolvements] = useState<boolean>(false);
     let { projectId } = useParams();
 
     const situations = getInvolvementSituationList();
@@ -26,10 +27,12 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
 
     const load = async () => {
         setInvolvements([]);
+        setloadingInvolvements(true);
         if (selectedSituation) {
             const response = await getByProjectAndSituation(parseInt(projectId ? projectId : "0"), selectedSituation);
             setInvolvements(response?.data);
         }
+        setloadingInvolvements(false);
     }
 
     const handleClickManageProject = (event: any, project: any) => {
@@ -55,23 +58,23 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
             </ul>
             {involvements.length ? (
                 <ul className="divide-y divide-gray-200">
-                {involvements.map((involvement) => (
-                    <li key={involvement.id} className="py-4 flex">
-                        <div className="flex-shrink-0">
-                            <FiUser />
-                        </div>
-                        <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-900">ID do Envolvimento: {involvement.id}</p>
-                            <p className="text-sm text-gray-500">Situação: {involvement.situation}</p>
-                            <p className="text-sm text-gray-500">Tipo: {involvement.type}</p>
-                            <p className="text-sm text-gray-500">ID do Usuário: {involvement.userId}</p>
-                            <p className="text-sm text-gray-500">ID do Projeto: {involvement.projectId}</p>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                    {involvements.map((involvement) => (
+                        <li key={involvement.id} className="py-4 flex">
+                            <div className="flex-shrink-0">
+                                <FiUser />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-900">ID do Envolvimento: {involvement.id}</p>
+                                <p className="text-sm text-gray-500">Situação: {involvement.situation}</p>
+                                <p className="text-sm text-gray-500">Tipo: {involvement.type}</p>
+                                <p className="text-sm text-gray-500">ID do Usuário: {involvement.userId}</p>
+                                <p className="text-sm text-gray-500">ID do Projeto: {involvement.projectId}</p>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             ) : (
-                <div className="text-center text-lg m-20 text-purple-600">Carregando informações do projeto...</div>
+                <div className="text-center text-lg m-20 text-purple-600">{loadingInvolvements ? "Carregando informações do projeto..." : "Nenhuma candidatura"}</div>
             )}
         </PainelContainer>
     );
