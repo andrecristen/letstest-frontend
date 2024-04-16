@@ -36,7 +36,7 @@ function ProjectsOwnerList() {
     const handleClickManageProject = (event: any, project: any) => {
         event.preventDefault();
         event.stopPropagation();
-        navigate('/painel/manage-project/' + project.id);
+        navigate('/project/detail/' + project.id);
     }
 
     const handleClickEditProject = (event: any, project: any) => {
