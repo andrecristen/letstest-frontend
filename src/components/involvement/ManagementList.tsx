@@ -125,7 +125,7 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
                     ))}
                 </ul>
             ) : (
-                <div className="text-center text-lg m-20 text-purple-600">{loadingInvolvements ? "Carregando informações do projeto..." : "Nenhuma candidatura"}</div>
+                <div className="text-center text-lg m-20 text-purple-600">{loadingInvolvements ? "Carregando informações do projeto..." : selectedSituation == InvolvementSituationEnum.Recebido ? "Nenhuma candidatura recebida" : "Nenhum envolvimento com o projeto para a situação"}</div>
             )}
         </PainelContainer>
     );
