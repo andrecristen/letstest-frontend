@@ -31,7 +31,9 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
         setloadingInvolvements(true);
         if (selectedSituation) {
             const response = await getByProjectAndSituation(parseInt(projectId ? projectId : "0"), selectedSituation);
-            setInvolvements(response?.data);
+            const involvements = response?.data;
+            const filteredInvolvements = involvements.filter((involvement: InvolvementData) => involvement.type === type);
+            setInvolvements(filteredInvolvements);
         }
         setloadingInvolvements(false);
     }
