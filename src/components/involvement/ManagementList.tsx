@@ -6,6 +6,7 @@ import PainelContainer from "../base/PainelContainer";
 import logo from '../../assets/logo-transparente.png';
 import { FiCheckCircle, FiMail, FiSkipBack, FiTrash, FiUser, FiUserX } from "react-icons/fi";
 import notifyService from "../../services/notifyService";
+import { TitleContainer } from "../base/TitleContainer";
 
 interface InvolvementManagementListProps {
     type: InvolvementTypeEnum;
@@ -102,17 +103,18 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
         setInviting(false);
     }
 
+    const handleClickSelectSituation = (event: any, situationId: InvolvementSituationEnum) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setSelectedSituation(situationId)
+    }
+
     return (
         <PainelContainer>
-            <div className="bg-purple-600 rounded-lg h-16 m-4 p-4">
-                <h1 className="float-left text-2xl text-white font-bold">{title}</h1>
-                <button onClick={() => { navigate(-1) }} className="float-right bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-                    <FiSkipBack className="w-4 h-4" />
-                </button>
-            </div>
+            <TitleContainer title={title}/>
             <ul className="w-full flex border-b mt-1">
                 {situations.map((situation: any) => (
-                    <li onClick={() => { setSelectedSituation(situation.id) }} className="w-full -mb-px">
+                    <li onClick={(event) => { handleClickSelectSituation(event, situation.id) }} className="w-full -mb-px">
                         <a className={"w-full bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 " + (situation.id == selectedSituation ? "border-b-4 border-b-purple-400 text-purple-700 font-semibold" : "text-purple-600 hover:text-purple-600 hover:font-semibold")} href="#">{situation.name}</a>
                     </li>
                 ))}

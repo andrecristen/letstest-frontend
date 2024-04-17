@@ -9,6 +9,7 @@ import { ProjectData } from "../../types/ProjectData";
 import notifyService from '../../services/notifyService';
 import ProjectsForm from "./Form";
 import { FormDialogBaseExtendsRef } from "../base/FormDialogBase";
+import { TitleContainer } from "../base/TitleContainer";
 
 const ProjectsDetailView = () => {
 
@@ -52,6 +53,7 @@ const ProjectsDetailView = () => {
 
     return (
         <PainelContainer>
+            <TitleContainer title="Detalhes do Projeto"/>
             {project ? (
                 <div className="border rounded-lg overflow-hidden shadow-lg bg-white">
                     <img src={logo} className="w-full h-40 object-cover object-center" alt={project.name} />

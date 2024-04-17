@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import logo from '../../assets/logo-transparente.png'
 import { FormDialogBaseExtendsRef } from "../base/FormDialogBase";
 import ProjectsForm from "./Form";
+import { TitleContainer } from "../base/TitleContainer";
 
 function ProjectsOwnerList() {
 
@@ -46,9 +47,16 @@ function ProjectsOwnerList() {
         formDialogRef.current?.getDialogBase().current.openDialog();
     }
 
+    const handleClickSelectSituation = (event: any, situation:number) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setSelectedSituation(situation)
+    }
+
     return (
         <PainelContainer>
             <>
+            <TitleContainer title="Gerenciar Projetos"/>
                 <div className="my-4 px-2 flex justify-end items-stretch flex-wrap pb-0 bg-transparent">
                     <button
                         type="button"
@@ -60,7 +68,7 @@ function ProjectsOwnerList() {
                 </div>
                 <ul className="w-full flex border-b mt-1">
                     {situations.map((situation: any) => (
-                        <li onClick={() => { setSelectedSituation(situation.id) }} className="w-full -mb-px">
+                        <li onClick={(event) => { handleClickSelectSituation(event, situation.id) }} className="w-full -mb-px">
                             <a className={"w-full bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 " + (situation.id == selectedSituation ? "border-b-4 border-b-purple-400 text-purple-700 font-semibold" : "text-purple-600 hover:text-purple-600 hover:font-semibold")} href="#">{situation.name}</a>
                         </li>
                     ))}
