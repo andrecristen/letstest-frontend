@@ -11,6 +11,7 @@ const PainelContainer = (props: any) => {
     if (!tokenService.getSessionToken()) {
         navigate('/login');
         notifyService.info("Você precisa estar logado para acessar essa área do sistema.");
+        window.location.assign("/login")
         return null;
     }
 

@@ -73,18 +73,30 @@ function ProjectsOwnerList() {
                                     <table className="table-auto w-full my-0 align-middle text-dark border">
                                         <thead className="bg-gray-300 border-b m-3">
                                             <tr className="text-secondary-dark">
+                                                <th className="pb-3 pt-3 text-center min-w-[125px]"></th>
                                                 <th className="pb-3 pt-3 text-center w-1/3 min-w-[200px]">Projeto</th>
                                                 <th className="pb-3 pt-3 text-center min-w-[80px]">Aplicação</th>
                                                 <th className="pb-3 pt-3 text-center min-w-[80px]">Testado</th>
                                                 <th className="pb-3 pt-3 text-center min-w-[80px]">Situação</th>
                                                 <th className="pb-3 pt-3 text-center min-w-[80px]">Criado em</th>
-                                                <th className="pb-3 pt-3 text-center min-w-[125px]">Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody className="m-2">
                                             {projects.filter((currentProject: any) => (currentProject.situation == selectedSituation || selectedSituation == null)).map((project: any) => (
                                                 <>
                                                     <tr className="border-b last:border-b-0 hover:bg-gray-200 cursor-pointer" onClick={(event) => { handleClickManageProject(event, project) }}>
+                                                        <td className="pr-3 text-center">
+                                                            <button onClick={(event) => { handleClickManageProject(event, project) }} title="Gerenciar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
+                                                                <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
+                                                                    <FiActivity className="w-6 h-6" />
+                                                                </span>
+                                                            </button>
+                                                            <button onClick={(event) => { handleClickEditProject(event, project) }} title="Editar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
+                                                                <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
+                                                                    <FiEdit className="w-6 h-6" />
+                                                                </span>
+                                                            </button>
+                                                        </td>
                                                         <td className="p-3">
                                                             <div className="flex items-center">
                                                                 <div className="relative inline-block shrink-0 rounded-2xl me-3">
@@ -115,18 +127,6 @@ function ProjectsOwnerList() {
                                                             <span className="font-semibold text-light-inverse text-md/normal">
                                                                 {project.date}
                                                             </span>
-                                                        </td>
-                                                        <td className="pr-3 text-center">
-                                                            <button onClick={(event) => { handleClickManageProject(event, project) }} title="Gerenciar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
-                                                                <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
-                                                                    <FiActivity className="w-6 h-6" />
-                                                                </span>
-                                                            </button>
-                                                            <button onClick={(event) => { handleClickEditProject(event, project) }} title="Editar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
-                                                                <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
-                                                                    <FiEdit className="w-6 h-6" />
-                                                                </span>
-                                                            </button>
                                                         </td>
                                                     </tr>
                                                 </>

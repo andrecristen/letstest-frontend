@@ -17,6 +17,7 @@ const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigat
         tokenService.removeSession();
         notifyService.info("Sua sessão é inválida, por favor efetue login novamente.");
         navigate("/login");
+        window.location.assign("/login")
         window.location.reload();
     }
 }

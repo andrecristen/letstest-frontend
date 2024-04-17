@@ -90,7 +90,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
           <option disabled value="null">Selecione a situação do projeto</option>
           {getProjectSituationList().map((situation) => {
             return (
-              <option value={situation.id ? situation.id : ProjectSituationEnum.Testando} >{situation.name}</option>
+              <option value={situation.id ? situation.id : ProjectSituationEnum.Teste} >{situation.name}</option>
             );
           })}
         </select>

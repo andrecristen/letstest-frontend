@@ -1,5 +1,5 @@
 export enum ProjectSituationEnum {
-    Testando = 1,
+    Teste = 1,
     Finalizado = 2,
     Cancelado = 3,
 }
