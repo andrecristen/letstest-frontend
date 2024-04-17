@@ -22,7 +22,12 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
     const [email, setEmail] = useState<string>("");
     let { projectId } = useParams();
 
-    const situations = getInvolvementSituationList();
+    let situations = getInvolvementSituationList();
+
+    if (type === InvolvementTypeEnum.Gerente) {
+        //Não há como solicitar participação para ser gerente, portanto não é necessário a posição recebidos
+        situations = situations.filter(situation => situation.id !== InvolvementSituationEnum.Recebido);
+    }
 
     useEffect(() => {
         load();

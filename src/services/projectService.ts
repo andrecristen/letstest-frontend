@@ -6,6 +6,10 @@ export const getMyProjects = async () => {
     return await apiTokenService.get('/projects/me');
 };
 
+export const getPublicProjects = async () => {
+    return await apiTokenService.get('/projects/public');
+};
+
 export const createProject = async (body: ProjectData) => {
     body.situation = ProjectSituationEnum.Testando;
     return await apiTokenService.post('/projects', body);

@@ -7,6 +7,7 @@ import Register from "./user/Register";
 import ProjectsDetailView from "./projects/DetailView";
 import { InvolvementManagementList } from "./involvement/ManagementList";
 import { InvolvementTypeEnum } from '../types/InvolvementData';
+import { ProjectsPublicList } from "./projects/PublicList";
 
 const AppRoutes = () => {
 
@@ -21,8 +22,9 @@ const AppRoutes = () => {
                 <Route path="/dashboard" element={<Dashboard />}></Route>
                 <Route path="/my-owner-projects" element={<ProjectsOwnerList />}></Route>
                 <Route path="/project/detail/:projectId" element={<ProjectsDetailView />}></Route>
-                <Route path="/project/testers/:projectId" element={<InvolvementManagementList title="Testadores" type={InvolvementTypeEnum.Testador}/>}></Route>
-                <Route path="/project/managers/:projectId" element={<InvolvementManagementList title="Gerentes" type={InvolvementTypeEnum.Gerente}/>}></Route>
+                <Route path="/project/testers/:projectId" element={<InvolvementManagementList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
+                <Route path="/project/managers/:projectId" element={<InvolvementManagementList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
+                <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
             </Routes>
         </Router>
     );

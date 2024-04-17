@@ -25,3 +25,9 @@ export const invite = async (projectId: number, email: string, type: Involvement
         "type": type
     });
 }
+
+export const apply = async (projectId: number) => {
+    return await apiTokenService.post('/involvement/apply', {
+        "project": projectId,
+    });
+}
