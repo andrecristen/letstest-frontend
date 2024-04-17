@@ -66,15 +66,15 @@ function ProjectsOwnerList() {
                     ))}
                 </ul>
                 <div className="flex flex-wrap">
-                    <div className="w-full max-w-full px-3 mb-6 mx-auto">
+                    <div className="w-full max-w-full py-3 mb-6 mx-auto">
                         <div className="relative flex flex-col min-w-0 break-words bg-light/30">
-                            <div className="flex-auto block p-2">
+                            <div className="flex-auto block py-2">
                                 <div className="overflow-x-auto">
                                     <table className="table-auto w-full my-0 align-middle text-dark border">
                                         <thead className="bg-gray-300 border-b m-3">
                                             <tr className="text-secondary-dark">
                                                 <th className="pb-3 pt-3 text-center min-w-[125px]"></th>
-                                                <th className="pb-3 pt-3 text-center w-1/3 min-w-[200px]">Projeto</th>
+                                                <th className="pb-3 pt-3 text-center w-1/3 min-w-[200px]">Nome</th>
                                                 <th className="pb-3 pt-3 text-center min-w-[80px]">Aplicação</th>
                                                 <th className="pb-3 pt-3 text-center min-w-[80px]">Testado</th>
                                                 <th className="pb-3 pt-3 text-center min-w-[80px]">Situação</th>
