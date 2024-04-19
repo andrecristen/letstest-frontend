@@ -15,3 +15,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.dropdown-menu {
+  z-index: 1000; /* Ou qualquer outro valor alto o suficiente para colocar o dropdown acima dos outros elementos */
+}
