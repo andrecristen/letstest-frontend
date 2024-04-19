@@ -1,31 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiCheck, FiEdit, FiPlusCircle, FiTrash, FiType, FiX, FiXSquare } from 'react-icons/fi';
 import notifyService from '../../services/notifyService';
-
-type ColumnType = 'text' | 'label' | 'image';
-
-interface Column {
-  type: ColumnType;
-  content: string;
-}
+import EditForm, { Column, ColumnType } from './ColumnFormEditor';
 
 interface CustomizableRowProps {
-  initialColumnCount: number;
   minColumnCount: number;
   maxColumnCount: number;
-  onChange: (columns: Column[]) => void; // Adicionando propriedade onChange
+  onChange: (columns: Column[]) => void;
 }
 
-const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, minColumnCount, maxColumnCount, onChange }) => {
+const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxColumnCount, onChange }) => {
   const [columns, setColumns] = useState<Column[]>([]);
   const [editColumnIndex, setEditColumnIndex] = useState<number | null>(null);
-  const [selectedType, setSelectedType] = useState<ColumnType>('text');
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [appliedInitialColumnCount, setAppliedInitialColumnCount] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!appliedInitialColumnCount) {
+      addColumn();
+      setAppliedInitialColumnCount(true);
+    }
+  }, []);
+
 
   const addColumn = () => {
     if (columns.length < maxColumnCount) {
-      setColumns([...columns, { type: 'text', content: '' }]);
-      onChange([...columns, { type: 'text', content: '' }]);
+      const updatedColumns = [...columns, { type: ColumnType.Text, content: '' }];
+      updateColumns(updatedColumns);
     } else {
       notifyService.info(`Linha não pode ter mais de ${maxColumnCount} coluna(s)`);
     }
@@ -35,10 +36,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, m
     if (columns.length > minColumnCount) {
       const updatedColumns = [...columns];
       updatedColumns.splice(index, 1);
-      setColumns(updatedColumns);
-      onChange(updatedColumns); // Chamando onChange com as colunas atualizadas
-
-      // Fechar a edição se a coluna excluída estiver sendo editada
+      updateColumns(updatedColumns);
       if (editColumnIndex === index) {
         setEditColumnIndex(null);
         setIsEditing(false);
@@ -51,16 +49,13 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, m
   const updateColumnType = (index: number, newType: ColumnType) => {
     const updatedColumns = [...columns];
     updatedColumns[index].type = newType;
-    setColumns(updatedColumns);
-    setSelectedType(newType);
-    onChange(updatedColumns); // Chamando onChange com as colunas atualizadas
+    updateColumns(updatedColumns);
   };
 
   const updateColumnContent = (index: number, content: string) => {
     const updatedColumns = [...columns];
     updatedColumns[index].content = content;
-    setColumns(updatedColumns);
-    onChange(updatedColumns); // Chamando onChange com as colunas atualizadas
+    updateColumns(updatedColumns);
   };
 
   const toggleEditForm = (index: number) => {
@@ -78,10 +73,16 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, m
     setIsEditing(false);
   };
 
-  if (columns.length < initialColumnCount) {
-    for (var i = 0; i < initialColumnCount; i++) {
-      addColumn();
+  const updateColumns = (updatedColumns: Column[]) => {
+    setColumns(updatedColumns);
+    onChange(updatedColumns);
+  }
+
+  const getColumnEditingType = (index: number,) => {
+    if (columns[index]) {
+      return columns[index].type
     }
+    return null;
   }
 
   return (
@@ -90,13 +91,14 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, m
         <div key={index} className="flex-auto border-r border-gray-300 p-2 relative">
           {editColumnIndex === index ? (
             <EditForm
+              column={column}
               initialValue={column.content}
               onSubmit={newContent => handleEditFormSubmit(index, newContent)}
               onClose={() => toggleEditForm(index)}
             />
           ) : (
             <>
-              {column.type === 'text' && (
+              {column.type === ColumnType.Text && (
                 <input
                   placeholder="Preencha o campo"
                   type="text"
@@ -105,13 +107,16 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, m
                   className="w-full border border-gray-200 focus:outline-none bg-transparent"
                 />
               )}
-              {column.type === 'label' && (
-                <span onClick={() => toggleEditForm(index)} className="text-black px-2 py-1 cursor-pointer">
+              {column.type === ColumnType.Label && (
+                <span onClick={() => toggleEditForm(index)} className="w-full text-black px-2 py-1 cursor-pointer">
                   {column.content || 'Editar Label'}:
                 </span>
               )}
-              {column.type === 'image' && (
+              {column.type === ColumnType.Image && (
                 <img src={column.content} alt="Imagem" onClick={() => toggleEditForm(index)} className="cursor-pointer" />
+              )}
+              {column.type === ColumnType.Empty && (
+                <div className="w-full text-center"> - </div>
               )}
             </>
           )}
@@ -121,41 +126,22 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, m
                 {editColumnIndex === index && isEditing ? <FiXSquare /> : <FiEdit />}
               </button>
               {editColumnIndex === index && (
-                <ul className="dropdown-menu fixed text-gray-700 pt-1 bg-purple-300 rounded-md min-w-36">
-                  <li>
-                    <button
-                      onClick={() => updateColumnType(index, 'text')}
-                      className={`block px-4 py-2 text-sm text-gray-900 ${selectedType === 'text' ? 'bg-purple-400 hover:text-white' : 'hover:bg-purple-400 hover:text-white'
-                        } w-full text-left flex justify-between items-center`}
-                    >
-                      <span>Texto</span>
-                      {selectedType === 'text' && <FiCheck />}
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => updateColumnType(index, 'label')}
-                      className={`block px-4 py-2 text-sm text-gray-900 ${selectedType === 'label' ? 'bg-purple-400 hover:text-white' : 'hover:bg-purple-400 hover:text-white'
-                        } w-full text-left flex justify-between items-center`}
-                    >
-                      <span>Label</span>
-                      {selectedType === 'label' && <FiCheck />}
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => updateColumnType(index, 'image')}
-                      className={`block px-4 py-2 text-sm text-gray-900 ${selectedType === 'image' ? 'bg-purple-400 hover:text-white' : 'hover:bg-purple-400 hover:text-white'
-                        } w-full text-left flex justify-between items-center`}
-                    >
-                      <span>Imagem</span>
-                      {selectedType === 'image' && <FiCheck />}
-                    </button>
-                  </li>
+                <ul className="dropdown-menu fixed text-gray-700 pt-1 bg-purple-400 rounded-md min-w-36">
+                  {Object.values(ColumnType).map((type: ColumnType) => (
+                    <li key={type}>
+                      <button
+                        onClick={() => updateColumnType(index, type)}
+                        className={`px-4 py-2 text-sm text-white ${getColumnEditingType(editColumnIndex) === type ? 'bg-purple-500 hover:text-white' : 'hover:bg-purple-600'} w-full text-left flex justify-between items-center`}
+                      >
+                        <span>{type}</span>
+                        {getColumnEditingType(editColumnIndex) === type && <FiCheck />}
+                      </button>
+                    </li>
+                  ))}
                   <li>
                     <button
                       onClick={() => deleteColumn(index)}
-                      className="block px-4 py-2 text-sm text-red-700 bg-red-200 hover:bg-red-400 hover:text-white w-full text-left"
+                      className="px-4 py-2 text-sm text-red-700 bg-red-200 hover:bg-red-400 hover:text-white w-full  text-left flex justify-between items-center"
                     >
                       <span>Excluir</span>
                       <FiTrash />
@@ -169,30 +155,6 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ initialColumnCount, m
       ))}
       <button onClick={addColumn} className="bg-blue-500 text-white px-4 py-2 flex items-center"><FiPlusCircle /></button>
     </div>
-  );
-};
-
-interface EditFormProps {
-  initialValue: string;
-  onSubmit: (value: string) => void;
-  onClose: () => void;
-}
-
-const EditForm: React.FC<EditFormProps> = ({ initialValue, onSubmit, onClose }) => {
-  const [value, setValue] = useState(initialValue);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(value);
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" value={value} onChange={e => setValue(e.target.value)} />
-      <button className="rounded-full bg-green-500 text-white focus:outline-none m-1 p-1" type="submit">
-        <FiCheck />
-      </button>
-    </form>
   );
 };
 

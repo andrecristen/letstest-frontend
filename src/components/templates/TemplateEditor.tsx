@@ -5,13 +5,12 @@ import { TitleContainer } from '../base/TitleContainer';
 import CustomizableRow from './CustomizableRow';
 
 const TemplateEditor = () => {
-    const [rows, setRows] = useState<{initialColumnCount: number; minColumnCount: number; maxColumnCount: number; columns: any[]; }[]>([
-        {initialColumnCount: 2, minColumnCount: 1, maxColumnCount: 6, columns: [] }
+    const [rows, setRows] = useState<{minColumnCount: number; maxColumnCount: number; columns: any[]; }[]>([
+        {minColumnCount: 1, maxColumnCount: 6, columns: [] }
     ]);
 
     const addRow = () => {
         const newRow = {
-            initialColumnCount: 2,
             minColumnCount: 1,
             maxColumnCount: 6,
             columns: []
@@ -40,7 +39,6 @@ const TemplateEditor = () => {
             <TitleContainer title="Personalizar Template" />
             {rows.map((row, index) => (
                 <CustomizableRow
-                    initialColumnCount={row.initialColumnCount}
                     minColumnCount={row.minColumnCount}
                     maxColumnCount={row.maxColumnCount}
                     onChange={(updatedColumns) => updateRow(index, updatedColumns)}
