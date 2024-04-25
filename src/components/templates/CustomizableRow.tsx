@@ -60,15 +60,15 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
 
   const toggleEditForm = (index: number) => {
     if (editColumnIndex === index && isEditing) {
-      handleEditFormSubmit(index, columns[index].content);
+      handleEditFormSubmit(index, columns[index]);
     } else {
       setEditColumnIndex(index);
       setIsEditing(true);
     }
   };
 
-  const handleEditFormSubmit = (index: number, newContent: string) => {
-    updateColumnContent(index, newContent);
+  const handleEditFormSubmit = (index: number, updatedColumn: Column) => {
+    updateColumns(columns);
     setEditColumnIndex(null);
     setIsEditing(false);
   };
@@ -92,8 +92,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
           {editColumnIndex === index ? (
             <EditForm
               column={column}
-              initialValue={column.content}
-              onSubmit={newContent => handleEditFormSubmit(index, newContent)}
+              onSubmit={updatedColumn => handleEditFormSubmit(index, updatedColumn)}
               onClose={() => toggleEditForm(index)}
             />
           ) : (
@@ -125,30 +124,9 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
               <button className="bg-transparent border-none" onClick={() => toggleEditForm(index)}>
                 {editColumnIndex === index && isEditing ? <FiXSquare /> : <FiEdit />}
               </button>
-              {editColumnIndex === index && (
-                <ul className="dropdown-menu fixed text-gray-700 pt-1 bg-purple-400 rounded-md min-w-36">
-                  {Object.values(ColumnType).map((type: ColumnType) => (
-                    <li key={type}>
-                      <button
-                        onClick={() => updateColumnType(index, type)}
-                        className={`px-4 py-2 text-sm text-white ${getColumnEditingType(editColumnIndex) === type ? 'bg-purple-500 hover:text-white' : 'hover:bg-purple-600'} w-full text-left flex justify-between items-center`}
-                      >
-                        <span>{type}</span>
-                        {getColumnEditingType(editColumnIndex) === type && <FiCheck />}
-                      </button>
-                    </li>
-                  ))}
-                  <li>
-                    <button
-                      onClick={() => deleteColumn(index)}
-                      className="px-4 py-2 text-sm text-red-700 bg-red-200 hover:bg-red-400 hover:text-white w-full  text-left flex justify-between items-center"
-                    >
-                      <span>Excluir</span>
-                      <FiTrash />
-                    </button>
-                  </li>
-                </ul>
-              )}
+              <button className="bg-transparent border-none" onClick={() => deleteColumn(index)}>
+                <FiTrash />
+              </button>
             </div>
           </div>
         </div>

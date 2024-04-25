@@ -45,7 +45,7 @@ const FormDialogBase = React.forwardRef<FormDialogBaseRef, FormDialogBaseProps>(
 
     return (
         <Transition.Root show={dialogVisible} as={Fragment}>
-            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={(value: boolean) => { setDialogVisible(value) }}>
+            <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={handleCancel}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
