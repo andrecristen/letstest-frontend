@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PainelContainer from "../base/PainelContainer";
-import {FiUser } from "react-icons/fi";
+import { FiCopy, FiFileText, FiLink, FiTerminal, FiUser } from "react-icons/fi";
 import notifyService from "../../services/notifyService";
 import { TitleContainer } from "../base/TitleContainer";
-import { TemplateData } from "../../types/TemplateData";
+import { TemplateData, getTemplateTypeDescription } from "../../types/TemplateData";
+import { getAllByProjects } from "../../services/templatesService";
 
 
 export const TemplateManagementList = () => {
@@ -17,40 +18,51 @@ export const TemplateManagementList = () => {
 
     useEffect(() => {
         load();
-    });
+    }, []);
 
     const load = async () => {
         setLoadingTemplates(true);
+        const response = await getAllByProjects(parseInt(projectId ? projectId : "0"));
+        setTemplates(response?.data);
     }
 
     const handleClickNewTemplate = () => {
-        
+
+    }
+
+    const handleClickDuplicate = (event: any, templateId: number) => {
+
     }
 
     return (
         <PainelContainer>
             <TitleContainer title="Templates" />
             <div className="my-4 px-2 flex justify-end items-stretch flex-wrap pb-0 bg-transparent">
-                    <button
-                        type="button"
-                        className="py-2 px-12 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                        onClick={handleClickNewTemplate}
-                    >
-                        Criar Novo
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    className="py-2 px-12 border border-transparent text-lg font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    onClick={handleClickNewTemplate}
+                >
+                    Criar Novo
+                </button>
+            </div>
             {templates.length ? (
-                <ul className="divide-y divide-purple-200">
-                    {templates.map((template) => (
-                        <li key={template.id} className="py-4 flex">
+                <ul className="divide-y border border-gray-300 rounded-lg">
+                    {templates.map((template, index) => (
+                        <li key={template.id} className={`p-6 flex ${index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-200'}`}>
                             <div className="flex-shrink-0">
-                                <FiUser className="text-lg" />
+                                <FiFileText className="text-lg" />
                             </div>
                             <div className="ml-3">
-                                <p className="text-sm font-medium text-purple-900">#: {template.id}</p>
-                                <p className="text-sm text-purple-500">Nome: {template.name}</p>
-                                <p className="text-sm text-purple-500">Descrição: {template.description}</p>
-                                <p className="text-sm text-purple-500">Tipo: {template.type}</p>
+                                <p className="text-sm font-medium text-purple-900"># {template.id}</p>
+                                <p className="font-bold text-lg text-purple-500">{template.name}</p>
+                                <p className="font-bold text-sm text-purple-500">{getTemplateTypeDescription(template.type)}</p>
+                                <p className="text-sm text-gray-400"> {template.description}</p>
+                            </div>
+                            <div className="ml-auto flex">
+                                <button onClick={(event) => { handleClickDuplicate(event, template.id) }} className="h-8 inline-flex items-center px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <FiCopy className="h-5 w-5 mr-2" /> Personalizar
+                                </button>
                             </div>
                         </li>
                     ))}
@@ -61,3 +73,5 @@ export const TemplateManagementList = () => {
         </PainelContainer>
     );
 }
+
+//{template.projectId && <FiLink />}

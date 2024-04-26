@@ -60,7 +60,7 @@ function ProjectsOwnerList() {
                 <div className="my-4 px-2 flex justify-end items-stretch flex-wrap pb-0 bg-transparent">
                     <button
                         type="button"
-                        className="py-2 px-12 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                        className="py-2 px-12 border border-transparent text-lg font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                         onClick={handleClickNewProject}
                     >
                         Criar Novo
