@@ -9,6 +9,7 @@ import { InvolvementManagementList } from "./involvement/ManagementList";
 import { InvolvementTypeEnum } from '../types/InvolvementData';
 import { ProjectsPublicList } from "./projects/PublicList";
 import TemplateEditor from "./templates/TemplateEditor";
+import { TemplateManagementList } from "./templates/ManagementList";
 
 const AppRoutes = () => {
 
@@ -25,8 +26,8 @@ const AppRoutes = () => {
                 <Route path="/project/detail/:projectId" element={<ProjectsDetailView />}></Route>
                 <Route path="/project/testers/:projectId" element={<InvolvementManagementList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
                 <Route path="/project/managers/:projectId" element={<InvolvementManagementList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
+                <Route path="/project/templates/:projectId" element={<TemplateManagementList />}></Route>
                 <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
-                <Route path="/templates" element={<TemplateEditor />}></Route>
             </Routes>
         </Router>
     );

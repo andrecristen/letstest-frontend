@@ -1,5 +1,5 @@
 import PainelContainer from "../base/PainelContainer";
-import { FiEdit, FiFileText, FiPieChart, FiSmartphone, FiTrello, FiUser, FiUserPlus } from 'react-icons/fi';
+import { FiEdit, FiFilePlus, FiFileText, FiPieChart, FiSmartphone, FiTrello, FiUser, FiUserPlus } from 'react-icons/fi';
 import { getProjectById } from '../../services/projectService';
 import { getProjectSituationColor, getProjectSituationDescription } from '../../types/ProjectSituationEnum';
 import { useEffect, useRef, useState } from "react";
@@ -38,6 +38,7 @@ const ProjectsDetailView = () => {
     }
 
     const callListTesters = () => navigateToRoute("testers");
+    const callListTemplates = () => navigateToRoute("templates");
     const callListManagers = () => navigateToRoute("managers");
     const callListTestCases = () => navigateToRoute("test-cases");
     const callListEnvironments = () => navigateToRoute("environments");
@@ -93,6 +94,10 @@ const ProjectsDetailView = () => {
                     <div onClick={callListTestCases} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
                         <FiFileText className="w-20 h-20 mx-auto mb-4" />
                         <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Casos de Teste</h3>
+                    </div>
+                    <div onClick={callListTemplates} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
+                        <FiFilePlus className="w-20 h-20 mx-auto mb-4" />
+                        <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Templates</h3>
                     </div>
                     <div onClick={callListKanban} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
                         <FiTrello className="w-20 h-20 mx-auto mb-4" />
