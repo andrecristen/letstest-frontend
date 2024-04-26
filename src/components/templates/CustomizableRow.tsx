@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FiCheck, FiEdit, FiPlusCircle, FiTrash, FiType, FiX, FiXSquare } from 'react-icons/fi';
+import { FiEdit, FiPlusCircle, FiTrash, FiXSquare } from 'react-icons/fi';
 import notifyService from '../../services/notifyService';
 import EditForm, { Column, ColumnType } from './ColumnFormEditor';
 
@@ -22,7 +22,6 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
     }
   }, []);
 
-
   const addColumn = () => {
     if (columns.length < maxColumnCount) {
       const updatedColumns = [...columns, { type: ColumnType.Text, content: '' }];
@@ -44,12 +43,6 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
     } else {
       notifyService.info(`Linha precisa ter ao menos ${minColumnCount} coluna(s)`);
     }
-  };
-
-  const updateColumnType = (index: number, newType: ColumnType) => {
-    const updatedColumns = [...columns];
-    updatedColumns[index].type = newType;
-    updateColumns(updatedColumns);
   };
 
   const updateColumnContent = (index: number, content: string) => {
@@ -76,13 +69,6 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
   const updateColumns = (updatedColumns: Column[]) => {
     setColumns(updatedColumns);
     onChange(updatedColumns);
-  }
-
-  const getColumnEditingType = (index: number,) => {
-    if (columns[index]) {
-      return columns[index].type
-    }
-    return null;
   }
 
   return (
