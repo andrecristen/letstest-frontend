@@ -57,7 +57,7 @@ export const TemplateManagementList = () => {
                                 <p className="text-sm font-medium text-purple-900"># {template.id}</p>
                                 <p className="font-bold text-lg text-purple-500">{template.name}</p>
                                 <p className="font-bold text-sm text-purple-500">{getTemplateTypeDescription(template.type)}</p>
-                                <p className="text-sm text-gray-400"> {template.description}</p>
+                                <p className="text-sm text-gray-400 line-clamp-6"> {template.description}</p>
                             </div>
                             <div className="ml-auto flex">
                                 <button onClick={() => { handleClickDuplicate(template.id) }} className="h-8 inline-flex items-center px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
