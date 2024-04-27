@@ -45,7 +45,6 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
   }
 
   const handleCancel = () => {
-    console.log(getValues()["id"]);
     reset();
   }
 

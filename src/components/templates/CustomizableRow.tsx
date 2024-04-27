@@ -21,7 +21,6 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
   }
 
   useEffect(() => {
-    debugger;
     if (!appliedInitialColumnCount && !columnsRow.length) {
       addColumn();
       setAppliedInitialColumnCount(true);
@@ -78,8 +77,6 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
       onChange(updatedcolumnsRow);
     }
   }
-
-  console.log(columnsRow);
 
   return (
     <div className="flex border border-gray-300 overflow-hidden w-full h-12">
