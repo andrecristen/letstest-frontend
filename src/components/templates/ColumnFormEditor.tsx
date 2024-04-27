@@ -16,6 +16,7 @@ export enum ColumnType {
 }
 
 export interface Column {
+    id: number;
     type: ColumnType;
     content: string;
 }

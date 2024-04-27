@@ -2,12 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { FiPlusCircle, FiSave, FiTrash } from 'react-icons/fi';
 import PainelContainer from '../base/PainelContainer';
 import { TitleContainer } from '../base/TitleContainer';
-import CustomizableRow from './CustomizableRow';
+import CustomizableRow, { CustomizableRowProps } from './CustomizableRow';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { TemplateData, getTemplateTypeList } from '../../types/TemplateData';
-import { create } from '../../services/templatesService';
+import { create, getById } from '../../services/templatesService';
 import notifyService from '../../services/notifyService';
+import { Column } from './ColumnFormEditor';
+
+
+interface RowProps extends CustomizableRowProps {
+    id: number;
+}
 
 const TemplateEditor = () => {
 
@@ -15,16 +21,33 @@ const TemplateEditor = () => {
         return Date.now();
     }
 
-    const [rows, setRows] = useState<{ id: number; minColumnCount: number; maxColumnCount: number; columns: any[]; }[]>([
+    const [rows, setRows] = useState<RowProps[]>([
         { id: getIdRow(), minColumnCount: 1, maxColumnCount: 6, columns: [] }
     ]);
     const { register, handleSubmit, setValue, getValues, reset } = useForm<TemplateData>();
+    const [isLoadedTemplateCopy, setIsLoadedTemplateCopy] = useState<boolean>(false);
     const { projectId, templateIdCopy } = useParams();
     const navigate = useNavigate();
 
     useEffect(() => {
-
+        if (!isLoadedTemplateCopy) {
+            loadOfCopy();
+        }
     }, [rows]);
+
+    const loadOfCopy = async () => {
+        setIsLoadedTemplateCopy(true);
+        if (templateIdCopy) {
+            const templateCopyData = await getById(parseInt(templateIdCopy));
+            if (templateCopyData?.data?.data) {
+                setValue("name", "Cópia de: " + templateCopyData?.data.name);
+                setValue("description", templateCopyData?.data.description + " (Cópia de: " + templateCopyData?.data.name + ")");
+                setValue("type", templateCopyData?.data.type);
+                const newRows: RowProps[] = Object.values(templateCopyData.data.data);
+                setRows(newRows);
+            }
+        }
+    }
 
     const addRow = () => {
         const newRow = {
@@ -109,6 +132,7 @@ const TemplateEditor = () => {
                             <div key={row.id} className="flex justify-between items-center">
                                 <CustomizableRow
                                     key={`row` + row.id}
+                                    columns={row.columns}
                                     minColumnCount={row.minColumnCount}
                                     maxColumnCount={row.maxColumnCount}
                                     onChange={(updatedColumns) => updateRow(index, updatedColumns)}

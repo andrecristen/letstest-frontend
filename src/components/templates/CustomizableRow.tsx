@@ -3,39 +3,45 @@ import { FiEdit, FiPlusCircle, FiTrash, FiXSquare } from 'react-icons/fi';
 import notifyService from '../../services/notifyService';
 import EditForm, { Column, ColumnType } from './ColumnFormEditor';
 
-interface CustomizableRowProps {
+export interface CustomizableRowProps {
+  columns?: Column[]
   minColumnCount: number;
   maxColumnCount: number;
-  onChange: (columns: Column[]) => void;
+  onChange?: (columnsRow: Column[]) => void;
 }
 
-const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxColumnCount, onChange }) => {
-  const [columns, setColumns] = useState<Column[]>([]);
+const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCount, maxColumnCount, onChange }) => {
+  const [columnsRow, setcolumnsRow] = useState<Column[]>(columns || []);
   const [editColumnIndex, setEditColumnIndex] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [appliedInitialColumnCount, setAppliedInitialColumnCount] = useState<boolean>(false);
 
+  const getIdColumn = () => {
+    return Date.now();
+  }
+
   useEffect(() => {
-    if (!appliedInitialColumnCount) {
+    debugger;
+    if (!appliedInitialColumnCount && !columnsRow.length) {
       addColumn();
       setAppliedInitialColumnCount(true);
     }
-  }, [columns]);
+  }, [columnsRow]);
 
   const addColumn = () => {
-    if (columns.length < maxColumnCount) {
-      const updatedColumns = [...columns, { type: ColumnType.Text, content: '' }];
-      updateColumns(updatedColumns);
+    if (columnsRow.length < maxColumnCount) {
+      const updatedcolumnsRow = [...columnsRow, { id: getIdColumn(), type: ColumnType.Text, content: '' }];
+      updatecolumnsRow(updatedcolumnsRow);
     } else {
       notifyService.info(`Linha não pode ter mais de ${maxColumnCount} coluna(s)`);
     }
   };
 
   const deleteColumn = (index: number) => {
-    if (columns.length > minColumnCount) {
-      const updatedColumns = [...columns];
-      updatedColumns.splice(index, 1);
-      updateColumns(updatedColumns);
+    if (columnsRow.length > minColumnCount) {
+      const updatedcolumnsRow = [...columnsRow];
+      updatedcolumnsRow.splice(index, 1);
+      updatecolumnsRow(updatedcolumnsRow);
       if (editColumnIndex === index) {
         setEditColumnIndex(null);
         setIsEditing(false);
@@ -46,14 +52,14 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
   };
 
   const updateColumnContent = (index: number, content: string) => {
-    const updatedColumns = [...columns];
-    updatedColumns[index].content = content;
-    updateColumns(updatedColumns);
+    const updatedcolumnsRow = [...columnsRow];
+    updatedcolumnsRow[index].content = content;
+    updatecolumnsRow(updatedcolumnsRow);
   };
 
   const toggleEditForm = (index: number) => {
     if (editColumnIndex === index && isEditing) {
-      handleEditFormSubmit(index, columns[index]);
+      handleEditFormSubmit(index, columnsRow[index]);
     } else {
       setEditColumnIndex(index);
       setIsEditing(true);
@@ -61,20 +67,24 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
   };
 
   const handleEditFormSubmit = (index: number, updatedColumn: Column) => {
-    updateColumns(columns);
+    updatecolumnsRow(columnsRow);
     setEditColumnIndex(null);
     setIsEditing(false);
   };
 
-  const updateColumns = (updatedColumns: Column[]) => {
-    setColumns(updatedColumns);
-    onChange(updatedColumns);
+  const updatecolumnsRow = (updatedcolumnsRow: Column[]) => {
+    setcolumnsRow(updatedcolumnsRow);
+    if (onChange) {
+      onChange(updatedcolumnsRow);
+    }
   }
+
+  console.log(columnsRow);
 
   return (
     <div className="flex border border-gray-300 overflow-hidden w-full h-12">
-      {columns.map((column, index) => (
-        <div key={index} className="flex-auto border-r border-gray-300 p-2 relative">
+      {columnsRow.map((column, index) => (
+        <div key={`column` + column.id} className="flex-auto border-r border-gray-300 p-2 relative">
           {editColumnIndex === index ? (
             <EditForm
               column={column}
