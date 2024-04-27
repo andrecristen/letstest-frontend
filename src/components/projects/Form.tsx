@@ -41,6 +41,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
       }
     }
     formDialogRef.current?.closeDialog();
+    props.callbackSubmit();
   }
 
   const handleCancel = () => {
@@ -81,7 +82,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
           })}
         </select>
       </div>
-      <div hidden={getValues()["id"] == undefined }className="py-2">
+      <div hidden={getValues()["id"] == undefined} className="py-2">
         <select
           {...register("situation")}
           required

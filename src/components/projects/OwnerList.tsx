@@ -155,7 +155,7 @@ function ProjectsOwnerList() {
                     </div>
                 </div>
             </>
-            <ProjectsForm ref={formDialogRef} />
+            <ProjectsForm callbackSubmit={load} ref={formDialogRef} />
         </PainelContainer>
     );
 }
