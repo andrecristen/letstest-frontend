@@ -5,6 +5,7 @@ import notifyService from '../../services/notifyService';
 import tokenService from '../../services/tokenService';
 import { AuthData } from '../../types/AuthData';
 import logo from '../../assets/logo-transparente.png'
+import { FiLoader } from 'react-icons/fi';
 
 const Login = () => {
 
@@ -52,7 +53,7 @@ const Login = () => {
                 <input className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded" required type="text" placeholder="Login" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <input className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4" required type="password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} />
                 <div className="text-center md:text-center">
-                    <button disabled={validatingLogin ? true : false} className="mt-4 bg-purple-600 hover:bg-purple-700 px-4 py-2 text-white uppercase rounded text-xs tracking-wider" type="submit">Login</button>
+                    <button disabled={validatingLogin ? true : false} className="mt-4 bg-purple-600 hover:bg-purple-700 px-4 py-2 text-white uppercase rounded text-xs tracking-wider" type="submit">{validatingLogin ? <FiLoader className="text-white animate-spin" size={30} /> : "Login"}</button>
                 </div>
                 <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-center">
                     Ainda não possui uma conta? <a className="text-red-600 hover:underline hover:underline-offset-4" href="/register">Crie agora</a>
