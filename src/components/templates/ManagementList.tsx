@@ -27,11 +27,11 @@ export const TemplateManagementList = () => {
     }
 
     const handleClickNewTemplate = () => {
-
+        navigate("/project/templates/" + projectId + "/add");
     }
 
-    const handleClickDuplicate = (event: any, templateId: number) => {
-
+    const handleClickDuplicate = (templateId: number) => {
+        navigate("/project/templates/" + projectId + "/copy/" + templateId);
     }
 
     return (
@@ -60,7 +60,7 @@ export const TemplateManagementList = () => {
                                 <p className="text-sm text-gray-400"> {template.description}</p>
                             </div>
                             <div className="ml-auto flex">
-                                <button onClick={(event) => { handleClickDuplicate(event, template.id) }} className="h-8 inline-flex items-center px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <button onClick={() => { handleClickDuplicate(template.id) }} className="h-8 inline-flex items-center px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <FiCopy className="h-5 w-5 mr-2" /> Personalizar
                                 </button>
                             </div>

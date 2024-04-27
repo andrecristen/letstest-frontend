@@ -27,6 +27,8 @@ const AppRoutes = () => {
                 <Route path="/project/testers/:projectId" element={<InvolvementManagementList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
                 <Route path="/project/managers/:projectId" element={<InvolvementManagementList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
                 <Route path="/project/templates/:projectId" element={<TemplateManagementList />}></Route>
+                <Route path="/project/templates/:projectId/add" element={<TemplateEditor />}></Route>
+                <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateEditor />}></Route>
                 <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
             </Routes>
         </Router>

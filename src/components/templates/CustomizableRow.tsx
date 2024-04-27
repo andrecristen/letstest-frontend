@@ -20,7 +20,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
       addColumn();
       setAppliedInitialColumnCount(true);
     }
-  }, []);
+  }, [columns]);
 
   const addColumn = () => {
     if (columns.length < maxColumnCount) {
@@ -72,7 +72,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
   }
 
   return (
-    <div className="flex border border-gray-300 overflow-hidden">
+    <div className="flex border border-gray-300 overflow-hidden w-full h-12">
       {columns.map((column, index) => (
         <div key={index} className="flex-auto border-r border-gray-300 p-2 relative">
           {editColumnIndex === index ? (
@@ -107,17 +107,17 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ minColumnCount, maxCo
           )}
           <div className="absolute right-2 top-2">
             <div className="dropdown inline-block relative">
-              <button className="bg-transparent border-none" onClick={() => toggleEditForm(index)}>
+              <button type="button" className="bg-transparent border-none" onClick={() => toggleEditForm(index)}>
                 {editColumnIndex === index && isEditing ? <FiXSquare /> : <FiEdit />}
               </button>
-              <button className="bg-transparent border-none" onClick={() => deleteColumn(index)}>
+              <button type="button" className="bg-transparent border-none" onClick={() => deleteColumn(index)}>
                 <FiTrash />
               </button>
             </div>
           </div>
         </div>
       ))}
-      <button onClick={addColumn} className="bg-blue-500 text-white px-4 py-2 flex items-center"><FiPlusCircle /></button>
+      <button type="button" onClick={addColumn} className="bg-blue-500 text-white px-4 py-3 rounded-sm h-full flex items-center"><FiPlusCircle /></button>
     </div>
   );
 };

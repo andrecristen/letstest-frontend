@@ -35,7 +35,9 @@ const EditForm: React.FC<EditFormProps> = ({ column, onSubmit, onClose }) => {
         });
     }, [column, setValue]);
 
-    const callOnSubmit: SubmitHandler<Column> = async (data) => {
+    const callOnSubmit: SubmitHandler<Column> = async (data, event) => {
+        event?.preventDefault();
+        event?.stopPropagation();
         column.type = data.type;
         column.content = data.content;
         onSubmit(column);
