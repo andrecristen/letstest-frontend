@@ -15,6 +15,8 @@ function ProjectsOwnerList() {
 
     const [selectedSituation, setSelectedSituation] = useState(1);
     const [projects, setProjects] = useState([]);
+    const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
+
 
     const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
 
@@ -26,8 +28,10 @@ function ProjectsOwnerList() {
     }, []);
 
     const load = async () => {
+        setLoadingProjects(true);
         const response = await getMyProjects();
         setProjects(response?.data);
+        setLoadingProjects(false);
     }
 
     const handleClickNewProject = () => {
@@ -47,7 +51,7 @@ function ProjectsOwnerList() {
         formDialogRef.current?.getDialogBase().current.openDialog();
     }
 
-    const handleClickSelectSituation = (event: any, situation:number) => {
+    const handleClickSelectSituation = (event: any, situation: number) => {
         event.preventDefault();
         event.stopPropagation();
         setSelectedSituation(situation)
@@ -56,7 +60,7 @@ function ProjectsOwnerList() {
     return (
         <PainelContainer>
             <>
-            <TitleContainer title="Gerenciar Projetos"/>
+                <TitleContainer title="Gerenciar Projetos" />
                 <div className="my-4 px-2 flex justify-end items-stretch flex-wrap pb-0 bg-transparent">
                     <button
                         type="button"
@@ -90,55 +94,59 @@ function ProjectsOwnerList() {
                                             </tr>
                                         </thead>
                                         <tbody className="m-2">
-                                            {projects.filter((currentProject: any) => (currentProject.situation == selectedSituation || selectedSituation == null)).map((project: any) => (
-                                                <>
-                                                    <tr className="border-b last:border-b-0 hover:bg-gray-200 cursor-pointer" onClick={(event) => { handleClickManageProject(event, project) }}>
-                                                        <td className="pr-3 text-center">
-                                                            <button onClick={(event) => { handleClickManageProject(event, project) }} title="Gerenciar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
-                                                                <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
-                                                                    <FiActivity className="w-6 h-6" />
-                                                                </span>
-                                                            </button>
-                                                            <button onClick={(event) => { handleClickEditProject(event, project) }} title="Editar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
-                                                                <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
-                                                                    <FiEdit className="w-6 h-6" />
-                                                                </span>
-                                                            </button>
-                                                        </td>
-                                                        <td className="p-3">
-                                                            <div className="flex items-center">
-                                                                <div className="relative inline-block shrink-0 rounded-2xl me-3">
-                                                                    <img src={project.logo ? project.logo : logo} className="w-[50px] h-[50px] inline-block shrink-0 rounded-2xl" alt="" />
+                                            {projects.length ? (
+                                                projects.filter((currentProject: any) => (currentProject.situation == selectedSituation || selectedSituation == null)).map((project: any) => (
+                                                    <>
+                                                        <tr className="border-b last:border-b-0 hover:bg-gray-200 cursor-pointer" onClick={(event) => { handleClickManageProject(event, project) }}>
+                                                            <td className="pr-3 text-center">
+                                                                <button onClick={(event) => { handleClickManageProject(event, project) }} title="Gerenciar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
+                                                                    <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
+                                                                        <FiActivity className="w-6 h-6" />
+                                                                    </span>
+                                                                </button>
+                                                                <button onClick={(event) => { handleClickEditProject(event, project) }} title="Editar" className="m-1 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700">
+                                                                    <span className="flex items-center justify-center p-2 leading-none shrink-0 ">
+                                                                        <FiEdit className="w-6 h-6" />
+                                                                    </span>
+                                                                </button>
+                                                            </td>
+                                                            <td className="p-3">
+                                                                <div className="flex items-center">
+                                                                    <div className="relative inline-block shrink-0 rounded-2xl me-3">
+                                                                        <img src={project.logo ? project.logo : logo} className="w-[50px] h-[50px] inline-block shrink-0 rounded-2xl" alt="" />
+                                                                    </div>
+                                                                    <div className="flex flex-col justify-start">
+                                                                        <a href="javascript:void(0)" className="mb-1 font-semibold transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary"> {project.name} </a>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex flex-col justify-start">
-                                                                    <a href="javascript:void(0)" className="mb-1 font-semibold transition-colors duration-200 ease-in-out text-lg/normal text-secondary-inverse hover:text-primary"> {project.name} </a>
+                                                                <div className="flex items-center">
+                                                                    <span title={project.description} className='text-sm text-gray-500 line-clamp-2'>{project.description}</span>
                                                                 </div>
-                                                            </div>
-                                                            <div className="flex items-center">
-                                                                <span title={project.description} className='text-sm text-gray-500 line-clamp-2'>{project.description}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="pr-0 text-center">
-                                                            <span className="font-semibold text-light-inverse text-md/normal"></span>
-                                                        </td>
-                                                        <td className="pr-0 text-center">
-                                                            <span className="text-center align-baseline inline-flex px-2 py-1 mr-auto items-center font-semibold text-base/none text-success bg-success-light rounded-lg">
-                                                                {project.percentage}%
-                                                            </span>
-                                                        </td>
-                                                        <td className="pr-0 text-center">
-                                                            <span className="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg">
-                                                                {project.situation}
-                                                            </span>
-                                                        </td>
-                                                        <td className="pr-0 text-center">
-                                                            <span className="font-semibold text-light-inverse text-md/normal">
-                                                                {project.date}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                </>
-                                            ))}
+                                                            </td>
+                                                            <td className="pr-0 text-center">
+                                                                <span className="font-semibold text-light-inverse text-md/normal"></span>
+                                                            </td>
+                                                            <td className="pr-0 text-center">
+                                                                <span className="text-center align-baseline inline-flex px-2 py-1 mr-auto items-center font-semibold text-base/none text-success bg-success-light rounded-lg">
+                                                                    {project.percentage}%
+                                                                </span>
+                                                            </td>
+                                                            <td className="pr-0 text-center">
+                                                                <span className="text-center align-baseline inline-flex px-4 py-3 mr-auto items-center font-semibold text-[.95rem] leading-none text-primary bg-primary-light rounded-lg">
+                                                                    {project.situation}
+                                                                </span>
+                                                            </td>
+                                                            <td className="pr-0 text-center">
+                                                                <span className="font-semibold text-light-inverse text-md/normal">
+                                                                    {project.date}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </>
+                                                ))
+                                            ) : (
+                                                <div className="text-center text-lg m-20 text-purple-600">{loadingProjects ? "Carregando seus projetos..." : "Nenhum projeto encontrado"}</div>
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
