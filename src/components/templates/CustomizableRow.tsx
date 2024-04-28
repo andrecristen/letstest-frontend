@@ -101,12 +101,9 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
                 />
               )}
               {column.type === ColumnType.Label && (
-                <span onClick={() => toggleEditForm(index)} className="w-full text-black px-2 py-1 cursor-pointer">
+                <span className="w-full text-black px-2 py-1">
                   {column.content || 'Editar Label'}:
                 </span>
-              )}
-              {column.type === ColumnType.Image && (
-                <img src={column.content} alt="Imagem" onClick={() => toggleEditForm(index)} className="cursor-pointer" />
               )}
               {column.type === ColumnType.Empty && (
                 <div className="w-full text-center"> - </div>

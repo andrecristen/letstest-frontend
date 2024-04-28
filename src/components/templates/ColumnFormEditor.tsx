@@ -10,7 +10,6 @@ interface EditFormProps {
 export enum ColumnType {
     Text = 'Texto',
     Label = 'Label',
-    Image = 'Imagem',
     Empty = 'Espaço',
     File = 'Arquivo',
     MultipleFiles = 'Múltiplos Arquivos',
@@ -23,6 +22,11 @@ export interface Column {
     files?: File[];
 }
 
+const TYPES_CONTENT_EDIT = [
+    ColumnType.Text,
+    ColumnType.Label
+]
+
 export const getColumnTypeList = () => {
     return Object.keys(ColumnType)
         .filter(key => isNaN(Number(key)))
@@ -30,7 +34,10 @@ export const getColumnTypeList = () => {
 }
 
 const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
-    const { register, handleSubmit, setValue, reset } = useForm<Column>();
+
+    const { register, handleSubmit, setValue, watch } = useForm<Column>();
+
+    const updateType = watch("type");
 
     useEffect(() => {
         Object.keys(column).forEach((key) => {
@@ -59,7 +66,7 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
                     required
                     className="form-input"
                 >
-                    <option disabled value="null">Tipo da coluna</option>
+                    <option disabled value="null">Tipo da coluna: {updateType}</option>
                     {getColumnTypeList().map((type) => {
                         return (
                             <option value={type.id}>{type.id}</option>
@@ -67,14 +74,17 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
                     })}
                 </select>
             </div>
-            <div className="py-2">
-                <input
-                    {...register("content")}
-                    required
-                    className="form-input"
-                    placeholder="Conteúdo"
-                />
-            </div>
+            {TYPES_CONTENT_EDIT.some((columnType) => columnType == updateType) ? (
+                <div className="py-2">
+                    <input
+                        {...register("content")}
+                        required
+                        className="form-input"
+                        placeholder="Conteúdo"
+                    />
+                </div>
+            ) : null}
+
         </FormDialogBase>
     );
 };
