@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FiEdit, FiPlusCircle, FiTrash, FiXSquare } from 'react-icons/fi';
 import notifyService from '../../services/notifyService';
 import EditForm, { Column, ColumnType } from './ColumnFormEditor';
+import FileUpload from '../base/FileUpload';
 
 export interface CustomizableRowProps {
   columns?: Column[]
@@ -30,7 +31,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
   const addColumn = () => {
     if (columnsRow.length < maxColumnCount) {
       const updatedcolumnsRow = [...columnsRow, { id: getIdColumn(), type: ColumnType.Text, content: '' }];
-      updatecolumnsRow(updatedcolumnsRow);
+      updateColumnsRow(updatedcolumnsRow);
     } else {
       notifyService.info(`Linha não pode ter mais de ${maxColumnCount} coluna(s)`);
     }
@@ -40,7 +41,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
     if (columnsRow.length > minColumnCount) {
       const updatedcolumnsRow = [...columnsRow];
       updatedcolumnsRow.splice(index, 1);
-      updatecolumnsRow(updatedcolumnsRow);
+      updateColumnsRow(updatedcolumnsRow);
       if (editColumnIndex === index) {
         setEditColumnIndex(null);
         setIsEditing(false);
@@ -53,25 +54,26 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
   const updateColumnContent = (index: number, content: string) => {
     const updatedcolumnsRow = [...columnsRow];
     updatedcolumnsRow[index].content = content;
-    updatecolumnsRow(updatedcolumnsRow);
+    updateColumnsRow(updatedcolumnsRow);
   };
+
+  const updateColumnFiles = (files: File[], index: number) => {
+    const updatedcolumnsRow = [...columnsRow];
+    updatedcolumnsRow[index].files = files;
+    updateColumnsRow(updatedcolumnsRow);
+  }
 
   const toggleEditForm = (index: number) => {
     if (editColumnIndex === index && isEditing) {
-      handleEditFormSubmit(index, columnsRow[index]);
+      setEditColumnIndex(null);
+      setIsEditing(false);
     } else {
       setEditColumnIndex(index);
       setIsEditing(true);
     }
   };
 
-  const handleEditFormSubmit = (index: number, updatedColumn: Column) => {
-    updatecolumnsRow(columnsRow);
-    setEditColumnIndex(null);
-    setIsEditing(false);
-  };
-
-  const updatecolumnsRow = (updatedcolumnsRow: Column[]) => {
+  const updateColumnsRow = (updatedcolumnsRow: Column[]) => {
     setcolumnsRow(updatedcolumnsRow);
     if (onChange) {
       onChange(updatedcolumnsRow);
@@ -85,8 +87,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
           {editColumnIndex === index ? (
             <EditForm
               column={column}
-              onSubmit={updatedColumn => handleEditFormSubmit(index, updatedColumn)}
-              onClose={() => toggleEditForm(index)}
+              onFinish={() => toggleEditForm(index)}
             />
           ) : (
             <>
@@ -109,6 +110,12 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, minColumnCou
               )}
               {column.type === ColumnType.Empty && (
                 <div className="w-full text-center"> - </div>
+              )}
+              {column.type === ColumnType.File && (
+                <FileUpload onChange={(files) => { updateColumnFiles(files, index) }} />
+              )}
+              {column.type === ColumnType.MultipleFiles && (
+                <FileUpload onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
               )}
             </>
           )}

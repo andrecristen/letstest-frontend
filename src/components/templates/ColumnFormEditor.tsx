@@ -4,8 +4,7 @@ import FormDialogBase from "../base/FormDialogBase";
 
 interface EditFormProps {
     column: Column;
-    onSubmit: (updatedColumn: Column) => void;
-    onClose: () => void;
+    onFinish: () => void;
 }
 
 export enum ColumnType {
@@ -13,12 +12,15 @@ export enum ColumnType {
     Label = 'Label',
     Image = 'Imagem',
     Empty = 'Espaço',
+    File = 'Arquivo',
+    MultipleFiles = 'Múltiplos Arquivos',
 }
 
 export interface Column {
     id: number;
     type: ColumnType;
     content: string;
+    files?: File[];
 }
 
 export const getColumnTypeList = () => {
@@ -27,7 +29,7 @@ export const getColumnTypeList = () => {
         .map(key => ({ name: key, id: ColumnType[key as keyof typeof ColumnType] }));
 }
 
-const EditForm: React.FC<EditFormProps> = ({ column, onSubmit, onClose }) => {
+const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
     const { register, handleSubmit, setValue, reset } = useForm<Column>();
 
     useEffect(() => {
@@ -41,14 +43,14 @@ const EditForm: React.FC<EditFormProps> = ({ column, onSubmit, onClose }) => {
         event?.stopPropagation();
         column.type = data.type;
         column.content = data.content;
-        onSubmit(column);
+        onFinish();
     };
 
     return (
         <FormDialogBase
             initialOpen={true}
             submit={handleSubmit(callOnSubmit)}
-            cancel={onClose}
+            cancel={onFinish}
             title="Editar Coluna"
         >
             <div className="py-2">
