@@ -66,7 +66,7 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
                     required
                     className="form-input"
                 >
-                    <option disabled value="null">Tipo da coluna: {updateType}</option>
+                    <option disabled value="null">Tipo da coluna</option>
                     {getColumnTypeList().map((type) => {
                         return (
                             <option value={type.id}>{type.id}</option>
