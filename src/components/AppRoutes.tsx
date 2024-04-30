@@ -1,15 +1,18 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// Views
 import Home from "../components/Home";
 import Login from "./user/Login";
 import Dashboard from "./Dashboard";
 import ProjectsOwnerList from "./projects/OwnerList";
 import Register from "./user/Register";
 import ProjectsDetailView from "./projects/DetailView";
-import { InvolvementManagementList } from "./involvement/ManagementList";
-import { InvolvementTypeEnum } from '../types/InvolvementData';
-import { ProjectsPublicList } from "./projects/PublicList";
+import InvolvementManagementList from "./involvement/ManagementList";
+import ProjectsPublicList from "./projects/PublicList";
 import TemplateEditor from "./templates/TemplateEditor";
-import { TemplateManagementList } from "./templates/ManagementList";
+import TemplateManagementList from "./templates/ManagementList";
+import TestCaseProjectOwnerList from "./testCase/OwnerList";
+// Others
+import { InvolvementTypeEnum } from '../types/InvolvementData';
 
 const AppRoutes = () => {
 
@@ -29,6 +32,7 @@ const AppRoutes = () => {
                 <Route path="/project/templates/:projectId" element={<TemplateManagementList />}></Route>
                 <Route path="/project/templates/:projectId/add" element={<TemplateEditor />}></Route>
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateEditor />}></Route>
+                <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
                 <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
             </Routes>
         </Router>

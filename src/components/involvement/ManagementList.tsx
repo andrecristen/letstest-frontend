@@ -13,7 +13,7 @@ interface InvolvementManagementListProps {
     title: string;
 }
 
-export const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
+const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
 
     const navigate = useNavigate();
     const [selectedSituation, setSelectedSituation] = useState(InvolvementSituationEnum.Aceito);
@@ -182,3 +182,5 @@ export const InvolvementManagementList: React.FC<InvolvementManagementListProps>
         </PainelContainer>
     );
 }
+
+export default InvolvementManagementList;

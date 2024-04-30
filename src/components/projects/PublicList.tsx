@@ -9,7 +9,7 @@ import { ProjectData } from '../../types/ProjectData';
 import notifyService from '../../services/notifyService';
 import { TitleContainer } from '../base/TitleContainer';
 
-export const ProjectsPublicList = () => {
+const ProjectsPublicList = () => {
 
     const [projects, setProjects] = useState<ProjectData[]>([]);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
@@ -106,3 +106,5 @@ export const ProjectsPublicList = () => {
     )
 
 };
+
+export default ProjectsPublicList;

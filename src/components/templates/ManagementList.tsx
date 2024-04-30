@@ -8,7 +8,7 @@ import { TemplateData, getTemplateTypeDescription } from "../../types/TemplateDa
 import { getAllByProjects } from "../../services/templatesService";
 
 
-export const TemplateManagementList = () => {
+const TemplateManagementList = () => {
 
     const navigate = useNavigate();
     let { projectId } = useParams();
@@ -75,4 +75,4 @@ export const TemplateManagementList = () => {
     );
 }
 
-//{template.projectId && <FiLink />}
+export default TemplateManagementList;
