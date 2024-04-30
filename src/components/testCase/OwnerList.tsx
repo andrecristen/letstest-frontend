@@ -32,11 +32,11 @@ const TestCaseProjectOwnerList = () => {
     }
 
     const handleClickView = (testCaseId: number) => {
-        navigate("/test-case/view/" + testCaseId);
+        navigate("/test-case/" + testCaseId + "/view");
     }
 
     const handleClickEdit = (testCaseId: number) => {
-        navigate("/test-case/edit/" + testCaseId);
+        navigate("/test-case/" + testCaseId + "/edit");
     }
 
     const handleClickTestExecutions = (testCaseId: number) => {
