@@ -5,18 +5,20 @@ import { createProject, updateProject } from '../../services/projectService';
 import FormDialogBase, { FormDialogBaseRef } from "../base/FormDialogBase"
 import { getProjectVisibilityList } from "../../types/ProjectData";
 import notifyService from '../../services/notifyService';
-import { ProjectSituationEnum, getProjectSituationList } from "../../types/ProjectData";
+import { data } from "autoprefixer";
 
 const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
 
   const formDialogRef = useRef<FormDialogBaseRef>(null);
-  const { register, handleSubmit, setValue, getValues, reset } = useForm<ProjectData>()
+  const { register, handleSubmit, setValue, watch, reset } = useForm<ProjectData>()
+  const updateId = watch('id');
 
   useImperativeHandle(ref, () => ({
     getDialogBase: () => {
       return formDialogRef;
     },
     setData: (data: ProjectData) => {
+      reset();
       Object.keys(data).forEach((key: string) => {
         setValue(key as keyof ProjectData, data[key as keyof ProjectData]);
       });
@@ -49,7 +51,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
   }
 
   return (
-    <FormDialogBase ref={formDialogRef} submit={handleSubmit(onSubmit)} cancel={handleCancel} title="Cadastro">
+    <FormDialogBase ref={formDialogRef} submit={handleSubmit(onSubmit)} cancel={handleCancel} title={updateId ? "Edição" : "Cadastro"}>
       <div className="py-2">
         <input
           {...register("name")}
@@ -77,20 +79,6 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
           {getProjectVisibilityList().map((visibility) => {
             return (
               <option value={visibility.id}>{visibility.name}</option>
-            );
-          })}
-        </select>
-      </div>
-      <div hidden={getValues()["id"] == undefined} className="py-2">
-        <select
-          {...register("situation")}
-          required
-          className="form-input"
-        >
-          <option disabled value="null">Selecione a situação do projeto</option>
-          {getProjectSituationList().map((situation) => {
-            return (
-              <option value={situation.id ? situation.id : ProjectSituationEnum.Teste} >{situation.name}</option>
             );
           })}
         </select>
