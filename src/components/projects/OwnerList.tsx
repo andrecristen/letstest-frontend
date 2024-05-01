@@ -103,7 +103,7 @@ function ProjectsOwnerList() {
                 onClick={(event) => handleClickManageProject(event, project)}
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-semibold text-purple-700">{project.name}</h3>
+                  <h3 className="text-xl font-semibold text-purple-700">#{project.id} - {project.name}</h3>
                   <button
                     className="bg-purple-500 text-white rounded-full hover:bg-purple-700 transition-colors p-2"
                     onClick={(event) => handleClickEditProject(event, project)}
