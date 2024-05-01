@@ -80,7 +80,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
     return (
         <div className="pt-4">
             {customizableTableRows.map((row, index) => (
-                <div key={row.id} className="flex justify-between items-center">
+                <div key={row.id} className="odd:bg-gray-200 flex justify-between items-center">
                     <CustomizableRow
                         key={`row` + row.id}
                         operation={props.operation}
