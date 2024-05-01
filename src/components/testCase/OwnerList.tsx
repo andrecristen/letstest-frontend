@@ -45,7 +45,7 @@ const TestCaseProjectOwnerList = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title="Gerenciar Casos de Teste" />
+            <TitleContainer title="Casos de Teste" />
             <div className="my-4 px-2 flex justify-end items-stretch flex-wrap pb-0 bg-transparent">
                 <button
                     type="button"
