@@ -113,16 +113,16 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
                   disabled={isEdit()}
                   required={isFillIn()}
                   onChange={e => updateColumnContent(index, e.target.value)}
-                  className="w-full border border-gray-200 focus:outline-none bg-transparent"
+                  className="form-input w-full h-full p-0"
                 />
               )}
               {column.type === ColumnType.Label && (
-                <span className="w-full text-black px-2 py-1">
+                <span className="w-full h-full text-black ">
                   {column.content || 'Editar Label'}:
                 </span>
               )}
               {column.type === ColumnType.Empty && (
-                <div className="w-full text-center"> - </div>
+                <div className="w-full h-full text-center"></div>
               )}
               {column.type === ColumnType.File && (
                 <FileUpload disabled={isEdit()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} />

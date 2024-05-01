@@ -19,7 +19,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
 
     useImperativeHandle(ref, () => ({
         setRows: (rows: CustomizableTableRows[]) => {
-            setRows(rows);
+            defineRows(rows);
         },
     }));
 
