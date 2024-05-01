@@ -42,7 +42,9 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
       }
     }
     formDialogRef.current?.closeDialog();
-    props.callbackSubmit();
+    if (props.callbackSubmit) {
+      props.callbackSubmit();
+    }
   }
 
   const handleCancel = () => {

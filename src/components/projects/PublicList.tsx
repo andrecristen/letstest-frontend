@@ -105,7 +105,7 @@ const ProjectsPublicList = () => {
                                         <img src={logo} alt="Logo" className="h-10 w-10 rounded-full bg-gray-50" />
                                         <div className="text-sm leading-6">
                                             <p className="font-semibold text-gray-900">
-                                                Criador {project.creatorId}
+                                                Criador: {project.creator?.name}
                                             </p>
                                         </div>
                                     </div>

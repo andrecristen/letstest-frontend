@@ -1,3 +1,5 @@
+import { UserSelectData } from "./UserData";
+
 export type ProjectData = {
     id?: number;
     name: string;
@@ -5,6 +7,7 @@ export type ProjectData = {
     visibility: number;
     situation: number;
     creatorId?: number;
+    creator?: UserSelectData;
 }
 
 export enum ProjectVisibilityEnum {

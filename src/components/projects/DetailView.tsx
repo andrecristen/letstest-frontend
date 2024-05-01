@@ -125,9 +125,7 @@ const ProjectsDetailView: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-
-            <ProjectsForm ref={formDialogRef} />
+            <ProjectsForm ref={formDialogRef} callbackSubmit={loadProject} />
         </PainelContainer>
     );
 };
