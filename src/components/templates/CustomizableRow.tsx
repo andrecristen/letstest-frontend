@@ -101,7 +101,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
   return (
     <div className="flex border border-gray-300 overflow-hidden w-full h-12">
       {columnsRow.map((column, index) => (
-        <div key={`column` + column.id} className="flex-auto border-r border-gray-300 p-2 relative">
+        <div key={`column` + column.id} className="w-full flex-auto border-r border-gray-300 p-2 relative">
           {editColumnIndex === index ? (
             <EditForm
               column={column}

@@ -26,7 +26,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, multiple = false, dis
                 disabled={disabled}
                 required={required}
                 multiple={multiple}
-                className="mb-4"
+                className="w-full h-full p-0"
             />
         </div>
     );
