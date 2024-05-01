@@ -5,7 +5,7 @@ import { FiCopy, FiFileText, FiLink, FiTerminal, FiUser } from "react-icons/fi";
 import notifyService from "../../services/notifyService";
 import { TitleContainer } from "../base/TitleContainer";
 import { TemplateData, getTemplateTypeDescription } from "../../types/TemplateData";
-import { getAllByProjects } from "../../services/templatesService";
+import { getAllByProject } from "../../services/templatesService";
 
 
 const TemplateManagementList = () => {
@@ -22,7 +22,7 @@ const TemplateManagementList = () => {
 
     const load = async () => {
         setLoadingTemplates(true);
-        const response = await getAllByProjects(parseInt(projectId ? projectId : "0"));
+        const response = await getAllByProject(parseInt(projectId ? projectId : "0"));
         setTemplates(response?.data);
         setLoadingTemplates(false);
     }

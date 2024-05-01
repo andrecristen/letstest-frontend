@@ -27,9 +27,17 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
         return Date.now();
     }
 
-    const [CustomizableTableRows, setRows] = useState<CustomizableTableRows[]>([
-        { id: getIdRow(), minColumnCount: 1, maxColumnCount: 6, columns: [] }
-    ]);
+    const getDefaultsRows = (): CustomizableTableRows[] => {
+        let defaultRows: CustomizableTableRows[] = [];
+        if (props.operation == Operation.Edit) {
+            defaultRows = [
+                { id: getIdRow(), minColumnCount: 1, maxColumnCount: 6, columns: [] },
+            ];
+        }
+        return defaultRows;
+    };
+
+    const [CustomizableTableRows, setRows] = useState<CustomizableTableRows[]>(getDefaultsRows());
 
     const updateRow = (index: number, updatedColumns: any[]) => {
         const updatedRows = [...CustomizableTableRows];

@@ -31,15 +31,15 @@ const TestCaseProjectOwnerList = () => {
         navigate("/test-case/" + projectId + "/add");
     }
 
-    const handleClickView = (testCaseId: number) => {
+    const handleClickView = (testCaseId?: number) => {
         navigate("/test-case/" + testCaseId + "/view");
     }
 
-    const handleClickEdit = (testCaseId: number) => {
+    const handleClickEdit = (testCaseId?: number) => {
         navigate("/test-case/" + testCaseId + "/edit");
     }
 
-    const handleClickTestExecutions = (testCaseId: number) => {
+    const handleClickTestExecutions = (testCaseId?: number) => {
         navigate("/test-executions/" + testCaseId);
     }
 
@@ -67,7 +67,7 @@ const TestCaseProjectOwnerList = () => {
                                 <p className="font-bold text-lg text-purple-700">{testCase.name}</p>
                             </div>
                             <div className="ml-auto flex flex-col">
-                                <button onClick={() => { handleClickView(testCase.id) }} className="m-1 h-8 inline-flex items-center px-4 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 active:bg-teal-800 transition duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <button onClick={() => { handleClickView(testCase?.id) }} className="m-1 h-8 inline-flex items-center px-4 py-2 bg-teal-600 text-white font-bold rounded-lg hover:bg-teal-700 active:bg-teal-800 transition duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500">
                                     <FiSearch className="h-5 w-5 mr-2" /> Visualizar
                                 </button>
                                 <button onClick={() => { handleClickEdit(testCase.id) }} className="m-1 h-8 inline-flex items-center px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 active:bg-blue-800 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">

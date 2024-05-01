@@ -1,8 +1,12 @@
 import { TemplateData } from "../types/TemplateData";
 import apiTokenService from "./apiTokenService";
 
-export const getAllByProjects = async (projectId: number) => {
+export const getAllByProject = async (projectId: number) => {
     return await apiTokenService.get('/template/' + projectId + '/all');
+};
+
+export const getAllByProjectAndType = async (projectId: number, type: number) => {
+    return await apiTokenService.get('/template/' + projectId + '/' + type);
 };
 
 export const getById = async (templateId: number) => {

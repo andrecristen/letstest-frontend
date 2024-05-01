@@ -43,6 +43,10 @@ const TemplateEditor = () => {
         event?.preventDefault();
         event?.stopPropagation();
         if (event?.target?.attributes?.name?.nodeValue == "template") {
+            if (!rows.length) {
+                notifyService.error("Necessário ao menos uma linha para confirmação.");
+                return;
+            }
             data.data = Object.fromEntries(
                 rows.map(item => [item.id, item])
             );
