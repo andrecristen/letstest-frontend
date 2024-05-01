@@ -12,6 +12,7 @@ interface CustomizableTableProps {
     onChange: (CustomizableTableRows: CustomizableTableRows[]) => void;
     maxColumnCount?: number;
     forceShowAddRows?: boolean;
+    forceHiddeColumnsActions?: boolean;
     defaultRows?: CustomizableTableRows[];
 }
 
@@ -85,13 +86,14 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
     return (
         <div className="pt-4">
             {customizableTableRows.map((row, index) => (
-                <div key={row.id} className="odd:bg-gray-200 flex justify-between items-center">
+                <div key={row.id} className={(!props.forceHiddeColumnsActions ? "odd:bg-gray-200" : "") + " flex justify-between items-center"}>
                     <CustomizableRow
                         key={`row` + row.id}
                         operation={props.operation}
                         columns={row.columns}
                         minColumnCount={row.minColumnCount}
                         maxColumnCount={row.maxColumnCount}
+                        hiddeColumnsActions={props.forceHiddeColumnsActions}
                         onChange={(updatedColumns) => updateRow(index, updatedColumns)}
                     />
                     {props.operation == Operation.Edit || props.forceShowAddRows ? (

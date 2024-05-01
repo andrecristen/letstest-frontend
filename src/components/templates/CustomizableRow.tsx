@@ -16,9 +16,10 @@ export interface CustomizableRowProps {
   minColumnCount: number;
   maxColumnCount: number;
   onChange?: (columnsRow: Column[]) => void;
+  hiddeColumnsActions?: boolean;
 }
 
-const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, minColumnCount, maxColumnCount, onChange }) => {
+const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, minColumnCount, maxColumnCount, onChange, hiddeColumnsActions }) => {
   const [columnsRow, setcolumnsRow] = useState<Column[]>(columns || []);
   const [editColumnIndex, setEditColumnIndex] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -157,14 +158,14 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
                 <FileUpload disabled={isEdit() || isView()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
               )}
               {column.type === ColumnType.List && (
-                <CustomizableTable defaultRows={column.rows} maxColumnCount={1} forceShowAddRows={getOperation() == Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
+                <CustomizableTable defaultRows={column.rows} maxColumnCount={1} forceHiddeColumnsActions={true} forceShowAddRows={getOperation() == Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
               )}
               {column.type === ColumnType.Table && (
                 <CustomizableTable defaultRows={column.rows} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
               )}
             </>
           )}
-          {operation == Operation.Edit ? (
+          {operation == Operation.Edit && !hiddeColumnsActions ? (
             <div className="absolute right-2 top-2">
               <div className="dropdown inline-block relative">
                 <button type="button" className="bg-transparent border-none" onClick={() => toggleEditForm(index)}>
