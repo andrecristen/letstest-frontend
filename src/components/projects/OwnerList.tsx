@@ -80,11 +80,10 @@ function ProjectsOwnerList() {
         {situations.map((situation) => (
           <div
             key={situation.id}
-            className={`cursor-pointer py-2 px-4 text-center ${
-              selectedSituation === situation.id
+            className={`cursor-pointer py-2 px-4 text-center ${selectedSituation === situation.id
                 ? 'text-purple-700 font-semibold border-b-4 border-purple-400'
                 : 'text-gray-600 hover:text-purple-600'
-            }`}
+              }`}
             onClick={() => handleClickSelectSituation(situation.id)}
           >
             {situation.name}
