@@ -5,14 +5,18 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 const PainelNavbar = (props: any) => {
 
+    const isMenuOpenSaved = (localStorage.getItem('isMenuOpen') === "true");
+
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState<Boolean>(isMenuOpenSaved);
     const [menuSelected, setMenuSelected] = useState(location.pathname);
 
     const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
+        const toogleMenu = !isMenuOpen;
+        setIsMenuOpen(toogleMenu);
+        localStorage.setItem('isMenuOpen', `${toogleMenu}`);
     };
 
     const menus = [
