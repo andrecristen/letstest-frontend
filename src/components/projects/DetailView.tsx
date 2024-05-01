@@ -12,7 +12,7 @@ import { getProjectById } from '../../services/projectService';
 import {
     getProjectSituationColor,
     getProjectSituationDescription,
-} from '../../types/ProjectSituationEnum';
+} from '../../types/ProjectData';
 import notifyService from '../../services/notifyService';
 import TitleContainer from '../base/TitleContainer';
 import ProjectsForm from './Form';
@@ -94,7 +94,7 @@ const ProjectsDetailView: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                     <div
                         onClick={() => navigateTo('managers')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow"
+                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
                     >
                         <FiUserPlus className="w-12 h-12 mx-auto mb-2 text-purple-600" />
                         <h3 className="text-center text-lg font-semibold text-purple-600">Gerentes</h3>
@@ -102,7 +102,7 @@ const ProjectsDetailView: React.FC = () => {
 
                     <div
                         onClick={() => navigateTo('testers')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow"
+                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
                     >
                         <FiUser className="w-12 h-12 mx-auto mb-2 text-purple-600" />
                         <h3 className="text-center text-lg font-semibold text-purple-600">Testadores</h3>
@@ -110,7 +110,7 @@ const ProjectsDetailView: React.FC = () => {
 
                     <div
                         onClick={() => navigateTo('test-cases')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow"
+                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
                     >
                         <FiFileText className="w-12 h-12 mx-auto mb-2 text-purple-600" />
                         <h3 className="text-center text-lg font-semibold text-purple-600">Casos de Teste</h3>
@@ -118,7 +118,7 @@ const ProjectsDetailView: React.FC = () => {
 
                     <div
                         onClick={() => navigateTo('templates')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow"
+                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
                     >
                         <FiFilePlus className="w-12 h-12 mx-auto mb-2 text-purple-600" />
                         <h3 className="text-center text-lg font-semibold text-purple-600">Templates</h3>

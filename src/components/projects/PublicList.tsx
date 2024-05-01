@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apply } from '../../services/involvementService';
 import logo from '../../assets/logo-transparente.png'
 import { getPublicProjects } from '../../services/projectService';
-import { getProjectSituationColor, getProjectSituationDescription } from '../../types/ProjectSituationEnum';
+import { getProjectSituationColor, getProjectSituationDescription } from '../../types/ProjectData';
 import PainelContainer from '../base/PainelContainer';
 import { ProjectData } from '../../types/ProjectData';
 import notifyService from '../../services/notifyService';

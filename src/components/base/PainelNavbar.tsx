@@ -88,7 +88,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6 bg-gray-50">
+        <div className="flex-1 overflow-auto p-2 bg-gray-50 pb-20">
           {children}
         </div>
       </main>

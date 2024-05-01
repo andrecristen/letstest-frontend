@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getByProjectAndSituation, accept, reject, remove, invite } from '../../services/involvementService';
-import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList } from '../../types/InvolvementData';
-import PainelContainer from "../base/PainelContainer";
-import logo from '../../assets/logo-transparente.png';
-import { FiCheckCircle, FiMail, FiSkipBack, FiTrash, FiUser, FiUserX } from "react-icons/fi";
-import notifyService from "../../services/notifyService";
-import TitleContainer  from "../base/TitleContainer";
+import {
+    InvolvementData,
+    InvolvementSituationEnum,
+    InvolvementTypeEnum,
+    getInvolvementSituationList,
+} from '../../types/InvolvementData';
+import PainelContainer from '../base/PainelContainer';
+import TitleContainer from '../base/TitleContainer';
+import { FiCheckCircle, FiMail, FiUserX, FiTrash, FiUser } from 'react-icons/fi';
+import notifyService from '../../services/notifyService';
 
 interface InvolvementManagementListProps {
     type: InvolvementTypeEnum;
@@ -14,173 +18,181 @@ interface InvolvementManagementListProps {
 }
 
 const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
-
     const navigate = useNavigate();
-    const [selectedSituation, setSelectedSituation] = useState(InvolvementSituationEnum.Aceito);
+    const { projectId } = useParams();
+    const [selectedSituation, setSelectedSituation] = useState<InvolvementSituationEnum>(InvolvementSituationEnum.Aceito);
     const [involvements, setInvolvements] = useState<InvolvementData[]>([]);
-    const [loadingInvolvements, setloadingInvolvements] = useState<boolean>(false);
+    const [loadingInvolvements, setLoadingInvolvements] = useState<boolean>(true);
     const [inviting, setInviting] = useState<boolean>(false);
-    const [email, setEmail] = useState<string>("");
-    let { projectId } = useParams();
+    const [email, setEmail] = useState<string>('');
 
     let situations = getInvolvementSituationList();
-
     if (type === InvolvementTypeEnum.Gerente) {
-        //Não há como solicitar participação para ser gerente, portanto não é necessário a posição recebidos
-        situations = situations.filter(situation => situation.id !== InvolvementSituationEnum.Recebido);
+        situations = situations.filter((situation) => situation.id !== InvolvementSituationEnum.Recebido);
     }
 
     useEffect(() => {
-        load();
+        loadInvolvements();
     }, [selectedSituation]);
 
-    const load = async () => {
-        setInvolvements([]);
-        setloadingInvolvements(true);
-        if (selectedSituation) {
-            const response = await getByProjectAndSituation(parseInt(projectId ? projectId : "0"), selectedSituation);
-            const involvements = response?.data;
-            const filteredInvolvements = involvements.filter((involvement: InvolvementData) => involvement.type === type);
+    const loadInvolvements = async () => {
+        setLoadingInvolvements(true);
+        try {
+            const response = await getByProjectAndSituation(parseInt(projectId || '0', 10), selectedSituation);
+            const filteredInvolvements = response?.data.filter((involvement: InvolvementData) => involvement.type === type) || [];
             setInvolvements(filteredInvolvements);
+        } catch (error) {
+            console.error('Erro ao carregar envolvimentos:', error);
+        } finally {
+            setLoadingInvolvements(false);
         }
-        setloadingInvolvements(false);
-    }
+    };
 
-    const handleClickReject = async (event: any, involvementId: number) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const response = await reject(involvementId);
-        if (response?.status == 200) {
-            notifyService.success("Candidatura rejeitada");
-            setSelectedSituation(InvolvementSituationEnum.Rejeitado);
-        } else {
-            notifyService.error("Erro ao rejeitar candidatura, tente novamente");
+    const handleSituationChange = (situationId: InvolvementSituationEnum | null) => {
+        if (situationId) {
+            setSelectedSituation(situationId);
         }
-    }
+    };
 
-    const handleClickAccept = async (event: any, involvementId: number) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const response = await accept(involvementId);
-        if (response?.status == 200) {
-            notifyService.success("Candidatura aceita");
-            setSelectedSituation(InvolvementSituationEnum.Aceito);
-        } else {
-            notifyService.error("Erro ao aceitar candidatura, tente novamente");
-        }
-    }
-
-    const handleClickDelete = async (event: any, involvementId: number) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const response = await remove(involvementId);
-        if (response?.status == 200) {
-            notifyService.success("Envolvimento com projeto excluído");
-            load();
-        } else {
-            notifyService.error("Erro ao excluir envolvimento, tente novamente");
-        }
-    }
-
-    const handleClickInvite = async () => {
+    const handleInvite = async () => {
         setInviting(true);
-        if (email) {
-            const response = await invite(parseInt(projectId ? projectId : "0"), email, type);
-            if (response?.status == 201) {
-                notifyService.success("Convite enviado");
-                load();
-            } else {
-                if (response && response.data) {
-                    notifyService.error(response.data);
-                } else {
-                    notifyService.error("Erro ao enviar convite, tente novamente");
-                }
-            }
-        } else {
-            notifyService.info("Preencha o e-mail do usuário que deseja convidar");
+        if (email.trim() === '') {
+            notifyService.info('Preencha o e-mail para enviar o convite.');
+            setInviting(false);
+            return;
         }
-        setEmail("");
+
+        try {
+            const response = await invite(parseInt(projectId || '0', 10), email, type);
+            if (response?.status === 201) {
+                notifyService.success('Convite enviado.');
+                loadInvolvements();
+            } else {
+                notifyService.error('Erro ao enviar convite.');
+            }
+        } catch (error) {
+            notifyService.error('Erro ao enviar convite.');
+        }
+
+        setEmail('');
         setInviting(false);
+    };
+
+    const handleRemove = async (involvement: InvolvementData) => {
+        await remove(involvement.id);
+        loadInvolvements();
     }
 
-    const handleClickSelectSituation = (event: any, situationId: InvolvementSituationEnum) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setSelectedSituation(situationId)
+    const handleAccept = async (involvement: InvolvementData) => {
+        await accept(involvement.id);
+        setSelectedSituation(InvolvementSituationEnum.Aceito);
     }
+
+    const handleReject = async (involvement: InvolvementData) => {
+        await handleReject(involvement);
+        setSelectedSituation(InvolvementSituationEnum.Rejeitado);
+    }
+
+    const renderInvolvementCard = (involvement: InvolvementData) => (
+        <div
+            key={involvement.id}
+            className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 flex justify-between items-center"
+        >
+            <div className="flex items-center">
+                <FiUser className="text-purple-700 w-6 h-6" />
+                <div className="ml-3">
+                    <p className="text-sm font-bold text-purple-800">#: {involvement.id}</p>
+                    <p className="text-sm text-purple-500">ID do Usuário: {involvement.userId}</p>
+                </div>
+            </div>
+            <div className="flex">
+                {selectedSituation === InvolvementSituationEnum.Recebido && (
+                    <>
+                        <button
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2"
+                            onClick={() => handleReject(involvement)}
+                            title="Rejeitar"
+                        >
+                            <FiUserX />
+                        </button>
+                        <button
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                            onClick={() => handleAccept(involvement)}
+                            title="Aceitar"
+                        >
+                            <FiCheckCircle />
+                        </button>
+                    </>
+                )}
+                {selectedSituation !== InvolvementSituationEnum.Recebido && (
+                    <button
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={() => handleRemove(involvement)}
+                        title="Excluir"
+                    >
+                        <FiTrash />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 
     return (
         <PainelContainer>
-            <TitleContainer title={title}/>
-            <ul className="w-full flex border-b mt-1">
-                {situations.map((situation: any) => (
-                    <li onClick={(event) => { handleClickSelectSituation(event, situation.id) }} className="w-full -mb-px">
-                        <a className={"w-full bg-white inline-block border-l border-t border-r rounded-t py-2 px-4 " + (situation.id == selectedSituation ? "border-b-4 border-b-purple-400 text-purple-700 font-semibold" : "text-purple-600 hover:text-purple-600 hover:font-semibold")} href="#">{situation.name}</a>
-                    </li>
-                ))}
-            </ul>
-            {selectedSituation === InvolvementSituationEnum.Enviado ? (
+            <TitleContainer title={title} />
 
+            <div className="flex flex-wrap border-b mb-4">
+                {situations.map((situation) => (
+                    <div
+                        key={situation.id}
+                        className={`cursor-pointer py-2 px-4 text-center ${selectedSituation === situation.id
+                            ? 'text-purple-700 font-semibold border-b-4 border-purple-400'
+                            : 'text-gray-600 hover:text-purple-600'
+                            }`}
+                        onClick={() => handleSituationChange(situation.id)}
+                    >
+                        {situation.name}
+                    </div>
+                ))}
+            </div>
+
+            {selectedSituation === InvolvementSituationEnum.Enviado && (
                 <div className="w-full flex items-center mt-4">
                     <input
                         type="email"
                         disabled={inviting}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="E-mail do usuário a ser convidado ao projeto"
-                        className="h-12 w-10/12 border border-purple-400 rounded-l py-2 px-3 focus:outline-none focus:border-purple-500"
+                        placeholder="E-mail do usuário para convite"
+                        className="h-12 w-10/12 border border-purple-400 rounded-l py-2 px-3 focus:outline-none"
                     />
                     <button
                         disabled={inviting}
-                        className="h-12 w-2/12 bg-purple-600 text-white py-2 px-3 rounded-r hover:bg-purple-700 focus:outline-none flex items-center justify-center"
-                        onClick={() => handleClickInvite()}
+                        className="h-12 w-2/12 bg-purple-600 text-white flex items-center justify-center rounded-r hover:bg-purple-700 transition-colors"
+                        onClick={handleInvite}
                     >
-                        <FiMail className="w-8 h-8" />
+                        <FiMail className="w-6 h-6" />
                     </button>
                 </div>
+            )}
 
-
-            ) : ""}
-            {involvements.length ? (
-                <ul className="divide-y divide-purple-200">
-                    {involvements.map((involvement) => (
-                        <li key={involvement.id} className="py-4 flex">
-                            <div className="flex-shrink-0">
-                                <FiUser className="text-lg" />
-                            </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-purple-900">ID do Envolvimento: {involvement.id}</p>
-                                <p className="text-sm text-purple-500">Situação: {involvement.situation}</p>
-                                <p className="text-sm text-purple-500">Tipo: {involvement.type}</p>
-                                <p className="text-sm text-purple-500">ID do Usuário: {involvement.userId}</p>
-                                <p className="text-sm text-purple-500">ID do Projeto: {involvement.projectId}</p>
-                            </div>
-                            {involvement.situation == InvolvementSituationEnum.Recebido ? (
-                                <div className="ml-auto flex">
-                                    <button onClick={(event) => { handleClickReject(event, involvement.id) }} className="mr-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" title="Rejeitar">
-                                        <FiUserX />
-                                    </button>
-                                    <button onClick={(event) => { handleClickAccept(event, involvement.id) }} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" title="Confirmar">
-                                        <FiCheckCircle />
-                                    </button>
-                                </div>
-                            ) : ""}
-
-                            {involvement.situation != InvolvementSituationEnum.Recebido ? (
-                                <div className="ml-auto flex">
-                                    <button onClick={(event) => { handleClickDelete(event, involvement.id) }} className="mr-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" title="Excluir">
-                                        <FiTrash />
-                                    </button>
-                                </div>
-                            ) : ""}
-                        </li>
-                    ))}
-                </ul>
+            {loadingInvolvements ? (
+                <div className="text-center text-purple-600">Carregando envolvimentos...</div>
             ) : (
-                <div className="text-center text-lg m-20 text-purple-600">{loadingInvolvements ? "Carregando informações do projeto..." : selectedSituation == InvolvementSituationEnum.Recebido ? "Nenhuma candidatura recebida" : "Nenhum envolvimento com o projeto para a situação"}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                    {involvements.length > 0 ? (
+                        involvements.map((involvement) => renderInvolvementCard(involvement))
+                    ) : (
+                        <div className="text-center text-purple-600 col-span-full">
+                            {selectedSituation === InvolvementSituationEnum.Recebido
+                                ? 'Nenhuma candidatura recebida'
+                                : 'Nenhum envolvimento com o projeto para a situação selecionada'}
+                        </div>
+                    )}
+                </div>
             )}
         </PainelContainer>
     );
-}
+};
 
 export default InvolvementManagementList;

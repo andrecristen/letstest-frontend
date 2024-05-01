@@ -1,5 +1,5 @@
 import { ProjectData } from "../types/ProjectData";
-import { ProjectSituationEnum } from "../types/ProjectSituationEnum";
+import { ProjectSituationEnum } from "../types/ProjectData";
 import apiTokenService from "./apiTokenService";
 
 export const getMyProjects = async () => {

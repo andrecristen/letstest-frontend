@@ -3,9 +3,9 @@ import { useForm, SubmitHandler } from "react-hook-form"
 import { ProjectData } from "../../types/ProjectData"
 import { createProject, updateProject } from '../../services/projectService';
 import FormDialogBase, { FormDialogBaseRef } from "../base/FormDialogBase"
-import { getProjectVisibilityList } from "../../types/ProjectVisibilityEnum";
+import { getProjectVisibilityList } from "../../types/ProjectData";
 import notifyService from '../../services/notifyService';
-import { ProjectSituationEnum, getProjectSituationList } from "../../types/ProjectSituationEnum";
+import { ProjectSituationEnum, getProjectSituationList } from "../../types/ProjectData";
 
 const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
 
