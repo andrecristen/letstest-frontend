@@ -89,7 +89,7 @@ const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ t
     }
 
     const handleReject = async (involvement: InvolvementData) => {
-        await handleReject(involvement);
+        await reject(involvement.id);
         setSelectedSituation(InvolvementSituationEnum.Rejeitado);
     }
 
