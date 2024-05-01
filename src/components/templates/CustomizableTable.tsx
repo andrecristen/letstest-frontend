@@ -1,6 +1,7 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { FiPlusCircle, FiTrash } from 'react-icons/fi';
 import CustomizableRow, { CustomizableRowProps, Operation } from './CustomizableRow';
+import notifyService from '../../services/notifyService';
 
 export interface CustomizableTableRows extends CustomizableRowProps {
     id: number;
@@ -69,7 +70,11 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
 
     const handleRemoveRow = (id: number) => {
         const newRows = customizableTableRows.filter((row) => row.id !== id);
-        defineRows(newRows);
+        if (!newRows.length) {
+            notifyService.info("Necessário ao menos uma linha");
+        } else {
+            defineRows(newRows);
+        }
     };
 
     const defineRows = (newRows: CustomizableTableRows[]) => {
