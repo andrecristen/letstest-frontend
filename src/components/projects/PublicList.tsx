@@ -119,7 +119,7 @@ const ProjectsPublicList = () => {
                                 </article>
                             ))
                         ) : (
-                            <div className="text-center text-lg text-purple-600 m-20">Nenhum projeto encontrado</div>
+                            <div className="text-center text-lg text-purple-600 m-20 col-span-3">Nenhum projeto encontrado</div>
                         )
                     )}
                 </div>

@@ -59,9 +59,9 @@ const TemplateManagementList: React.FC = () => {
             </div>
 
             {loadingTemplates ? (
-                <div className="text-center text-purple-600">Carregando templates do projeto...</div>
+                <div className="text-center text-purple-600 text-lg m-20">Carregando templates do projeto...</div>
             ) : filteredTemplates.length === 0 ? (
-                <div className="text-center text-purple-600">Nenhum template encontrado</div>
+                <div className="text-center text-purple-600 text-lg m-20">Nenhum template encontrado</div>
             ) : (
                 <div className="cards-list-inline">
                     {filteredTemplates.map((template) => (

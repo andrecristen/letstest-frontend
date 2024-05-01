@@ -41,6 +41,9 @@ const TestCaseForm = () => {
                 TemplateTypeEnum['Definição de casos de teste']
             );
             setTemplates(response?.data || []);
+            if (!templates.length) {
+                notifyService.info("Não há nenhum template para Definição de casos de teste para o seu projeto, certifique-se de criar ao menos.");
+            }
             setLoadingTemplates(false);
         } else if (getTestCaseId()) {
             const response = await getById(getTestCaseId());

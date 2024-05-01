@@ -55,9 +55,9 @@ const TestCaseProjectOwnerList: React.FC = () => {
             </div>
 
             {loadingTestCases ? (
-                <div className="text-center text-purple-600">Carregando casos de teste do projeto...</div>
+                <div className="text-center text-purple-600 text-lg m-20">Carregando casos de teste do projeto...</div>
             ) : filteredTestCases.length === 0 ? (
-                <div className="text-center text-purple-600">Nenhum caso de teste encontrado</div>
+                <div className="text-center text-purple-600 text-lg m-20">Nenhum caso de teste encontrado</div>
             ) : (
                 <div className="cards-list-inline">
                     {filteredTestCases.map((testCase) => (
