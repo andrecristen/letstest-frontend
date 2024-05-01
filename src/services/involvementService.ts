@@ -1,4 +1,4 @@
-import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum } from "../types/InvolvementData";
+import { InvolvementTypeEnum } from "../types/InvolvementData";
 import apiTokenService from "./apiTokenService";
 
 

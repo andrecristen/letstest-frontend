@@ -101,8 +101,9 @@ const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ t
             <div className="flex items-center">
                 <FiUser className="text-purple-700 w-6 h-6" />
                 <div className="ml-3">
-                    <p className="text-sm font-bold text-purple-800">#: {involvement.id}</p>
-                    <p className="text-sm text-purple-500">ID do Usuário: {involvement.userId}</p>
+                    <p className="text-sm font-bold text-purple-800">#{involvement.id}</p>
+                    <p className="text-sm text-purple-500">Nome: {involvement.user?.name}</p>
+                    <p className="text-sm text-purple-500">Email: {involvement.user?.email}</p>
                 </div>
             </div>
             <div className="flex">

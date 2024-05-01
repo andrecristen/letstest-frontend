@@ -1,9 +1,12 @@
+import { UserSelectData } from "./UserData";
+
 export type InvolvementData = {
     id: number;
     situation: number;
     type: number;
     userId: number;
     projectId: number;
+    user?: UserSelectData
 }
 
 export enum InvolvementSituationEnum {
