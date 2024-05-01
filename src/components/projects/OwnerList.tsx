@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FiEdit } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { getMyProjects } from '../../services/projectService';
-import { getProjectSituationDescription, getProjectVisibilityDescription, getProjectVisibilityList, getProjectSituationList } from '../../types/ProjectData';
+import { getProjectSituationDescription, getProjectVisibilityDescription, getProjectVisibilityList, getProjectSituationList, getProjectSituationColor } from '../../types/ProjectData';
 import PainelContainer from '../base/PainelContainer';
 import TitleContainer from '../base/TitleContainer';
 import ProjectsForm from './Form';
@@ -118,9 +118,14 @@ function ProjectsOwnerList() {
                     <FiEdit className="w-5 h-5" />
                   </button>
                 </div>
-                <p className="text-gray-600 my-2 line-clamp-2">{project.description}</p>
-                <div className="text-sm text-gray-500">Situação: {getProjectSituationDescription(project.situation)}</div>
-                <div className="text-sm text-gray-500">Visibilidade: {getProjectVisibilityDescription(project.visibility)}</div>
+                <div className="text-sm text-gray-500"><span
+                  className={`bg-${getProjectSituationColor(
+                    project.situation
+                  )} text-white rounded-lg p-1`}
+                >
+                  {getProjectSituationDescription(project.situation)}
+                </span> Visibilidade: {getProjectVisibilityDescription(project.visibility)}</div>
+                <p title={project.description} className="text-gray-600 my-2 line-clamp-3 overflow-hidden text-ellipsis">{project.description}</p>
               </div>
             ))
           ) : (
