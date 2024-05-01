@@ -9,6 +9,8 @@ export interface CustomizableTableRows extends CustomizableRowProps {
 interface CustomizableTableProps {
     operation: Operation,
     onChange: (CustomizableTableRows: CustomizableTableRows[]) => void;
+    maxColumnCount?: number;
+    forceShowAddRows?: boolean;
 }
 
 export interface CustomizableTableRef {
@@ -27,20 +29,28 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
         return Date.now();
     }
 
+    const getMaxColumnCount = () => {
+        return props.maxColumnCount ?? 6;
+    }
+
     const getDefaultsRows = (): CustomizableTableRows[] => {
         let defaultRows: CustomizableTableRows[] = [];
         if (props.operation == Operation.Edit) {
             defaultRows = [
-                { id: getIdRow(), minColumnCount: 1, maxColumnCount: 6, columns: [] },
+                { id: getIdRow(), minColumnCount: 1, maxColumnCount: getMaxColumnCount(), columns: [] },
             ];
         }
         return defaultRows;
     };
 
-    const [CustomizableTableRows, setRows] = useState<CustomizableTableRows[]>(getDefaultsRows());
+    const [customizableTableRows, setRows] = useState<CustomizableTableRows[]>(getDefaultsRows());
+
+    useEffect(() => {
+        console.log(customizableTableRows);
+      }, [customizableTableRows]);
 
     const updateRow = (index: number, updatedColumns: any[]) => {
-        const updatedRows = [...CustomizableTableRows];
+        const updatedRows = [...customizableTableRows];
         updatedRows[index].columns = updatedColumns;
         defineRows(updatedRows);
     };
@@ -49,15 +59,15 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
         const newRow = {
             id: getIdRow(),
             minColumnCount: 1,
-            maxColumnCount: 6,
+            maxColumnCount: getMaxColumnCount(),
             columns: [],
         };
-        const newRows = [...CustomizableTableRows, newRow];
+        const newRows = [...customizableTableRows, newRow];
         defineRows(newRows);
     };
 
     const handleRemoveRow = (id: number) => {
-        const newRows = CustomizableTableRows.filter((row) => row.id !== id);
+        const newRows = customizableTableRows.filter((row) => row.id !== id);
         defineRows(newRows);
     };
 
@@ -68,7 +78,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
 
     return (
         <div className="pt-4">
-            {CustomizableTableRows.map((row, index) => (
+            {customizableTableRows.map((row, index) => (
                 <div key={row.id} className="flex justify-between items-center">
                     <CustomizableRow
                         key={`row` + row.id}
@@ -78,7 +88,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
                         maxColumnCount={row.maxColumnCount}
                         onChange={(updatedColumns) => updateRow(index, updatedColumns)}
                     />
-                    {props.operation == Operation.Edit ? (
+                    {props.operation == Operation.Edit || props.forceShowAddRows ? (
                         <div className="flex border border-gray-300 overflow-hidden h-12">
                             <button
                                 type="button"
@@ -91,7 +101,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
                     ) : null}
                 </div>
             ))}
-            {props.operation == Operation.Edit ? (
+            {props.operation == Operation.Edit || props.forceShowAddRows ? (
                 <button type="button" onClick={addRow} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 w-full mt-2 flex justify-center items-center rounded-md">
                     <FiPlusCircle className="mr-2" /> Adicionar Linha
                 </button>

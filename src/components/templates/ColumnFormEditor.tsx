@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import FormDialogBase from "../base/FormDialogBase";
+import { CustomizableTableRows } from "./CustomizableTable";
 
 interface EditFormProps {
     column: Column;
@@ -8,8 +9,10 @@ interface EditFormProps {
 }
 
 export enum ColumnType {
-    Text = 'Texto',
     Label = 'Label',
+    Text = 'Texto',
+    List = 'Lista',
+    Table = 'Tabela',
     Empty = 'Espaço',
     File = 'Arquivo',
     MultipleFiles = 'Múltiplos Arquivos',
@@ -19,12 +22,18 @@ export interface Column {
     id: number;
     type: ColumnType;
     content: string;
+    placeholder?: string;
+    rows?: CustomizableTableRows[];
     files?: File[];
 }
 
 const TYPES_CONTENT_EDIT = [
     ColumnType.Text,
     ColumnType.Label
+]
+
+const TYPES_CONTENT_PLACEHOLDER = [
+    ColumnType.Text,
 ]
 
 const TYPES_CONTENT_EDIT_REQUIRED = [
@@ -54,6 +63,7 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
         event?.stopPropagation();
         column.type = data.type;
         column.content = data.content;
+        column.placeholder = data.placeholder;
         onFinish();
     };
 
@@ -85,6 +95,15 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
                         required={TYPES_CONTENT_EDIT_REQUIRED.some((columnType) => columnType == updateType)}
                         className="form-input"
                         placeholder="Conteúdo"
+                    />
+                </div>
+            ) : null}
+            {TYPES_CONTENT_PLACEHOLDER.some((columnType) => columnType == updateType) ? (
+                <div className="py-2">
+                    <input
+                        {...register("placeholder")}
+                        className="form-input"
+                        placeholder="Texto de Ajuda"
                     />
                 </div>
             ) : null}

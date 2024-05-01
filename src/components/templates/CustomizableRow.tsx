@@ -3,6 +3,7 @@ import { FiEdit, FiPlusCircle, FiTrash, FiXSquare } from 'react-icons/fi';
 import notifyService from '../../services/notifyService';
 import EditForm, { Column, ColumnType } from './ColumnFormEditor';
 import FileUpload from '../base/FileUpload';
+import CustomizableTable, { CustomizableTableRows } from './CustomizableTable';
 
 export enum Operation {
   Edit = 'Edição',
@@ -37,7 +38,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
   const addColumn = () => {
     if (columnsRow.length < maxColumnCount) {
       const updatedcolumnsRow = [...columnsRow, { id: getIdColumn(), type: ColumnType.Text, content: '' }];
-      updateColumnsRow(updatedcolumnsRow);
+      applyUpdateColumnsRow(updatedcolumnsRow);
     } else {
       notifyService.info(`Linha não pode ter mais de ${maxColumnCount} coluna(s)`);
     }
@@ -47,7 +48,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
     if (columnsRow.length > minColumnCount) {
       const updatedcolumnsRow = [...columnsRow];
       updatedcolumnsRow.splice(index, 1);
-      updateColumnsRow(updatedcolumnsRow);
+      applyUpdateColumnsRow(updatedcolumnsRow);
       if (editColumnIndex === index) {
         setEditColumnIndex(null);
         setIsEditing(false);
@@ -60,13 +61,19 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
   const updateColumnContent = (index: number, content: string) => {
     const updatedcolumnsRow = [...columnsRow];
     updatedcolumnsRow[index].content = content;
-    updateColumnsRow(updatedcolumnsRow);
+    applyUpdateColumnsRow(updatedcolumnsRow);
   };
 
   const updateColumnFiles = (files: File[], index: number) => {
     const updatedcolumnsRow = [...columnsRow];
     updatedcolumnsRow[index].files = files;
-    updateColumnsRow(updatedcolumnsRow);
+    applyUpdateColumnsRow(updatedcolumnsRow);
+  }
+
+  const updateColumnRows = (rows: CustomizableTableRows[], index: number) => {
+    const updatedcolumnsRow = [...columnsRow];
+    updatedcolumnsRow[index].rows = rows;
+    applyUpdateColumnsRow(updatedcolumnsRow);
   }
 
   const toggleEditForm = (index: number) => {
@@ -79,7 +86,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
     }
   };
 
-  const updateColumnsRow = (updatedcolumnsRow: Column[]) => {
+  const applyUpdateColumnsRow = (updatedcolumnsRow: Column[]) => {
     setcolumnsRow(updatedcolumnsRow);
     if (onChange) {
       onChange(updatedcolumnsRow);
@@ -98,8 +105,12 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
     return operation == Operation.View;
   }
 
+  const getOperation = () => {
+    return operation ?? Operation.Edit;
+  }
+
   return (
-    <div className="flex border border-gray-300 overflow-hidden w-full h-12">
+    <div className="flex border border-gray-300 overflow-hidden w-full h-full min-h-12">
       {columnsRow.map((column, index) => (
         <div key={`column` + column.id} className="w-full flex-auto border-r border-gray-300 p-2 relative">
           {editColumnIndex === index ? (
@@ -111,7 +122,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
             <>
               {column.type === ColumnType.Text && (
                 <input
-                  placeholder="Preencha o campo"
+                  placeholder={column.placeholder ?? "Preencha o campo"}
                   type="text"
                   value={column.content}
                   disabled={isEdit() || isView()}
@@ -134,6 +145,12 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
               {column.type === ColumnType.MultipleFiles && (
                 <FileUpload disabled={isEdit() || isView()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
               )}
+              {column.type === ColumnType.List && (
+                <CustomizableTable maxColumnCount={1} forceShowAddRows={getOperation() == Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
+              )}
+              {column.type === ColumnType.Table && (
+                <CustomizableTable operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
+              )}
             </>
           )}
           {operation == Operation.Edit ? (
@@ -150,7 +167,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
           ) : null}
         </div>
       ))}
-      {operation == Operation.Edit ? (
+      {operation == Operation.Edit && maxColumnCount > 1? (
         <button type="button" onClick={addColumn} className="bg-blue-500 text-white px-4 py-3 rounded-sm h-full flex items-center"><FiPlusCircle /></button>
       ) : null}
     </div>
