@@ -27,6 +27,10 @@ const TYPES_CONTENT_EDIT = [
     ColumnType.Label
 ]
 
+const TYPES_CONTENT_EDIT_REQUIRED = [
+    ColumnType.Label
+]
+
 export const getColumnTypeList = () => {
     return Object.keys(ColumnType)
         .filter(key => isNaN(Number(key)))
@@ -78,7 +82,7 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
                 <div className="py-2">
                     <input
                         {...register("content")}
-                        required
+                        required={TYPES_CONTENT_EDIT_REQUIRED.some((columnType) => columnType == updateType)}
                         className="form-input"
                         placeholder="Conteúdo"
                     />

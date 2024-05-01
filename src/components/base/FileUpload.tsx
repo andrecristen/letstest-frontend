@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 interface FileUploadProps {
     onChange: (files: File[]) => void;
     multiple?: boolean;
+    disabled?: boolean;
+    required?: boolean;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({onChange, multiple = false }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onChange, multiple = false, disabled = false, required = false }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +23,9 @@ const FileUpload: React.FC<FileUploadProps> = ({onChange, multiple = false }) =>
             <input
                 type="file"
                 onChange={handleFileChange}
-                multiple={multiple} // Define se a seleção múltipla está ativada
+                disabled={disabled}
+                required={required}
+                multiple={multiple}
                 className="mb-4"
             />
         </div>

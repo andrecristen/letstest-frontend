@@ -86,6 +86,14 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
     }
   }
 
+  const isEdit = () => {
+    return operation == Operation.Edit;
+  }
+
+  const isFillIn = () => {
+    return operation == Operation.FillIn;
+  }
+
   return (
     <div className="flex border border-gray-300 overflow-hidden w-full h-12">
       {columnsRow.map((column, index) => (
@@ -102,6 +110,8 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
                   placeholder="Preencha o campo"
                   type="text"
                   value={column.content}
+                  disabled={isEdit()}
+                  required={isFillIn()}
                   onChange={e => updateColumnContent(index, e.target.value)}
                   className="w-full border border-gray-200 focus:outline-none bg-transparent"
                 />
@@ -115,10 +125,10 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
                 <div className="w-full text-center"> - </div>
               )}
               {column.type === ColumnType.File && (
-                <FileUpload onChange={(files) => { updateColumnFiles(files, index) }} />
+                <FileUpload disabled={isEdit()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} />
               )}
               {column.type === ColumnType.MultipleFiles && (
-                <FileUpload onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
+                <FileUpload disabled={isEdit()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
               )}
             </>
           )}
