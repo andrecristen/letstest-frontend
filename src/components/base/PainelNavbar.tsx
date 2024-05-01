@@ -30,9 +30,9 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
   const menus: Menu[] = [
     { name: 'Dashboard', route: '/dashboard', icon: <FiPieChart /> },
+    { name: 'Encontrar Projetos', route: '/find-new-projects', icon: <FiSearch /> },
     { name: 'Gerenciar Projetos', route: '/my-owner-projects', icon: <FiGitPullRequest /> },
     { name: 'Testar Projetos', route: '/my-test-projects', icon: <FiPlay /> },
-    { name: 'Encontrar Projetos', route: '/find-new-projects', icon: <FiSearch /> },
     { name: 'Perfil', route: '/profile', icon: <FiUser /> },
   ];
 

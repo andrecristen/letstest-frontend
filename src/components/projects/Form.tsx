@@ -5,7 +5,6 @@ import { createProject, updateProject } from '../../services/projectService';
 import FormDialogBase, { FormDialogBaseRef } from "../base/FormDialogBase"
 import { getProjectVisibilityList } from "../../types/ProjectData";
 import notifyService from '../../services/notifyService';
-import { data } from "autoprefixer";
 
 const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
 

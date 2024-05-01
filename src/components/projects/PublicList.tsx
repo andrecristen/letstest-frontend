@@ -1,110 +1,131 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { apply } from '../../services/involvementService';
-import logo from '../../assets/logo-transparente.png'
+import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo-transparente.png';
 import { getPublicProjects } from '../../services/projectService';
 import { getProjectSituationColor, getProjectSituationDescription } from '../../types/ProjectData';
 import PainelContainer from '../base/PainelContainer';
+import TitleContainer from '../base/TitleContainer';
 import { ProjectData } from '../../types/ProjectData';
 import notifyService from '../../services/notifyService';
-import TitleContainer from '../base/TitleContainer';
 
 const ProjectsPublicList = () => {
-
     const [projects, setProjects] = useState<ProjectData[]>([]);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const navigate = useNavigate();
 
     useEffect(() => {
-        load();
+        loadProjects();
     }, []);
 
-    const load = async () => {
+    const loadProjects = async () => {
         setLoadingProjects(true);
-        const response = await getPublicProjects();
-        setProjects(response?.data);
-        setLoadingProjects(false);
-    }
+        try {
+            const response = await getPublicProjects();
+            setProjects(response?.data ?? []);
+        } catch (error) {
+            notifyService.error('Erro ao carregar projetos');
+        } finally {
+            setLoadingProjects(false);
+        }
+    };
 
-    const onClickApply = async (event: any, projectId?: number) => {
+    const handleApply = async (event: React.MouseEvent, projectId?: number) => {
         event.preventDefault();
         event.stopPropagation();
         if (projectId) {
-            const response = await apply(projectId);
-            if (response?.status == 201) {
-                notifyService.success("Solicitação de participação enviada");
-                load();
-            } else {
-                if (response && response.data) {
-                    notifyService.error(response.data);
+            try {
+                const response = await apply(projectId);
+                if (response?.status === 201) {
+                    notifyService.success("Solicitação de participação enviada");
+                    loadProjects();
                 } else {
                     notifyService.error("Erro ao enviar solicitação, tente novamente");
                 }
+            } catch {
+                notifyService.error("Erro ao enviar solicitação, tente novamente");
             }
         }
+    };
+
+    const filteredProjects = projects.filter(
+        (project) => project.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleClickNewProject = () => {
+        navigate("/my-owner-projects");
     }
 
     return (
         <PainelContainer>
             <TitleContainer title="Encontrar Projetos" />
-            <div className="px-6 lg:px-8 mb-4">
-                <div className="mx-auto mt-2 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-                    {projects.length ? (
-                        projects.map((project) => (
-                            <article key={project.id} className="border rounded-lg p-2 border-purple-600 flex max-w-xl flex-col items-start justify-between">
-                                <div className="flex items-center gap-x-4 text-xs">
-                                    <a
-                                        className={"bg-" + (getProjectSituationColor(project.situation) ?? "purple-500") + " text-white relative z-10 rounded-full px-3 py-1.5 font-medium"}
-                                    >
-                                        {getProjectSituationDescription(project.situation)}
-                                    </a>
-                                    {/* <time dateTime={project.datetime} className="text-gray-500">
-                    {project.date}
-                </time> */}
-                                </div>
-                                <div className="group relative">
-                                    <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-                                        <a>
-                                            <span className="absolute inset-0" />
-                                            #{project.id} - {project.name}
-                                        </a>
-                                    </h3>
-                                    <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{project.description}</p>
-                                </div>
-                                <div className="relative mt-8 flex items-center gap-x-4">
-                                    <img src={logo} alt="" className="h-10 w-10 rounded-full bg-gray-50" />
-                                    <div className="text-sm leading-6">
-                                        <p className="font-semibold text-gray-900">
-                                            <a>
-                                                <span className="absolute inset-0" />
-                                                #Criador {project.creatorId}
-                                            </a>
-                                        </p>
-                                        {/* <p className="text-gray-600">Nome do criador</p> */}
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={(event) => onClickApply(event, project.id)}
-                                    className="mt-4 w-full relative py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                                >
-                                    Solicitar Participação
-                                </button>
-                            </article>
-                        ))
+
+            <div className="flex justify-between mb-4">
+                <input
+                    type="text"
+                    placeholder="Buscar por nome..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="form-input mr-2 py-2 px-8 "
+                />
+                <button
+                    type="button"
+                    className="py-2 px-8 text-lg font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 transition-colors"
+                    onClick={handleClickNewProject}
+                >
+                    Criar Meu Projeto
+                </button>
+            </div>
+
+            <div className="px-6 lg:px-8">
+                <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 pt-10 border-t border-gray-200 lg:max-w-none lg:grid-cols-3">
+                    {loadingProjects ? (
+                        <div className="text-center text-lg text-purple-600 my-20 col-span-3">Carregando seus projetos...</div>
                     ) : (
-                        <>
-                            <div></div>
-                            <div className="text-center text-lg m-20 text-purple-600">{loadingProjects ? "Carregando projetos..." : "Nenhum projeto encontrado"}</div>
-                            <div></div>
-                        </>
+                        filteredProjects.length > 0 ? (
+                            filteredProjects.map((project) => (
+                                <article key={project.id} className="border rounded-lg p-2 border-purple-600 flex flex-col items-start justify-between bg-white shadow-md hover:shadow-xl transition-shadow">
+                                    <div className="flex items-center gap-x-4 text-xs">
+                                        <span
+                                            className={`bg-${getProjectSituationColor(
+                                                project.situation
+                                            )} text-white relative z-10 rounded-full px-3 py-1.5 font-medium`}
+                                        >
+                                            {getProjectSituationDescription(project.situation)}
+                                        </span>
+                                    </div>
+                                    <div className="group relative">
+                                        <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                                            #{project.id} - {project.name}
+                                        </h3>
+                                        <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{project.description}</p>
+                                    </div>
+                                    <div className="relative mt-8 flex items-center gap-x-4">
+                                        <img src={logo} alt="Logo" className="h-10 w-10 rounded-full bg-gray-50" />
+                                        <div className="text-sm leading-6">
+                                            <p className="font-semibold text-gray-900">
+                                                Criador {project.creatorId}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={(event) => handleApply(event, project.id)}
+                                        className="mt-4 w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700"
+                                    >
+                                        Solicitar Participação
+                                    </button>
+                                </article>
+                            ))
+                        ) : (
+                            <div className="text-center text-lg text-purple-600 m-20">Nenhum projeto encontrado</div>
+                        )
                     )}
-
-
                 </div>
             </div>
-        </PainelContainer >
-    )
-
+        </PainelContainer>
+    );
 };
 
 export default ProjectsPublicList;

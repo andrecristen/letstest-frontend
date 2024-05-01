@@ -118,13 +118,13 @@ function ProjectsOwnerList() {
                     <FiEdit className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="text-sm text-gray-500"><span
+                <div className="text-sm text-gray-600"><span
                   className={`bg-${getProjectSituationColor(
                     project.situation
                   )} text-white rounded-lg p-1`}
                 >
                   {getProjectSituationDescription(project.situation)}
-                </span> Visibilidade: {getProjectVisibilityDescription(project.visibility)}</div>
+                </span> {getProjectVisibilityDescription(project.visibility)}</div>
                 <p title={project.description} className="text-gray-600 my-2 line-clamp-3 overflow-hidden text-ellipsis">{project.description}</p>
               </div>
             ))
