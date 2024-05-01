@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FiSave } from 'react-icons/fi';
 import PainelContainer from '../base/PainelContainer';
-import { TitleContainer } from '../base/TitleContainer';
+import TitleContainer from '../base/TitleContainer';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { TemplateData, getTemplateTypeList } from '../../types/TemplateData';

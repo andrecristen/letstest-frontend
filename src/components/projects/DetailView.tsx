@@ -9,7 +9,7 @@ import { ProjectData } from "../../types/ProjectData";
 import notifyService from '../../services/notifyService';
 import ProjectsForm from "./Form";
 import { FormDialogBaseExtendsRef } from "../base/FormDialogBase";
-import { TitleContainer } from "../base/TitleContainer";
+import  TitleContainer from "../base/TitleContainer";
 
 const ProjectsDetailView = () => {
 

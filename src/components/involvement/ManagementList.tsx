@@ -6,7 +6,7 @@ import PainelContainer from "../base/PainelContainer";
 import logo from '../../assets/logo-transparente.png';
 import { FiCheckCircle, FiMail, FiSkipBack, FiTrash, FiUser, FiUserX } from "react-icons/fi";
 import notifyService from "../../services/notifyService";
-import { TitleContainer } from "../base/TitleContainer";
+import TitleContainer  from "../base/TitleContainer";
 
 interface InvolvementManagementListProps {
     type: InvolvementTypeEnum;

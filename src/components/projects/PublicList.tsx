@@ -7,7 +7,7 @@ import { getProjectSituationColor, getProjectSituationDescription } from '../../
 import PainelContainer from '../base/PainelContainer';
 import { ProjectData } from '../../types/ProjectData';
 import notifyService from '../../services/notifyService';
-import { TitleContainer } from '../base/TitleContainer';
+import TitleContainer from '../base/TitleContainer';
 
 const ProjectsPublicList = () => {
 

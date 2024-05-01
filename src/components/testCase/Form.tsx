@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { create, getById, update } from '../../services/testCaseService';
 import notifyService from '../../services/notifyService';
 import PainelContainer from '../base/PainelContainer';
-import { TitleContainer } from '../base/TitleContainer';
+import TitleContainer from '../base/TitleContainer';
 import { TestCaseData } from '../../types/TestCaseData';
 import { FiSave } from 'react-icons/fi';
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from '../templates/CustomizableTable';

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import PainelContainer from "../base/PainelContainer";
 import { FiCopy, FiExternalLink, FiFileText, FiSearch, } from "react-icons/fi";
 import notifyService from "../../services/notifyService";
-import { TitleContainer } from "../base/TitleContainer";
+import  TitleContainer  from "../base/TitleContainer";
 import { getAllByProjects } from "../../services/testCaseService";
 import { TestCaseData } from "../../types/TestCaseData";
 

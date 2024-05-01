@@ -1,107 +1,99 @@
 import React, { useEffect, useState } from 'react';
 import { FiMenu, FiBell, FiUser, FiGitPullRequest, FiPlay, FiSearch, FiPieChart } from 'react-icons/fi';
-import logo from '../../assets/logo-transparente.png'
 import { useLocation, useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo-transparente.png';
 
-const PainelNavbar = (props: any) => {
+interface Menu {
+  name: string;
+  route: string;
+  icon: JSX.Element;
+}
 
-    const isMenuOpenSaved = (localStorage.getItem('isMenuOpen') === "true");
+interface PainelNavbarProps {
+  children: React.ReactNode;
+}
 
-    const navigate = useNavigate();
-    const location = useLocation();
+const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const [isMenuOpen, setIsMenuOpen] = useState<Boolean>(isMenuOpenSaved);
-    const [menuSelected, setMenuSelected] = useState(location.pathname);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(
+    localStorage.getItem('isMenuOpen') === 'true'
+  );
+  const [menuSelected, setMenuSelected] = useState(location.pathname);
 
-    const toggleMenu = () => {
-        const toogleMenu = !isMenuOpen;
-        setIsMenuOpen(toogleMenu);
-        localStorage.setItem('isMenuOpen', `${toogleMenu}`);
-    };
+  const toggleMenu = () => {
+    const newIsMenuOpen = !isMenuOpen;
+    setIsMenuOpen(newIsMenuOpen);
+    localStorage.setItem('isMenuOpen', `${newIsMenuOpen}`);
+  };
 
-    const menus = [
-        {
-            name: "Dashboard",
-            route: "/dashboard",
-            icon: <FiPieChart className="w-12 h-12" />
-        },
-        {
-            name: "Gerenciar Projetos",
-            route: "/my-owner-projects",
-            icon: <FiGitPullRequest className="w-12 h-12" />
-        },
-        {
-            name: "Testar Projetos",
-            route: "/my-test-projects",
-            icon: <FiPlay className=" w-12 h-12" />
-        },
-        {
-            name: "Encontrar Projetos",
-            route: "/find-new-projects",
-            icon: <FiSearch className="w-12 h-12" />
-        },
-        {
-            name: "Perfil",
-            route: "/profile",
-            icon: <FiUser className="w-12 h-12" />
-        },
-    ];
+  const menus: Menu[] = [
+    { name: 'Dashboard', route: '/dashboard', icon: <FiPieChart /> },
+    { name: 'Gerenciar Projetos', route: '/my-owner-projects', icon: <FiGitPullRequest /> },
+    { name: 'Testar Projetos', route: '/my-test-projects', icon: <FiPlay /> },
+    { name: 'Encontrar Projetos', route: '/find-new-projects', icon: <FiSearch /> },
+    { name: 'Perfil', route: '/profile', icon: <FiUser /> },
+  ];
 
-    const onClickMenu = (event: any, route: string) => {
-        event.preventDefault();
-        event.stopPropagation();
-        navigate(route);
-        setMenuSelected(route);
-    }
+  const handleClickMenu = (event: React.MouseEvent, route: string) => {
+    event.preventDefault();
+    navigate(route);
+    setMenuSelected(route);
+  };
 
-    return (
-        <div className="flex h-screen bg-gray-100">
-            {/* Sidebar */}
-            <nav
-                className={`bg-purple-900 text-gray-300 border-r overflow-y-auto transition-all duration-100 ease-in-out ${isMenuOpen ? 'w-64' : 'w-0 md:w-16 2xl:w-16'}`}
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <nav
+        className={`bg-purple-800 text-gray-200 transition-width duration-300 ${
+          isMenuOpen ? 'w-56' : 'w-16'
+        }`}
+      >
+        <div className="flex flex-col h-full space-y-6 p-4">
+          {menus.map((menu) => (
+            <a
+              key={menu.name}
+              onClick={(event) => handleClickMenu(event, menu.route)}
+              href="#"
+              className={`flex items-center p-2 rounded hover:bg-purple-600 hover:text-white ${
+                menu.route === menuSelected ? 'bg-purple-600 text-white' : ''
+              }`}
+              title={isMenuOpen ? '' : menu.name}
             >
-                <div className="space-y-8">
-                    {menus.map((menu) => (
-                        <a title={menu.name} onClick={(event) => { onClickMenu(event, menu.route) }} href="#" className={"p-2 hover:bg-purple-600 hover:text-white flex items-center " + (menu.route == menuSelected ? "bg-purple-600 text-white" : "")}>
-                            {menu.icon}
-                            {isMenuOpen && <span className="ml-2">{menu.name}</span>}
-                        </a>
-                    ))}
-                </div>
-            </nav>
-            {/* Conteúdo principal */}
-            <main className="flex-1 flex flex-col overflow-hidden">
-                {/* Cabeçalho */}
-                <header className="w-full bg-white min-h-[64px] max-h-[64px]">
-                    <div className="mr-6 h-full">
-                        <div className="flex items-center justify-between h-full">
-                            <button
-                                className="text-gray-500 focus:outline-none w-15 h-full pl-5"
-                                onClick={toggleMenu}
-                            >
-                                <FiMenu className='text-4xl' />
-                            </button>
-                            {/* Logo e outros elementos do cabeçalho */}
-                            <img src={logo} alt="Logo" className="h-8" />
-                            <div className="space-x-4">
-                                <button>
-                                    <FiBell className="text-gray-500" />
-                                </button>
-                                <button>
-                                    <FiUser className="text-gray-500" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                {/* Conteúdo */}
-                <div className="px-2 mb-10 overflow-auto lg:mb-2">
-                    {props.children}
-                </div>
-            </main>
+              <span className="text-xl">{menu.icon}</span>
+              {isMenuOpen && <span className="ml-4">{menu.name}</span>}
+            </a>
+          ))}
         </div>
-    );
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="bg-white flex items-center justify-between px-6 py-3 border-b">
+          <button
+            className="text-gray-600 focus:outline-none"
+            onClick={toggleMenu}
+          >
+            <FiMenu className="text-2xl" />
+          </button>
+
+          <img src={logo} alt="Logo" className="h-8" />
+
+          <div className="space-x-4 flex items-center">
+            <FiBell className="text-gray-500" />
+            <FiUser className="text-gray-500" />
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default PainelNavbar;

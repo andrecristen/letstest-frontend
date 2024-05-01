@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import logo from '../../assets/logo-transparente.png'
 import { FormDialogBaseExtendsRef } from "../base/FormDialogBase";
 import ProjectsForm from "./Form";
-import { TitleContainer } from "../base/TitleContainer";
+import TitleContainer from "../base/TitleContainer";
 
 function ProjectsOwnerList() {
 
