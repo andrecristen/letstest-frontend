@@ -131,6 +131,17 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
                   className="form-input w-full h-full p-0"
                 />
               )}
+              {column.type === ColumnType.LongText && (
+                <textarea
+                  placeholder={column.placeholder ?? "Preencha o campo"}
+                  rows={4}
+                  value={column.content}
+                  disabled={isEdit() || isView()}
+                  required={isFillIn()}
+                  onChange={e => updateColumnContent(index, e.target.value)}
+                  className="form-input w-full h-full p-0"
+                />
+              )}
               {column.type === ColumnType.Label && (
                 <span className="w-full h-full text-black ">
                   {column.content || 'Editar Label'}:

@@ -11,6 +11,7 @@ interface EditFormProps {
 export enum ColumnType {
     Label = 'Label',
     Text = 'Texto',
+    LongText = 'Texto Longo',
     List = 'Lista',
     Table = 'Tabela',
     Empty = 'Espaço',
@@ -29,11 +30,13 @@ export interface Column {
 
 const TYPES_CONTENT_EDIT = [
     ColumnType.Text,
+    ColumnType.LongText,
     ColumnType.Label
 ]
 
 const TYPES_CONTENT_PLACEHOLDER = [
     ColumnType.Text,
+    ColumnType.LongText,
 ]
 
 const TYPES_CONTENT_EDIT_REQUIRED = [
