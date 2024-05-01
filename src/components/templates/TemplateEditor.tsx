@@ -1,29 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { FiPlusCircle, FiSave, FiTrash } from 'react-icons/fi';
+import React, { useEffect, useRef, useState } from 'react';
+import { FiSave } from 'react-icons/fi';
 import PainelContainer from '../base/PainelContainer';
 import { TitleContainer } from '../base/TitleContainer';
-import CustomizableRow, { CustomizableRowProps } from './CustomizableRow';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { TemplateData, getTemplateTypeList } from '../../types/TemplateData';
 import { create, getById } from '../../services/templatesService';
 import notifyService from '../../services/notifyService';
-import { Column } from './ColumnFormEditor';
-
-
-interface RowProps extends CustomizableRowProps {
-    id: number;
-}
+import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from './CustomizableTable';
+import { Operation } from './CustomizableRow';
 
 const TemplateEditor = () => {
 
-    const getIdRow = () => {
-        return Date.now();
-    }
-
-    const [rows, setRows] = useState<RowProps[]>([
-        { id: getIdRow(), minColumnCount: 1, maxColumnCount: 6, columns: [] }
-    ]);
+    const customizableTableRef = useRef<CustomizableTableRef>(null);
+    const [rows, setRows] = useState<CustomizableTableRows[]>([]);
     const { register, handleSubmit, setValue, getValues, reset } = useForm<TemplateData>();
     const [isLoadedTemplateCopy, setIsLoadedTemplateCopy] = useState<boolean>(false);
     const { projectId, templateIdCopy } = useParams();
@@ -43,26 +33,11 @@ const TemplateEditor = () => {
                 setValue("name", "Cópia de: " + templateCopyData?.data.name);
                 setValue("description", templateCopyData?.data.description + " (Cópia de: " + templateCopyData?.data.name + ")");
                 setValue("type", templateCopyData?.data.type);
-                const newRows: RowProps[] = Object.values(templateCopyData.data.data);
-                setRows(newRows);
+                const newRows: CustomizableTableRows[] = Object.values(templateCopyData.data.data);
+                customizableTableRef.current?.setRows(newRows);
             }
         }
     }
-
-    const addRow = () => {
-        const newRow = {
-            id: getIdRow(),
-            minColumnCount: 1,
-            maxColumnCount: 6,
-            columns: [],
-        };
-        setRows([...rows, newRow]);
-    };
-
-    const handleRemoveRow = (id: number) => {
-        const newRows = rows.filter((row) => row.id !== id);
-        setRows(newRows);
-    };
 
     const onSubmit: SubmitHandler<TemplateData> = async (data, event) => {
         event?.preventDefault();
@@ -80,12 +55,6 @@ const TemplateEditor = () => {
             }
         }
     }
-
-    const updateRow = (index: number, updatedColumns: any[]) => {
-        const updatedRows = [...rows];
-        updatedRows[index].columns = updatedColumns;
-        setRows(updatedRows);
-    };
 
     return (
         <PainelContainer>
@@ -127,32 +96,11 @@ const TemplateEditor = () => {
                 <fieldset>
                     <legend>Definição Template:</legend>
                     <hr />
-                    <div className="pt-4">
-                        {rows.map((row, index) => (
-                            <div key={row.id} className="flex justify-between items-center">
-                                <CustomizableRow
-                                    key={`row` + row.id}
-                                    columns={row.columns}
-                                    minColumnCount={row.minColumnCount}
-                                    maxColumnCount={row.maxColumnCount}
-                                    onChange={(updatedColumns) => updateRow(index, updatedColumns)}
-                                />
-                                <div className="flex border border-gray-300 overflow-hidden h-12">
-
-                                    <button
-                                        type="button"
-                                        onClick={() => handleRemoveRow(row.id)}
-                                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-sm h-full"
-                                    >
-                                        <FiTrash />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                        <button type="button" onClick={addRow} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 w-full mt-2 flex justify-center items-center rounded-md">
-                            <FiPlusCircle className="mr-2" /> Adicionar Linha
-                        </button>
-                    </div>
+                    <CustomizableTable
+                        ref={customizableTableRef}
+                        operation={Operation.Edit}
+                        onChange={(rows: CustomizableTableRows[]) => { setRows(rows) }}
+                    />
                 </fieldset>
                 <button type="submit" className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 w-full flex justify-center items-center rounded-md">
                     <FiSave className="mr-2" /> Salvar

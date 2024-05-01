@@ -6,10 +6,14 @@ import PainelContainer from "../base/PainelContainer";
 import { TitleContainer } from "../base/TitleContainer";
 import { TestCaseData } from "../../types/TestCaseData";
 import { FiSave } from "react-icons/fi";
+import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from "../templates/CustomizableTable";
+import { Operation } from "../templates/CustomizableRow";
 
 const TestCaseForm = () => {
 
     const { register, handleSubmit, setValue, getValues, reset } = useForm<TestCaseData>()
+    const customizableTableRef = useRef<CustomizableTableRef>(null);
+    const [rows, setRows] = useState<CustomizableTableRows[]>([]);
 
     const onSubmit: SubmitHandler<TestCaseData> = async (data) => {
         if (data.id) {
@@ -42,13 +46,15 @@ const TestCaseForm = () => {
                     />
                 </div>
                 <div className="py-2">
-                    <textarea
-                        {...register("data")}
-                        rows={5}
-                        required
-                        className="form-input"
-                        placeholder="Data Template"
-                    />
+                    <fieldset>
+                        <legend>Definição do Caso de Teste:</legend>
+                        <hr />
+                        <CustomizableTable
+                            ref={customizableTableRef}
+                            operation={Operation.FillIn}
+                            onChange={(rows: CustomizableTableRows[]) => { setRows(rows) }}
+                        />
+                    </fieldset>
                 </div>
                 <button type="submit" className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 w-full flex justify-center items-center rounded-md">
                     <FiSave className="mr-2" /> Salvar
