@@ -33,6 +33,7 @@ const AppRoutes = () => {
                 <Route path="/project/templates/:projectId" element={<TemplateManagementList />}></Route>
                 <Route path="/project/templates/:projectId/add" element={<TemplateEditor />}></Route>
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateEditor />}></Route>
+                <Route path="/project/templates/:projectId/view/:templateIdCopy" element={<TemplateEditor />}></Route>
                 <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
                 <Route path="/test-case/:projectId/add" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
