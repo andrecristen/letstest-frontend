@@ -11,6 +11,7 @@ interface CustomizableTableProps {
     onChange: (CustomizableTableRows: CustomizableTableRows[]) => void;
     maxColumnCount?: number;
     forceShowAddRows?: boolean;
+    defaultRows?: CustomizableTableRows[];
 }
 
 export interface CustomizableTableRef {
@@ -34,7 +35,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
     }
 
     const getDefaultsRows = (): CustomizableTableRows[] => {
-        let defaultRows: CustomizableTableRows[] = [];
+        let defaultRows: CustomizableTableRows[] = props.defaultRows ?? [];
         if (props.operation == Operation.Edit) {
             defaultRows = [
                 { id: getIdRow(), minColumnCount: 1, maxColumnCount: getMaxColumnCount(), columns: [] },
@@ -46,7 +47,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
     const [customizableTableRows, setRows] = useState<CustomizableTableRows[]>(getDefaultsRows());
 
     useEffect(() => {
-        console.log(customizableTableRows);
+        console.log(props.maxColumnCount, customizableTableRows);
       }, [customizableTableRows]);
 
     const updateRow = (index: number, updatedColumns: any[]) => {

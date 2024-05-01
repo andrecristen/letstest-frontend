@@ -146,10 +146,10 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
                 <FileUpload disabled={isEdit() || isView()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
               )}
               {column.type === ColumnType.List && (
-                <CustomizableTable maxColumnCount={1} forceShowAddRows={getOperation() == Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
+                <CustomizableTable defaultRows={column.rows} maxColumnCount={1} forceShowAddRows={getOperation() == Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
               )}
               {column.type === ColumnType.Table && (
-                <CustomizableTable operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
+                <CustomizableTable defaultRows={column.rows} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
               )}
             </>
           )}
@@ -167,7 +167,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
           ) : null}
         </div>
       ))}
-      {operation == Operation.Edit && maxColumnCount > 1? (
+      {operation == Operation.Edit && maxColumnCount > 1 ? (
         <button type="button" onClick={addColumn} className="bg-blue-500 text-white px-4 py-3 rounded-sm h-full flex items-center"><FiPlusCircle /></button>
       ) : null}
     </div>
