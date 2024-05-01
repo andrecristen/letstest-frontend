@@ -99,7 +99,7 @@ const ProjectsDetailView = () => {
                         <FiFilePlus className="w-20 h-20 mx-auto mb-4" />
                         <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Templates</h3>
                     </div>
-                    <div onClick={callListKanban} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
+                    {/* <div onClick={callListKanban} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
                         <FiTrello className="w-20 h-20 mx-auto mb-4" />
                         <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Kanban</h3>
                     </div>
@@ -110,7 +110,7 @@ const ProjectsDetailView = () => {
                     <div onClick={callListDashboard} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-500 cursor-pointer border border-purple-500">
                         <FiPieChart className="w-20 h-20 mx-auto mb-4" />
                         <h3 className="text-center text-2xl font-semibold mb-2 text-purple-600">Dashboard</h3>
-                    </div>
+                    </div> */}
                 </div>
             </div>
             <ProjectsForm ref={formDialogRef} />
