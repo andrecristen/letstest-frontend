@@ -48,7 +48,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
     const [customizableTableRows, setRows] = useState<CustomizableTableRows[]>(getDefaultsRows());
 
     useEffect(() => {
-        console.log(props.maxColumnCount, customizableTableRows);
+        
       }, [customizableTableRows]);
 
     const updateRow = (index: number, updatedColumns: any[]) => {
