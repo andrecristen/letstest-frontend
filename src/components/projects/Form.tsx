@@ -27,6 +27,7 @@ const ProjectsForm = React.forwardRef<any, any>((props, ref) => {
   const onSubmit: SubmitHandler<ProjectData> = async (data) => {
     data.visibility = parseInt(data.visibility.toString());
     if (data.id) {
+      delete data.creator;
       const response = await updateProject(data);
       if (response?.status == 200) {
         notifyService.success("Projeto alterado com sucesso");
