@@ -15,6 +15,7 @@ import TestCaseProjectOwnerList from "./testCase/OwnerList";
 import { InvolvementTypeEnum } from '../types/InvolvementData';
 import TestCaseForm from "./testCase/Form";
 import ProjectsTestList from "./projects/TestList";
+import TestCaseProjectTestList from "./testCase/TestList";
 
 const AppRoutes = () => {
 
@@ -37,6 +38,7 @@ const AppRoutes = () => {
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateEditor />}></Route>
                 <Route path="/project/templates/:projectId/view/:templateIdCopy" element={<TemplateEditor />}></Route>
                 <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
+                <Route path="/project/test/:projectId" element={<TestCaseProjectTestList />}></Route>
                 <Route path="/test-case/:projectId/add" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/view" element={<TestCaseForm />}></Route>

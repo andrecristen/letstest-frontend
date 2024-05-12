@@ -14,6 +14,10 @@
     @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-teal-600 text-white font-bold rounded-md hover:bg-teal-700 transition-colors mb-2;
 }
 
+.action-button-purple {
+    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-purple-600 text-white font-bold rounded-md hover:bg-purple-700 transition-colors mb-2;
+}
+
 .cards-list-inline {
     @apply grid grid-cols-1 gap-6;
 }

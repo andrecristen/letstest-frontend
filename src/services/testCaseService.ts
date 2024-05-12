@@ -5,6 +5,10 @@ export const getAllByProjects = async (projectId: number) => {
     return await apiTokenService.get('/test-case/project/' + projectId);
 };
 
+export const getMyByProjects = async (projectId: number) => {
+    return await apiTokenService.get('/test-case/project/' + projectId);
+};
+
 export const getById = async (testCaseId: number) => {
     return await apiTokenService.get('/test-case/' + testCaseId);
 };
