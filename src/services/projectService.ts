@@ -6,6 +6,11 @@ export const getMyProjects = async () => {
     return await apiTokenService.get('/projects/me');
 };
 
+
+export const getTestProjects = async () => {
+    return await apiTokenService.get('/projects/test');
+};
+
 export const getPublicProjects = async () => {
     return await apiTokenService.get('/projects/public');
 };

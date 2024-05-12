@@ -14,6 +14,7 @@ import TestCaseProjectOwnerList from "./testCase/OwnerList";
 // Others
 import { InvolvementTypeEnum } from '../types/InvolvementData';
 import TestCaseForm from "./testCase/Form";
+import ProjectsTestList from "./projects/TestList";
 
 const AppRoutes = () => {
 
@@ -27,6 +28,7 @@ const AppRoutes = () => {
                 {/* Private Access */}
                 <Route path="/dashboard" element={<Dashboard />}></Route>
                 <Route path="/my-owner-projects" element={<ProjectsOwnerList />}></Route>
+                <Route path="/my-test-projects" element={<ProjectsTestList />}></Route>
                 <Route path="/project/detail/:projectId" element={<ProjectsDetailView />}></Route>
                 <Route path="/project/testers/:projectId" element={<InvolvementManagementList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
                 <Route path="/project/managers/:projectId" element={<InvolvementManagementList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
