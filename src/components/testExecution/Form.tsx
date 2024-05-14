@@ -1,16 +1,18 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { getById } from '../../services/testCaseService';
+import { create } from '../../services/testExecutionService';
 import notifyService from '../../services/notifyService';
 import PainelContainer from '../base/PainelContainer';
 import TitleContainer from '../base/TitleContainer';
 import { TestCaseData } from '../../types/TestCaseData';
+import { TestExecutionData } from '../../types/TestExecutionData';
 import { FiSave } from 'react-icons/fi';
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from '../templates/CustomizableTable';
 import { Operation } from '../templates/CustomizableRow';
 import { TemplateData, TemplateTypeEnum } from '../../types/TemplateData';
 import { getAllByProjectAndType } from '../../services/templatesService';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Timer from '../base/Timer';
 
 const TestExecutionForm = () => {
@@ -22,7 +24,7 @@ const TestExecutionForm = () => {
     const [templates, setTemplates] = useState<TemplateData[]>([]);
     const [loadingTemplates, setLoadingTemplates] = useState(false);
     const [timerFinished, setTimerFinished] = useState<Boolean>(false);
-    const [timerTime, setTimerTime] = useState<Number>(0);
+    const [timerTime, setTimerTime] = useState<number>(0);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
@@ -58,7 +60,17 @@ const TestExecutionForm = () => {
     };
 
     const onSubmit: SubmitHandler<TestCaseData> = async (data) => {
-
+        let dataSend: TestExecutionData = {
+            data: Object.fromEntries(rows.map((item) => [item.id, item])),
+            testTime: timerTime
+        };
+        const response = await create(getTestCaseId(), dataSend);
+        if (response?.status === 200 || response?.status === 201) {
+            notifyService.success("Execução reportada com sucesso.");
+            navigate(-1);
+        } else {
+            notifyService.error("Erro ao reportar execução, tente novamente.");
+        }
     };
 
     const handleChangeTemplate = () => {
@@ -71,7 +83,7 @@ const TestExecutionForm = () => {
     return (
         <PainelContainer>
             <TitleContainer title="Testar Caso de Teste" />
-            <div onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
 
                 <div className="py-2">
                     <input
@@ -144,7 +156,7 @@ const TestExecutionForm = () => {
                         ) : null}</>
                 ) : null}
 
-            </div>
+            </form>
         </PainelContainer>
     );
 };

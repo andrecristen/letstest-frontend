@@ -112,19 +112,19 @@ const Timer: React.FC<TimerProps> = ({ title, onChange, onStart, onStop, onReset
             <h1 className="text-2xl font-bold mb-4">{title}</h1>
             <p className="text-xl mb-4">Tempo decorrido: {formatTime(timeElapsed)}</p>
             {isInitial ? (
-                <button onClick={handleStart} className="action-button-blue m-2">
+                <button type="button" onClick={handleStart} className="action-button-blue m-2">
                     <FiPlay className="m-2 text-2xl" /> {timeElapsed ? "Continuar" : "Inicializar"}
                 </button>
             ) : (
                 <>
-                    <button onClick={handleStop} className="action-button-red m-2">
+                    <button type="button" onClick={handleStop} className="action-button-red m-2">
                         <FiCheckSquare className="m-2 text-2xl" /> Finalizar
                     </button>
-                    <button onClick={handleReset} className="action-button-teal m-2">
+                    <button type="button" onClick={handleReset} className="action-button-teal m-2">
                         <FiSkipBack className="m-2 text-2xl" /> Reiniciar
                     </button>
                     {!isRecording && (
-                        <button onClick={handleRecord} className="action-button-purple m-2">
+                        <button type="button" onClick={handleRecord} className="action-button-purple m-2">
                             <FiVideo className="m-2 text-2xl" /> Gravar Tela
                         </button>
                     )}
