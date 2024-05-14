@@ -16,6 +16,7 @@ import { InvolvementTypeEnum } from '../types/InvolvementData';
 import TestCaseForm from "./testCase/Form";
 import ProjectsTestList from "./projects/TestList";
 import TestCaseProjectTestList from "./testCase/TestList";
+import TestExecutionForm from "./testExecution/Form";
 
 const AppRoutes = () => {
 
@@ -43,6 +44,7 @@ const AppRoutes = () => {
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/view" element={<TestCaseForm />}></Route>
                 <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
+                <Route path="/test-executions/test/:projectId/:testCaseId" element={<TestExecutionForm />}></Route>
             </Routes>
         </Router>
     );
