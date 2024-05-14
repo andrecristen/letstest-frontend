@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { create, getById, update } from '../../services/testCaseService';
+import { getById } from '../../services/testCaseService';
 import notifyService from '../../services/notifyService';
 import PainelContainer from '../base/PainelContainer';
 import TitleContainer from '../base/TitleContainer';
@@ -21,11 +21,11 @@ const TestExecutionForm = () => {
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
     const [templates, setTemplates] = useState<TemplateData[]>([]);
     const [loadingTemplates, setLoadingTemplates] = useState(false);
+    const [timerFinished, setTimerFinished] = useState<Boolean>(false);
+    const [timerTime, setTimerTime] = useState<Number>(0);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
-    const updateId = watch('id');
-    const location = useLocation();
 
     useEffect(() => {
         load();
@@ -93,44 +93,57 @@ const TestExecutionForm = () => {
                 </div>
                 <Timer
                     title="Executar caso de teste"
-                    onChange={() => { }}
+                    onChange={(value) => { setTimerTime(value) }}
+                    onStart={() => { setTimerFinished(false) }}
+                    onReset={() => { setTimerFinished(false) }}
+                    onStop={() => { setTimerFinished(true); setValue("templateId", undefined); handleChangeTemplate(); }}
                 />
-                <div className="py-2">
-                    <select
-                        {...register('templateId', {
-                            setValueAs: (value) => parseInt(value, 10),
-                            onChange: handleChangeTemplate,
-                        })}
-                        required
-                        className="form-input"
-                    >
-                        <option value="">Selecione o template</option>
-                        {templates.map((template) => (
-                            <option key={template.id} value={template.id}>
-                                {template.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="py-2">
-                    <fieldset className="border rounded p-4">
-                        <legend className="text-lg font-semibold">Reportar execução do Caso de Teste:</legend>
-                        <CustomizableTable
-                            ref={customizableTableTestExecutionRef}
-                            operation={Operation.FillIn}
-                            onChange={setRows}
-                        />
-                    </fieldset>
-                </div>
-                {!loadingTemplates && updateTemplate ? (
-                    <button
-                        type="submit"
-                        className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
-                    >
-                        <FiSave className="mr-2" />
-                        Salvar
-                    </button>
+                {timerFinished ? (
+                    <>
+                        <div className="py-2">
+                            <select
+                                {...register('templateId', {
+                                    setValueAs: (value) => parseInt(value, 10),
+                                    onChange: handleChangeTemplate,
+                                })}
+                                required
+                                className="form-input"
+                            >
+                                <option value="">Selecione o template</option>
+                                {templates.map((template) => (
+                                    <option key={template.id} value={template.id}>
+                                        {template.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="py-2">
+                            <fieldset className="border rounded p-4">
+                                <legend className="text-lg font-semibold">Reportar execução do Caso de Teste:</legend>
+                                {!updateTemplate && (
+                                    <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
+                                        <strong className="font-bold mr-2">Atenção!</strong>
+                                        <span>Selecione o template desejado para preenchimento.</span>
+                                    </div>
+                                )}
+                                <CustomizableTable
+                                    ref={customizableTableTestExecutionRef}
+                                    operation={Operation.FillIn}
+                                    onChange={setRows}
+                                />
+                            </fieldset>
+                        </div>
+                        {!loadingTemplates && updateTemplate ? (
+                            <button
+                                type="submit"
+                                className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
+                            >
+                                <FiSave className="mr-2" />
+                                Reportar Execução
+                            </button>
+                        ) : null}</>
                 ) : null}
+
             </div>
         </PainelContainer>
     );
