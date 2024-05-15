@@ -5,6 +5,7 @@ import EditForm, { Column, ColumnType } from './ColumnFormEditor';
 import FileUpload from '../base/FileUpload';
 import CustomizableTable, { CustomizableTableRows } from './CustomizableTable';
 import { FileData } from '../../types/FileData';
+import FileViewer from '../base/FileViewer';
 
 export enum Operation {
   Edit = 'Edição',
@@ -152,11 +153,14 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
               {column.type === ColumnType.Empty && (
                 <div className="w-full h-full text-center"></div>
               )}
-              {column.type === ColumnType.File && (
-                <FileUpload disabled={isEdit() || isView()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} />
+              {column.type === ColumnType.File && !isView() && (
+                <FileUpload disabled={isEdit()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} />
               )}
-              {column.type === ColumnType.MultipleFiles && (
-                <FileUpload disabled={isEdit() || isView()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
+              {column.type === ColumnType.MultipleFiles && !isView() && (
+                <FileUpload disabled={isEdit()} required={isFillIn()} onChange={(files) => { updateColumnFiles(files, index) }} multiple={true} />
+              )}
+              {(column.type === ColumnType.File || column.type === ColumnType.MultipleFiles) && isView() && (
+                <FileViewer files={column.files || []} />
               )}
               {column.type === ColumnType.List && (
                 <CustomizableTable defaultRows={column.rows} maxColumnCount={1} forceHiddeColumnsActions={true} forceShowAddRows={getOperation() == Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
