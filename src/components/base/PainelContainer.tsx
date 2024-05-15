@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PainelNavbar from './PainelNavbar';
 import tokenService from '../../services/tokenService';

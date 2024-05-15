@@ -1,6 +1,5 @@
-import React, { Fragment, useRef, useState, useImperativeHandle, ForwardedRef, RefObject } from "react";
+import React, { Fragment, useRef, useState, useImperativeHandle } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { useForm } from "react-hook-form"
 import '../../styles/form.css';
 
 interface FormDialogBaseProps {

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import axios, { AxiosProgressEvent } from 'axios';
+import { AxiosProgressEvent } from 'axios';
 import notifyService from '../../services/notifyService';
 import { upload } from '../../services/fileService';
 import { FiXCircle } from 'react-icons/fi';

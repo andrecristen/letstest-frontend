@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // Views
-import Home from "../components/Home";
 import Login from "./user/Login";
 import Dashboard from "./Dashboard";
 import ProjectsOwnerList from "./projects/OwnerList";

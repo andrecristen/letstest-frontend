@@ -10,7 +10,7 @@ interface FileViewerProps {
 const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
     const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
     const formDialogRef = React.useRef<FormDialogBaseRef>(null);
-    const url = process.env.bucketEndpoint;
+    const url = process.env.REACT_APP_FILES_ENDPOINT_URL;
     console.log(url, process.env);
 
     const openFileViewer = async (file: FileData) => {
