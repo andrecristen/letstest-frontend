@@ -2,21 +2,25 @@ import React, { useState } from 'react';
 import FormDialogBase, { FormDialogBaseRef } from './FormDialogBase';
 import { FileData } from '../../types/FileData';
 import { FiFile } from 'react-icons/fi';
+import DocViewer, { DocViewerRenderers, IDocument } from "@cyntler/react-doc-viewer";
 
 interface FileViewerProps {
     files: FileData[];
 }
 
 const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
-    const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
+    const [selectedFile, setSelectedFile] = useState<IDocument[] | null>(null);
     const formDialogRef = React.useRef<FormDialogBaseRef>(null);
     const url = process.env.REACT_APP_FILES_ENDPOINT_URL;
 
     const openFileViewer = async (file: FileData) => {
         //@todo propagar URl e Type para o modelo de retorno do backend
         file.url = url + "/" + file.bucket + "/" + file.name;
-        file.type = "image";
-        setSelectedFile(file);
+        console.log(file.url);
+        const docs: IDocument[] = [
+            { uri: file.url },
+        ];
+        setSelectedFile(docs);
         if (formDialogRef.current) {
             formDialogRef.current.openDialog();
         }
@@ -43,16 +47,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
             <FormDialogBase ref={formDialogRef} title="Visualizar Arquivo" initialOpen={false} submit={(event: React.FormEvent) => closeFileViewer(event)}>
                 {selectedFile && (
                     <div>
-                        {selectedFile.name}
-                        {selectedFile.type === 'image' && (
-                            <img src={selectedFile.url} alt={selectedFile.name} />
-                        )}
-                        {selectedFile.type === 'video' && (
-                            <video controls>
-                                <source src={selectedFile.url} type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                        )}
+                        <DocViewer documents={selectedFile} />
                     </div>
                 )}
             </FormDialogBase>

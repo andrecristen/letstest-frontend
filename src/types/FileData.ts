@@ -3,5 +3,4 @@ export type FileData = {
     bucket: string;
     name: string;
     url?: string;
-    type?: string;
 }
