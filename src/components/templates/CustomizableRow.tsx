@@ -4,6 +4,7 @@ import notifyService from '../../services/notifyService';
 import EditForm, { Column, ColumnType } from './ColumnFormEditor';
 import FileUpload from '../base/FileUpload';
 import CustomizableTable, { CustomizableTableRows } from './CustomizableTable';
+import { FileData } from '../../types/FileData';
 
 export enum Operation {
   Edit = 'Edição',
@@ -65,7 +66,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
     applyUpdateColumnsRow(updatedcolumnsRow);
   };
 
-  const updateColumnFiles = (files: File[], index: number) => {
+  const updateColumnFiles = (files: FileData[], index: number) => {
     const updatedcolumnsRow = [...columnsRow];
     updatedcolumnsRow[index].files = files;
     applyUpdateColumnsRow(updatedcolumnsRow);

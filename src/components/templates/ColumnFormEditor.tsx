@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import FormDialogBase from "../base/FormDialogBase";
 import { CustomizableTableRows } from "./CustomizableTable";
+import { FileData } from "../../types/FileData";
 
 interface EditFormProps {
     column: Column;
@@ -25,7 +26,7 @@ export interface Column {
     content: string;
     placeholder?: string;
     rows?: CustomizableTableRows[];
-    files?: File[];
+    files?: FileData[];
 }
 
 const TYPES_CONTENT_EDIT = [

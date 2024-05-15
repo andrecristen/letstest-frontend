@@ -35,9 +35,14 @@ const apiTokenService = {
         }
     },
 
-    post: async (path: string, body: any) => {
+    post: async (path: string, body: any, extraConfigs? : any) => {
         try {
-            return await api.post(path, body, getExtraConfigs());
+            const defaultExtraConfigs = getExtraConfigs();
+            if (extraConfigs && extraConfigs.headers) {
+                defaultExtraConfigs.headers = {...defaultExtraConfigs.headers, ...extraConfigs.headers}
+            }
+            const finalConfigs = {...extraConfigs, ...defaultExtraConfigs};
+            return await api.post(path, body, finalConfigs);
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
