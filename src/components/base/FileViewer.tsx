@@ -10,10 +10,12 @@ interface FileViewerProps {
 const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
     const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
     const formDialogRef = React.useRef<FormDialogBaseRef>(null);
+    const url = process.env.bucketEndpoint;
+    console.log(url, process.env);
 
     const openFileViewer = async (file: FileData) => {
         //@todo propagar URl e Type para o modelo de retorno do backend
-        file.url = process.env.bucketEndpoint + "/" + file.bucket + "/" + file.name;
+        file.url = url + "/" + file.bucket + "/" + file.name;
         file.type = "image";
         setSelectedFile(file);
         if (formDialogRef.current) {
