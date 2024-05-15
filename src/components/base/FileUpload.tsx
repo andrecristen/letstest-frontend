@@ -40,28 +40,36 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, req
                     }
                 },
             });
-            debugger;
-            setProgress(0);
-            setCurrentFileIndex(currentFileIndex + 1);
-            const newFiles = [...uploadedFiles, response?.data];
-            setUploadedFiles(newFiles);
-            if (currentFileIndex === filesToUpload.length - 1) {
-                setUploading(false);
-                setCurrentFileIndex(0);
-                setFilesToUpload([]);
-                onChange(newFiles);
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
+            if (response?.status !== 201) {
+                throw new Error(response?.data);
+            } else {
+                setProgress(0);
+                setCurrentFileIndex(currentFileIndex + 1);
+                const newFiles = [...uploadedFiles, response?.data];
+                setUploadedFiles(newFiles);
+                if (currentFileIndex === filesToUpload.length - 1) {
+                    setUploading(false);
+                    setCurrentFileIndex(0);
+                    setFilesToUpload([]);
+                    onChange(newFiles);
+                    clearCurrentSelectedFiles();
                 }
             }
         } catch (error: any) {
             notifyService.error('Erro ao enviar arquivo:' + error.toString());
+            clearCurrentSelectedFiles();
             setUploading(false);
             setCurrentFileIndex(0);
             setProgress(0);
             setFilesToUpload([]);
         }
     };
+
+    const clearCurrentSelectedFiles = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    }
 
     React.useEffect(() => {
         if (filesToUpload.length > 0 && currentFileIndex < filesToUpload.length) {
