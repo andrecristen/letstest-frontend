@@ -14,6 +14,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
     const url = process.env.REACT_APP_FILES_ENDPOINT_URL;
 
     const openFileViewer = async (file: FileData) => {
+        //@todo propagar URl e Type para o modelo de retorno do backend
         file.url = url + "/" + file.bucket + "/" + file.name;
         console.log(file.url);
         const docs: IDocument[] = [
@@ -36,23 +37,17 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
 
     return (
         <>
-            <div>
+            <ul>
                 {files.map((file) => (
-                    <button 
-                        key={file.id}
-                        className="inline-flex items-center w-full px-2 py-1 bg-purple-500 text-white font-bold rounded-md hover:bg-purple-700 transition-colors mb-2 overflow-hidden" 
-                        style={{ maxWidth: '100%', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} 
-                        onClick={() => openFileViewer(file)}
-                    >
-                        <FiFile className="m-2" />
-                        <span className="overflow-hidden whitespace-nowrap">Arquivo #{file.id}</span>
-                    </button>
+                    <li key={file.id}>
+                        <button className="inline-flex items-center w-full px-4 py-2 bg-purple-500 text-white font-bold rounded-md hover:bg-purple-700 transition-colors mb-2" onClick={() => openFileViewer(file)}><FiFile className="m-2" />{file.name}</button>
+                    </li>
                 ))}
-            </div>
-            <FormDialogBase fullScreen={true} ref={formDialogRef} title="Visualizar Arquivo" initialOpen={false} submit={(event: React.FormEvent) => closeFileViewer(event)}>
+            </ul>
+            <FormDialogBase ref={formDialogRef} title="Visualizar Arquivo" initialOpen={false} submit={(event: React.FormEvent) => closeFileViewer(event)}>
                 {selectedFile && (
                     <div>
-                        <DocViewer className="min-h-full" documents={selectedFile} />
+                        <DocViewer documents={selectedFile} />
                     </div>
                 )}
             </FormDialogBase>
