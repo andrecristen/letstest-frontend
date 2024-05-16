@@ -46,7 +46,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
             </ul>
             <FormDialogBase ref={formDialogRef} title="Visualizar Arquivo" initialOpen={false} submit={(event: React.FormEvent) => closeFileViewer(event)}>
                 {selectedFile && (
-                    <div className="h-screen">
+                    <div className="h-70vh">
                         <DocViewer documents={selectedFile} />
                     </div>
                 )}
