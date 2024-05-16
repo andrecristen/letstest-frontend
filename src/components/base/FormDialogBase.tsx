@@ -8,6 +8,7 @@ interface FormDialogBaseProps {
     cancel?: (event: React.FormEvent) => void;
     title: React.ReactNode;
     children?: React.ReactNode;
+    fullScreen?: boolean;
 }
 
 export interface FormDialogBaseRef {
@@ -68,7 +69,7 @@ const FormDialogBase = React.forwardRef<FormDialogBaseRef, FormDialogBaseProps>(
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-8 w-full max-w-lg">
+                            <Dialog.Panel className={"relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all my-8 w-full" + (props.fullScreen ? " max-w-full h-full min-h-full m-2" : " max-w-lg")}>
                                 <form className="mt-8 space-y-6" onSubmit={props.submit} autoComplete="off">
                                     <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                         <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -85,13 +86,14 @@ const FormDialogBase = React.forwardRef<FormDialogBaseRef, FormDialogBaseProps>(
                                         >
                                             Confirmar
                                         </button>
-                                        <button
+                                        {props.cancel ? (<button
                                             type="button"
                                             className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
                                             onClick={handleCancel}
                                         >
                                             Cancelar
-                                        </button>
+                                        </button>) : null}
+
                                     </div>
                                 </form>
                             </Dialog.Panel>
