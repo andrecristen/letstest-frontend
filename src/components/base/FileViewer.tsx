@@ -14,7 +14,6 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
     const url = process.env.REACT_APP_FILES_ENDPOINT_URL;
 
     const openFileViewer = async (file: FileData) => {
-        //@todo propagar URl e Type para o modelo de retorno do backend
         file.url = url + "/" + file.bucket + "/" + file.name;
         console.log(file.url);
         const docs: IDocument[] = [
