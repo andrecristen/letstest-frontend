@@ -3,24 +3,29 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import PainelContainer from '../base/PainelContainer';
 import { FiSmartphone, FiSmile } from 'react-icons/fi';
 import { UserData } from '../../types/UserData';
-import { getMe } from '../../services/userService';
+import { getMe, update } from '../../services/userService';
 import LoadingOverlay from '../base/LoadingOverlay';
+import tokenService from '../../services/tokenService';
+import notifyService from '../../services/notifyService';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileEdit = () => {
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<UserData>();
     const [loading, setLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         load();
     }, []);
 
-    const onSubmit: SubmitHandler<UserData> = data => {
-        console.log('Perfil atualizado:', data);
-    };
-
-    const navigateTo = (route: string) => {
-
+    const onSubmit: SubmitHandler<UserData> = async (data) => {
+        const response = await update(tokenService.getSessionUserId(), data);
+        if (response?.status === 200 || response?.status === 201) {
+            notifyService.success("Perfil alterado com sucesso.");
+        } else {
+            notifyService.error("Erro ao alterar perfil, tente novamente.");
+        }
     };
 
     const load = async () => {
@@ -34,7 +39,7 @@ const ProfileEdit = () => {
 
     return (
         <PainelContainer>
-            <LoadingOverlay show={loading}/>
+            <LoadingOverlay show={loading} />
             <div className="mx-auto bg-white p-8 rounded-lg shadow-md">
                 <div className="flex flex-col items-center mb-6">
                     <img
@@ -46,7 +51,7 @@ const ProfileEdit = () => {
                 <div className="container mx-auto my-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div
-                            onClick={() => navigateTo('managers')}
+                            onClick={() => navigate('/habilities')}
                             className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
                         >
                             <FiSmile className="w-12 h-12 mx-auto mb-2 text-purple-600" />
@@ -54,7 +59,7 @@ const ProfileEdit = () => {
                         </div>
 
                         <div
-                            onClick={() => navigateTo('testers')}
+                            onClick={() => navigate('/devices')}
                             className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
                         >
                             <FiSmartphone className="w-12 h-12 mx-auto mb-2 text-purple-600" />
