@@ -80,7 +80,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     { name: 'Encontrar Projetos', route: '/find-new-projects', icon: <FiSearch /> },
     { name: 'Gerenciar Projetos', route: '/my-owner-projects', icon: <FiGitPullRequest /> },
     { name: 'Testar Projetos', route: '/my-test-projects', icon: <FiPlay /> },
-    { name: 'Perfil', route: '/profile', icon: <FiUser /> },
+    { name: 'Meu Perfil', route: '/profile', icon: <FiUser /> },
   ];
 
   const handleClickMenu = (event: React.MouseEvent, route: string) => {

@@ -1,4 +1,4 @@
-import { UserSelectData } from "./UserData";
+import { UserData } from "./UserData";
 
 export type InvolvementData = {
     id: number;
@@ -6,7 +6,7 @@ export type InvolvementData = {
     type: number;
     userId: number;
     projectId: number;
-    user?: UserSelectData
+    user?: UserData
 }
 
 export enum InvolvementSituationEnum {
