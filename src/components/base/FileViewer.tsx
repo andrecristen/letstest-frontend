@@ -15,7 +15,6 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
 
     const openFileViewer = async (file: FileData) => {
         file.url = url + "/" + file.bucket + "/" + file.name;
-        console.log(file.url);
         const docs: IDocument[] = [
             { uri: file.url },
         ];
