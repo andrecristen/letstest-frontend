@@ -19,6 +19,7 @@ import ProjectsForm from './Form';
 import { FormDialogBaseExtendsRef } from '../base/FormDialogBase';
 import PainelContainer from '../base/PainelContainer';
 import { ProjectData } from '../../types/ProjectData';
+import LoadingOverlay from '../base/LoadingOverlay';
 
 const ProjectsDetailView: React.FC = () => {
     const { projectId } = useParams();
@@ -56,7 +57,7 @@ const ProjectsDetailView: React.FC = () => {
     return (
         <PainelContainer>
             <TitleContainer title="Detalhes do Projeto" />
-
+            <LoadingOverlay show={(!project?.id)}/>
             {project ? (
                 <div className="border rounded-lg overflow-hidden shadow-md bg-white">
                     <img src={logo} className="w-full h-40 object-cover" alt={project.name} />

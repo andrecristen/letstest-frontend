@@ -9,7 +9,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show }) => {
   return (
     <>
       {show && (
-        <div className="fixed inset-0 bg-purple-400 bg-opacity-45 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-purple-400 bg-opacity-35 flex items-center justify-center z-50">
           <FiLoader className="text-white text-8xl animate-spin" />
         </div>
       )}

@@ -19,6 +19,7 @@ import TestExecutionForm from "./testExecution/Form";
 import TestExecutionTestCaseOwnerList from "./testExecution/OwnerList";
 import ProfileEdit from "./user/ProfileEdit";
 import DeviceUser from "./devices/DeviceUser";
+import HabilityUser from "./habilities/HabilityUser";
 
 const AppRoutes = () => {
 
@@ -51,6 +52,7 @@ const AppRoutes = () => {
                 <Route path="/profile" element={<ProfileEdit />}></Route>
                 <Route path="/profile/:id" element={<ProfileEdit />}></Route>
                 <Route path="/devices" element={<DeviceUser />}></Route>
+                <Route path="/habilities" element={<HabilityUser />}></Route>
             </Routes>
         </Router>
     );
