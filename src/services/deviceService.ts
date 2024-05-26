@@ -3,10 +3,10 @@ import apiTokenService from "./apiTokenService";
 import tokenService from "./tokenService";
 
 export const getMy = async () => {
-    return await getByUserId(tokenService.getSessionUserId());
+    return await getDevicesByUserId(tokenService.getSessionUserId());
 };
 
-export const getByUserId = async (userId: number) => {
+export const getDevicesByUserId = async (userId: number) => {
     return await apiTokenService.get('/device/' + userId);
 };
 

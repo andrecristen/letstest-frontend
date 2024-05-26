@@ -3,10 +3,10 @@ import apiTokenService from "./apiTokenService";
 import tokenService from "./tokenService";
 
 export const getMy = async () => {
-    return await getByUserId(tokenService.getSessionUserId());
+    return await getHabilitiesByUserId(tokenService.getSessionUserId());
 };
 
-export const getByUserId = async (userId: number) => {
+export const getHabilitiesByUserId = async (userId: number) => {
     return await apiTokenService.get('/hability/' + userId);
 };
 

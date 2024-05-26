@@ -20,6 +20,7 @@ import TestExecutionTestCaseOwnerList from "./testExecution/OwnerList";
 import ProfileEdit from "./user/ProfileEdit";
 import DeviceUser from "./devices/DeviceUser";
 import HabilityUser from "./habilities/HabilityUser";
+import ProfileView from "./user/ProfileView";
 
 const AppRoutes = () => {
 
@@ -50,7 +51,7 @@ const AppRoutes = () => {
                 <Route path="/test-executions/test/:projectId/:testCaseId" element={<TestExecutionForm />}></Route>
                 <Route path="/test-executions/:testCaseId" element={<TestExecutionTestCaseOwnerList />}></Route>
                 <Route path="/profile" element={<ProfileEdit />}></Route>
-                <Route path="/profile/:id" element={<ProfileEdit />}></Route>
+                <Route path="/profile/:userId" element={<ProfileView />}></Route>
                 <Route path="/devices" element={<DeviceUser />}></Route>
                 <Route path="/habilities" element={<HabilityUser />}></Route>
             </Routes>

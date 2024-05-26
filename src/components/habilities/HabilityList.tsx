@@ -7,7 +7,7 @@ import TitleContainer from '../base/TitleContainer';
 
 interface HabilityListProps {
     habilities: HabilityData[];
-    onDelete: () => void;
+    onDelete?: () => void;
 }
 
 const HabilityList: React.FC<HabilityListProps> = ({ habilities, onDelete }) => {
@@ -16,7 +16,9 @@ const HabilityList: React.FC<HabilityListProps> = ({ habilities, onDelete }) => 
             const response = await remove(hability.id);
             if (response?.status === 200) {
                 notifyService.success("Habilidade excluída com sucesso.");
-                onDelete();
+                if (onDelete) {
+                    onDelete();
+                }
             } else {
                 notifyService.error("Erro ao excluir habilidade, tente novamente");
             }
@@ -57,13 +59,15 @@ const HabilityList: React.FC<HabilityListProps> = ({ habilities, onDelete }) => 
                                     <p className="text-sm text-purple-500">Tipo: {getHabilityTypeDescription(hability.type)}</p>
                                 </div>
                             </div>
-                            <button
-                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                                onClick={() => handleDelete(hability)}
-                                title="Excluir"
-                            >
-                                <FiTrash />
-                            </button>
+                            {onDelete ? (
+                                <button
+                                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                                    onClick={() => handleDelete(hability)}
+                                    title="Excluir"
+                                >
+                                    <FiTrash />
+                                </button>
+                            ) : null}
                         </div>
                     ))
                 ) : (

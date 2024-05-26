@@ -9,7 +9,7 @@ import {
 } from '../../types/InvolvementData';
 import PainelContainer from '../base/PainelContainer';
 import TitleContainer from '../base/TitleContainer';
-import { FiCheckCircle, FiMail, FiUserX, FiTrash, FiUser } from 'react-icons/fi';
+import { FiCheckCircle, FiMail, FiUserX, FiTrash, FiUser, FiEye } from 'react-icons/fi';
 import notifyService from '../../services/notifyService';
 
 interface InvolvementManagementListProps {
@@ -93,6 +93,10 @@ const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ t
         setSelectedSituation(InvolvementSituationEnum.Rejeitado);
     }
 
+    const handleView = async (involvement: InvolvementData) => {
+        navigate("/profile/" + involvement.user?.id);
+    }
+
     const renderInvolvementCard = (involvement: InvolvementData) => (
         <div
             key={involvement.id}
@@ -101,12 +105,18 @@ const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ t
             <div className="flex items-center">
                 <FiUser className="text-purple-700 w-6 h-6" />
                 <div className="ml-3">
-                    <p className="text-sm font-bold text-purple-800">#{involvement.id}</p>
-                    <p className="text-sm text-purple-500">Nome: {involvement.user?.name}</p>
-                    <p className="text-sm text-purple-500">Email: {involvement.user?.email}</p>
+                    <p className="text-2xl text-purple-800">{involvement.user?.name}</p>
+                    <p className="text-sm text-purple-500">{involvement.user?.email}</p>
                 </div>
             </div>
             <div className="flex">
+                <button
+                    className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded mr-2"
+                    onClick={() => handleView(involvement)}
+                    title="Visualizar"
+                >
+                    <FiEye />
+                </button>
                 {selectedSituation === InvolvementSituationEnum.Recebido && (
                     <>
                         <button

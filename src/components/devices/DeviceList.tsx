@@ -7,7 +7,7 @@ import TitleContainer from '../base/TitleContainer';
 
 interface DeviceListProps {
     devices: DeviceData[];
-    onDelete: () => void;
+    onDelete?: () => void;
 }
 
 const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
@@ -16,7 +16,9 @@ const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
             const response = await remove(device.id);
             if (response?.status === 200) {
                 notifyService.success("Dispositivo excluído com sucesso.");
-                onDelete();
+                if (onDelete) {
+                    onDelete();
+                }
             } else {
                 notifyService.error("Erro ao excluir dispositivo, tente novamente");
             }
@@ -59,13 +61,15 @@ const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
                                     <p className="text-sm text-purple-500">Sistema: {device.system}</p>
                                 </div>
                             </div>
-                            <button
-                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                                onClick={() => handleDelete(device)}
-                                title="Excluir"
-                            >
-                                <FiTrash />
-                            </button>
+                            {onDelete ? (
+                                <button
+                                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                                    onClick={() => handleDelete(device)}
+                                    title="Excluir"
+                                >
+                                    <FiTrash />
+                                </button>
+                            ) : null}
                         </div>
                     ))
                 ) : (
