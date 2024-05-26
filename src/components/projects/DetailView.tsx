@@ -3,6 +3,7 @@ import {
     FiEdit,
     FiFilePlus,
     FiFileText,
+    FiMonitor,
     FiUser,
     FiUserPlus,
 } from 'react-icons/fi';
@@ -57,7 +58,7 @@ const ProjectsDetailView: React.FC = () => {
     return (
         <PainelContainer>
             <TitleContainer title="Detalhes do Projeto" />
-            <LoadingOverlay show={(!project?.id)}/>
+            <LoadingOverlay show={(!project?.id)} />
             {project ? (
                 <div className="border rounded-lg overflow-hidden shadow-md bg-white">
                     <img src={logo} className="w-full h-40 object-cover" alt={project.name} />
@@ -123,6 +124,13 @@ const ProjectsDetailView: React.FC = () => {
                     >
                         <FiFilePlus className="w-12 h-12 mx-auto mb-2 text-purple-600" />
                         <h3 className="text-center text-lg font-semibold text-purple-600">Templates</h3>
+                    </div>
+                    <div
+                        onClick={() => navigateTo('environments')}
+                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
+                    >
+                        <FiMonitor className="w-12 h-12 mx-auto mb-2 text-purple-600" />
+                        <h3 className="text-center text-lg font-semibold text-purple-600">Ambientes</h3>
                     </div>
                 </div>
             </div>

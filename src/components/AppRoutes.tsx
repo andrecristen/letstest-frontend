@@ -21,6 +21,7 @@ import ProfileEdit from "./user/ProfileEdit";
 import DeviceUser from "./devices/DeviceUser";
 import HabilityUser from "./habilities/HabilityUser";
 import ProfileView from "./user/ProfileView";
+import EnvironmentList from "./environment/EnvironmentList";
 
 const AppRoutes = () => {
 
@@ -33,8 +34,8 @@ const AppRoutes = () => {
                 <Route path="/register" element={<Register />}></Route>
                 {/* Private Access */}
                 <Route path="/dashboard" element={<Dashboard />}></Route>
+                {/* Manager */}
                 <Route path="/my-owner-projects" element={<ProjectsOwnerList />}></Route>
-                <Route path="/my-test-projects" element={<ProjectsTestList />}></Route>
                 <Route path="/project/detail/:projectId" element={<ProjectsDetailView />}></Route>
                 <Route path="/project/testers/:projectId" element={<InvolvementManagementList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
                 <Route path="/project/managers/:projectId" element={<InvolvementManagementList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
@@ -43,13 +44,17 @@ const AppRoutes = () => {
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateEditor />}></Route>
                 <Route path="/project/templates/:projectId/view/:templateIdCopy" element={<TemplateEditor />}></Route>
                 <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
-                <Route path="/project/test/:projectId" element={<TestCaseProjectTestList />}></Route>
+                <Route path="/project/environments/:projectId" element={<EnvironmentList />}></Route>
                 <Route path="/test-case/:projectId/add" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/view" element={<TestCaseForm />}></Route>
-                <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
-                <Route path="/test-executions/test/:projectId/:testCaseId" element={<TestExecutionForm />}></Route>
                 <Route path="/test-executions/:testCaseId" element={<TestExecutionTestCaseOwnerList />}></Route>
+                {/* Tester */}
+                <Route path="/my-test-projects" element={<ProjectsTestList />}></Route>
+                <Route path="/project/test/:projectId" element={<TestCaseProjectTestList />}></Route>
+                <Route path="/test-executions/test/:projectId/:testCaseId" element={<TestExecutionForm />}></Route>
+                {/* Shared */}
+                <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
                 <Route path="/profile" element={<ProfileEdit />}></Route>
                 <Route path="/profile/:userId" element={<ProfileView />}></Route>
                 <Route path="/devices" element={<DeviceUser />}></Route>
