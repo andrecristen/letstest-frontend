@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { FiLoader } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo-transparente.png';
 import { registerAccount } from '../../services/authService';
 import notifyService from '../../services/notifyService';
-import logo from '../../assets/logo-transparente.png'
-import { SubmitHandler, useForm } from 'react-hook-form';
 import { RegisterData } from '../../types/RegisterData';
+import '../../styles/form.css';
 
 const Register = () => {
 
     const navigate = useNavigate();
 
     const { register, handleSubmit, setValue } = useForm<RegisterData>()
+    const [validatingRegister, setValidatingRegister] = useState(false);
 
 
     const redirectToHome = () => {
@@ -22,10 +25,12 @@ const Register = () => {
     }
 
     const onSubmit: SubmitHandler<RegisterData> = async (data) => {
+        setValidatingRegister(true);
         if (data.password != data.confirmPassword) {
             notifyService.info("Senhas não coincidem");
             setValue("password", undefined);
             setValue("confirmPassword", undefined);
+            setValidatingRegister(false);
             return;
         }
         const response = await registerAccount(data);
@@ -33,9 +38,9 @@ const Register = () => {
             notifyService.success("Conta criada com sucesso");
             redirectToLogin();
         } else {
-            notifyService.error("Erro ao alterar projeto, tente novamente");
-            window.location.reload();
+            notifyService.error("Erro ao se registrar, tente novamente");
         }
+        setValidatingRegister(false);
     }
 
     return (
@@ -106,11 +111,11 @@ const Register = () => {
                             </div> */}
                             <button
                                 type="submit"
-                                className="w-full text-white bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-purple-600 dark:hover-bg-purple-700 dark:focus-ring-purple-800"
+                                disabled={validatingRegister}
+                                className="action-button-purple justify-center"
                             >
-                                Criar uma conta
+                                {validatingRegister ? <FiLoader className="text-white animate-spin" size={30} /> : "Criar Conta"}
                             </button>
-
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                 Já tem uma conta? <a href="/login" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Faça login aqui</a>
                             </p>

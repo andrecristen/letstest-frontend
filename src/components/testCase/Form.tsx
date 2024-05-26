@@ -11,6 +11,7 @@ import { Operation } from '../templates/CustomizableRow';
 import { TemplateData, TemplateTypeEnum } from '../../types/TemplateData';
 import { getAllByProjectAndType } from '../../services/templatesService';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import LoadingOverlay from '../base/LoadingOverlay';
 
 const TestCaseForm = () => {
     const { projectId, testCaseId } = useParams();
@@ -19,6 +20,7 @@ const TestCaseForm = () => {
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
     const [templates, setTemplates] = useState<TemplateData[]>([]);
     const [loadingTemplates, setLoadingTemplates] = useState(false);
+    const [loadingTestCase, setLoadingTestCase] = useState(false);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
@@ -47,11 +49,13 @@ const TestCaseForm = () => {
             }
             setLoadingTemplates(false);
         } else if (getTestCaseId()) {
+            setLoadingTestCase(true);
             const response = await getById(getTestCaseId());
             setValue('id', response?.data.id);
             setValue('name', response?.data.name);
             const newRows: CustomizableTableRows[] = Object.values(response?.data.data);
             customizableTableRef.current?.setRows(newRows);
+            setLoadingTestCase(false);
         }
     };
 
@@ -101,6 +105,7 @@ const TestCaseForm = () => {
     return (
         <PainelContainer>
             <TitleContainer title="Caso de Teste" />
+            <LoadingOverlay show={loadingTemplates || loadingTestCase}/>
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
                     <div className="py-2">
