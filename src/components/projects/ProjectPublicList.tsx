@@ -62,6 +62,10 @@ const ProjectPublicList: React.FC = () => {
         navigate("/involvements");
     }
 
+    const handleClickProfileUser = (project: ProjectData) => {
+        navigate("/profile/" + project.creator?.id);
+    }
+
     return (
         <PainelContainer>
             <TitleContainer title="Encontrar Projetos" />
@@ -119,7 +123,9 @@ const ProjectPublicList: React.FC = () => {
                                         <img src={logo} alt="Logo" className="h-10 w-10 rounded-full bg-gray-50" />
                                         <div className="text-sm leading-6">
                                             <p className="font-semibold text-gray-900">
-                                                Criador: {project.creator?.name}
+                                                <p className="font-semibold text-gray-900">
+                                                    <a href="" className="border-b border-purple-400" onClick={() => {handleClickProfileUser(project)}}>Criador: {project.creator?.name}</a>
+                                                </p>
                                             </p>
                                         </div>
                                     </div>

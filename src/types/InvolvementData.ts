@@ -1,3 +1,4 @@
+import { ProjectData } from "./ProjectData";
 import { UserData } from "./UserData";
 
 export type InvolvementData = {
@@ -6,7 +7,8 @@ export type InvolvementData = {
     type: number;
     userId: number;
     projectId: number;
-    user?: UserData
+    user?: UserData;
+    project?: ProjectData;
 }
 
 export enum InvolvementSituationEnum {
@@ -25,4 +27,10 @@ export const getInvolvementSituationList = () => {
 export enum InvolvementTypeEnum {
     Testador = 1,
     Gerente = 2,
+}
+
+export const getInvolvementTypeDescription = (value: number): string | undefined => {
+    const description = Object.keys(InvolvementTypeEnum)
+        .find(key => InvolvementTypeEnum[key as keyof typeof InvolvementTypeEnum] === value);
+    return description ? description : undefined;
 }
