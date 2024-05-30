@@ -12,7 +12,7 @@ interface InvolvementManagementListProps {
     title: string;
 }
 
-const InvolvementList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
+const InvolvementOwnerList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
     
     const navigate = useNavigate();
     const { projectId } = useParams();
@@ -186,7 +186,7 @@ const InvolvementList: React.FC<InvolvementManagementListProps> = ({ type, title
             {loadingInvolvements ? (
                 <div className="text-center text-purple-600">Carregando envolvimentos...</div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                <div className="grid grid-cols-1 gap-6 mt-4">
                     {involvements.length > 0 ? (
                         involvements.map((involvement) => renderInvolvementCard(involvement))
                     ) : (
@@ -202,4 +202,4 @@ const InvolvementList: React.FC<InvolvementManagementListProps> = ({ type, title
     );
 };
 
-export default InvolvementList;
+export default InvolvementOwnerList;

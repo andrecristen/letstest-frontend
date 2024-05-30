@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FiMenu, FiBell, FiUser, FiGitPullRequest, FiPlay, FiSearch, FiPieChart, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiBell, FiUser, FiGitPullRequest, FiPlay, FiSearch, FiPieChart, FiLogOut, FiMail } from 'react-icons/fi';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../../assets/logo-transparente.png';
 import tokenService from '../../services/tokenService';
@@ -81,6 +81,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     { name: 'Encontrar Projetos', route: '/find-new-projects', icon: <FiSearch /> },
     { name: 'Gerenciar Projetos', route: '/my-owner-projects', icon: <FiGitPullRequest /> },
     { name: 'Testar Projetos', route: '/my-test-projects', icon: <FiPlay /> },
+    { name: 'Solicitações e Convites', route: '/involvements', icon: <FiMail /> },
     { name: 'Meu Perfil', route: '/profile', icon: <FiUser /> },
   ];
 
@@ -93,7 +94,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <nav className={`bg-purple-800 text-gray-200 transition-width duration-300 ${isMenuOpen ? 'w-56' : 'w-16'}`}>
+      <nav className={`bg-purple-800 text-gray-200 transition-width duration-300 ${isMenuOpen ? 'w-64' : 'w-16'}`}>
         <div className="flex flex-col h-full space-y-6 p-4">
           {menus.map((menu) => (
             <a

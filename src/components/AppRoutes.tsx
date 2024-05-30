@@ -7,7 +7,7 @@ import Dashboard from "./Dashboard";
 import ProjectOwnerList from "./projects/ProjectOwnerList";
 import UserFormRegister from "./user/UserFormRegister";
 import ProjectPageView from "./projects/ProjectPageView";
-import InvolvementList from "./involvement/InvolvementList";
+import InvolvementOwnerList from "./involvement/InvolvementOwnerList";
 import ProjectPublicList from "./projects/ProjectPublicList";
 import TemplateEditor from "./templates/TemplateEditor";
 import TemplateManagementList from "./templates/ManagementList";
@@ -23,6 +23,7 @@ import HabilityUserView from "./habilities/HabilityUserView";
 import UserFormProfileView from "./user/UserFormProfileView";
 import EnvironmentList from "./environment/EnvironmentList";
 import ReportList from "./reports/ReportList";
+import InvolvementPendingView from "./involvement/InvolvementPendingView";
 
 const AppRoutes = () => {
 
@@ -38,8 +39,8 @@ const AppRoutes = () => {
                 {/* Manager */}
                 <Route path="/my-owner-projects" element={<ProjectOwnerList />}></Route>
                 <Route path="/project/detail/:projectId" element={<ProjectPageView />}></Route>
-                <Route path="/project/testers/:projectId" element={<InvolvementList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
-                <Route path="/project/managers/:projectId" element={<InvolvementList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
+                <Route path="/project/testers/:projectId" element={<InvolvementOwnerList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
+                <Route path="/project/managers/:projectId" element={<InvolvementOwnerList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
                 <Route path="/project/templates/:projectId" element={<TemplateManagementList />}></Route>
                 <Route path="/project/templates/:projectId/add" element={<TemplateEditor />}></Route>
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateEditor />}></Route>
@@ -62,6 +63,7 @@ const AppRoutes = () => {
                 <Route path="/devices" element={<DeviceUserView />}></Route>
                 <Route path="/habilities" element={<HabilityUserView />}></Route>
                 <Route path="/reports/test-execution/:testExecutionId" element={<ReportList />}></Route>
+                <Route path="/involvements" element={<InvolvementPendingView />}></Route>
             </Routes>
         </Router>
     );

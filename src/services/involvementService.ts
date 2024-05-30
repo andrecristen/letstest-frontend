@@ -31,3 +31,11 @@ export const apply = async (projectId: number) => {
         "project": projectId,
     });
 }
+
+export const getInvolvementInvitations = async () => {
+    return await apiTokenService.get('/involvement/invitations');
+};
+
+export const getInvolvementApplied = async () => {
+    return await apiTokenService.get('/involvement/applied');
+};

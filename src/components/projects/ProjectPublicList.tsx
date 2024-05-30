@@ -58,6 +58,10 @@ const ProjectPublicList: React.FC = () => {
         navigate("/my-owner-projects");
     }
 
+    const handleClickInvolvements = () => {
+        navigate("/involvements");
+    }
+
     return (
         <PainelContainer>
             <TitleContainer title="Encontrar Projetos" />
@@ -70,12 +74,21 @@ const ProjectPublicList: React.FC = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="form-input mr-2 py-2 px-8 "
                 />
+            </div>
+            <div className="flex justify-end mb-4">
                 <button
                     type="button"
-                    className="py-2 px-8 text-lg font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 transition-colors"
+                    className="w-full py-2 px-8 text-lg font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 transition-colors"
                     onClick={handleClickNewProject}
                 >
                     Criar Meu Projeto
+                </button>
+                <button
+                    type="button"
+                    className="w-full ml-2 py-2 px-8 text-lg font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 transition-colors"
+                    onClick={handleClickInvolvements}
+                >
+                    Solicitações e Convites
                 </button>
             </div>
 
