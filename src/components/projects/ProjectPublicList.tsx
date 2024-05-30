@@ -69,16 +69,6 @@ const ProjectPublicList: React.FC = () => {
     return (
         <PainelContainer>
             <TitleContainer title="Encontrar Projetos" />
-
-            <div className="flex justify-between mb-4">
-                <input
-                    type="text"
-                    placeholder="Buscar por nome..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="form-input mr-2 py-2 px-8 "
-                />
-            </div>
             <div className="flex justify-end mb-4">
                 <button
                     type="button"
@@ -95,7 +85,15 @@ const ProjectPublicList: React.FC = () => {
                     Solicitações e Convites
                 </button>
             </div>
-
+            <div className="flex justify-between mb-4">
+                <input
+                    type="text"
+                    placeholder="Buscar por nome..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="form-input mr-2 py-2 px-8 text-lg h-16"
+                />
+            </div>
             <div className="px-6 lg:px-8">
                 <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 pt-10 border-t border-gray-200 lg:max-w-none lg:grid-cols-3">
                     {loadingProjects ? (
@@ -124,7 +122,7 @@ const ProjectPublicList: React.FC = () => {
                                         <div className="text-sm leading-6">
                                             <p className="font-semibold text-gray-900">
                                                 <p className="font-semibold text-gray-900">
-                                                    <a href="" className="border-b border-purple-400" onClick={() => {handleClickProfileUser(project)}}>Criador: {project.creator?.name}</a>
+                                                    <a href="" className="border-b border-purple-400" onClick={() => { handleClickProfileUser(project) }}>Criador: {project.creator?.name}</a>
                                                 </p>
                                             </p>
                                         </div>

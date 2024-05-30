@@ -14,6 +14,7 @@ import { FormDialogBaseExtendsRef } from '../base/FormDialogBase';
 import PainelContainer from '../base/PainelContainer';
 import { ProjectData } from '../../types/ProjectData';
 import LoadingOverlay from '../base/LoadingOverlay';
+import tokenService from '../../services/tokenService';
 
 const ProjectPageView: React.FC = () => {
     const { projectId } = useParams();
@@ -67,15 +68,17 @@ const ProjectPageView: React.FC = () => {
                             </span>
                         </h2>
                         <p className="text-gray-600 my-4">{project.description}</p>
-                        <div className="flex justify-end">
-                            <button
-                                onClick={handleEditClick}
-                                className="px-4 py-2 text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors"
-                            >
-                                <FiEdit className="inline-block w-5 h-5 mr-2" />
-                                Editar
-                            </button>
-                        </div>
+                        {project.creatorId == tokenService.getSessionUserId() ? (
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={handleEditClick}
+                                    className="px-4 py-2 text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors"
+                                >
+                                    <FiEdit className="inline-block w-5 h-5 mr-2" />
+                                    Editar
+                                </button>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             ) : (
