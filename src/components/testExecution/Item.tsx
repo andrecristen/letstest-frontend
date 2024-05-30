@@ -26,10 +26,15 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
         navigate("/profile/" + testExecution.user?.id);
     }
 
-    const handleEditReport = (event: React.MouseEvent) => {
+    const handleClickAddReport = (event: React.MouseEvent) => {
         event.preventDefault();
         formDialogRef.current?.getDialogBase().current.openDialog();
     };
+
+    const handleClickListReports = (event: React.MouseEvent, testExecution: TestExecutionData) => {
+        event.preventDefault();
+        navigate("/reports/test-execution/" + testExecution.id);
+    }
 
     const formatTime = (seconds: number): string => {
         const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
@@ -59,13 +64,13 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
                 />
             </div>
             <div className="w-full mt-2">
-                <button onClick={(event) => { handleEditReport(event) }} className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800">
+                <button onClick={(event) => { handleClickAddReport(event) }} className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800">
                     <FiStar className="mr-2" />
                     Avaliar
                 </button>
             </div>
             <div className="w-full mt-2">
-                <button className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800">
+                <button onClick={(event) => { handleClickListReports(event, testExecution) }} className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800">
                     <FiList className="mr-2" />
                     Avaliações
                 </button>

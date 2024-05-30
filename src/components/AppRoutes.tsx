@@ -22,6 +22,7 @@ import DeviceUser from "./devices/DeviceUser";
 import HabilityUser from "./habilities/HabilityUser";
 import ProfileView from "./user/ProfileView";
 import EnvironmentList from "./environment/EnvironmentList";
+import ReportList from "./reports/ReportList";
 
 const AppRoutes = () => {
 
@@ -59,6 +60,7 @@ const AppRoutes = () => {
                 <Route path="/profile/:userId" element={<ProfileView />}></Route>
                 <Route path="/devices" element={<DeviceUser />}></Route>
                 <Route path="/habilities" element={<HabilityUser />}></Route>
+                <Route path="/reports/test-execution/:testExecutionId" element={<ReportList />}></Route>
             </Routes>
         </Router>
     );
