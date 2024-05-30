@@ -1,4 +1,4 @@
-export interface DeviceData {
+export type DeviceData = {
     id?: number;
     type: number;
     brand: string;

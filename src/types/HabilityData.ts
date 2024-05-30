@@ -1,4 +1,4 @@
-export interface HabilityData {
+export type HabilityData = {
     id?: number;
     type: HabilityType;
     value: string;
