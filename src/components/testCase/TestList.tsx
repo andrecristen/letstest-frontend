@@ -60,6 +60,7 @@ const TestCaseProjectTestList: React.FC = () => {
                             name={testCase.name}
                             onView={() => navigate(`/test-case/${testCase.id}/view`)}
                             onExecuteTest={() => navigate(`/test-executions/test/${projectId}/${testCase.id}`)}
+                            onTestExecutions={() => navigate(`/test-executions/${testCase.id}/my`)}
                         />
                     ))}
                 </div>

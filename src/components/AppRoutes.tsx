@@ -15,8 +15,8 @@ import { InvolvementTypeEnum } from '../types/InvolvementData';
 import TestCaseForm from "./testCase/Form";
 import ProjectsTestList from "./projects/TestList";
 import TestCaseProjectTestList from "./testCase/TestList";
-import TestExecutionForm from "./testExecution/Form";
-import TestExecutionTestCaseOwnerList from "./testExecution/OwnerList";
+import TestExecutionForm from "./testExecution/TestExecutionForm";
+import TestExecutionList from "./testExecution/TestExecutionList";
 import ProfileEdit from "./user/ProfileEdit";
 import DeviceUser from "./devices/DeviceUser";
 import HabilityUser from "./habilities/HabilityUser";
@@ -49,11 +49,12 @@ const AppRoutes = () => {
                 <Route path="/test-case/:projectId/add" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/view" element={<TestCaseForm />}></Route>
-                <Route path="/test-executions/:testCaseId" element={<TestExecutionTestCaseOwnerList />}></Route>
+                <Route path="/test-executions/:testCaseId" element={<TestExecutionList />}></Route>
                 {/* Tester */}
                 <Route path="/my-test-projects" element={<ProjectsTestList />}></Route>
                 <Route path="/project/test/:projectId" element={<TestCaseProjectTestList />}></Route>
                 <Route path="/test-executions/test/:projectId/:testCaseId" element={<TestExecutionForm />}></Route>
+                <Route path="/test-executions/:testCaseId/my" element={<TestExecutionList />}></Route>
                 {/* Shared */}
                 <Route path="/find-new-projects" element={<ProjectsPublicList />}></Route>
                 <Route path="/profile" element={<ProfileEdit />}></Route>

@@ -5,6 +5,10 @@ export const getByTestCase = async (testCaseId: number) => {
     return await apiTokenService.get('/test-execution/test-case/' + testCaseId);
 };
 
+export const getMyByTestCase = async (testCaseId: number) => {
+    return await apiTokenService.get('/test-execution/test-case/' + testCaseId + '/my');
+};
+
 export const getById = async (TestExecutionId: number) => {
     return await apiTokenService.get('/test-execution/' + TestExecutionId);
 };

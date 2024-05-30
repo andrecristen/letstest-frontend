@@ -1,32 +1,40 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import TestExecutionItem from "./Item";
+import { useLocation, useParams } from "react-router-dom";
+import TestExecutionItem from "./TestExecutionItem";
 import PainelContainer from "../base/PainelContainer";
 import TitleContainer from "../base/TitleContainer";
 import { TestExecutionData } from "../../types/TestExecutionData";
-import { getByTestCase } from "../../services/testExecutionService";
+import { getByTestCase, getMyByTestCase } from "../../services/testExecutionService";
 import notifyService from "../../services/notifyService";
 
-const TestExecutionTestCaseOwnerList: React.FC = () => {
-    const navigate = useNavigate();
+const TestExecutionList: React.FC = () => {
+
     const { testCaseId } = useParams();
     const [testExecutions, setTestExecutions] = useState<TestExecutionData[]>([]);
-    const [loadingTestCases, setLoadingTestCases] = useState<boolean>(true);
+    const [loadingTestExecutions, setLoadingTestExecutions] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>("");
 
+    const location = useLocation();
+    const isUserView = location.pathname.includes("my");
+
     useEffect(() => {
-        loadTestCases();
+        loadTestExecutions();
     }, []);
 
-    const loadTestCases = async () => {
-        setLoadingTestCases(true);
+    const loadTestExecutions = async () => {
+        setLoadingTestExecutions(true);
         try {
-            const response = await getByTestCase(parseInt(testCaseId || "0", 10));
+            let response;
+            if (isUserView) {
+                response = await getMyByTestCase(parseInt(testCaseId || "0", 10));
+            } else {
+                response = await getByTestCase(parseInt(testCaseId || "0", 10));
+            }
             setTestExecutions(response?.data || []);
         } catch (error: any) {
             notifyService.error("Erro ao carregar execuções do caso de teste:" + error.toString());
         } finally {
-            setLoadingTestCases(false);
+            setLoadingTestExecutions(false);
         }
     };
 
@@ -48,7 +56,7 @@ const TestExecutionTestCaseOwnerList: React.FC = () => {
                 />
             </div>
 
-            {loadingTestCases ? (
+            {loadingTestExecutions ? (
                 <div className="text-center text-purple-600 text-lg m-20">Carregando execuções do caso de testes...</div>
             ) : filteredTestExecutions.length === 0 ? (
                 <div className="text-center text-purple-600 text-lg m-20">Nenhuma execução para o caso de teste encontrada</div>
@@ -65,4 +73,4 @@ const TestExecutionTestCaseOwnerList: React.FC = () => {
     );
 };
 
-export default TestExecutionTestCaseOwnerList;
+export default TestExecutionList;
