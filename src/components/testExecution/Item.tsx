@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from "react";
-import { FiFileText } from "react-icons/fi";
+import { FiEye, FiFileText, FiList, FiStar } from "react-icons/fi";
 import { Operation } from "../templates/CustomizableRow";
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from "../templates/CustomizableTable";
 import { TestExecutionData } from "../../types/TestExecutionData";
+import { useNavigate } from "react-router-dom";
 
 interface TestExecutionItemProps {
     testExecution: TestExecutionData;
@@ -10,6 +11,7 @@ interface TestExecutionItemProps {
 
 const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) => {
 
+    const navigate = useNavigate();
     const customizableTableTestExecutionRef = useRef<CustomizableTableRef>(null);
 
     useEffect(() => {
@@ -17,6 +19,16 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
         customizableTableTestExecutionRef.current?.setRows(newRows);
     }, []);
 
+    const handleClickProfileUser = (testExecution: TestExecutionData) => {
+        navigate("/profile/" + testExecution.user?.id);
+    }
+
+    const formatTime = (seconds: number): string => {
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    };
 
     return (
         <div className="card-flex">
@@ -24,6 +36,8 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
                 <FiFileText className="text-lg text-purple-700" />
                 <div className="ml-3">
                     <p className="text-sm font-medium text-purple-900"># {testExecution.id}</p>
+                    <p className="text-sm text-gray-500">Testado por: <a href="" className="border-b border-purple-400" onClick={() => { handleClickProfileUser(testExecution) }}>{testExecution.user?.name}</a></p>
+                    <p className="text-sm text-gray-500">Tempo de execução: {formatTime(testExecution.testTime)}</p>
                 </div>
             </div>
             <div className="card-flex-actions-container">
@@ -35,6 +49,18 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
                     operation={Operation.View}
                     onChange={() => { }}
                 />
+            </div>
+            <div className="w-full mt-2">
+                <button className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800">
+                    <FiStar className="mr-2" />
+                    Avaliar
+                </button>
+            </div>
+            <div className="w-full mt-2">
+                <button className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800">
+                    <FiList className="mr-2" />
+                    Avaliações
+                </button>
             </div>
         </div>
     );

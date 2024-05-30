@@ -41,7 +41,7 @@ const TestExecutionTestCaseOwnerList: React.FC = () => {
             <div className="flex justify-between mb-4">
                 <input
                     type="text"
-                    placeholder="Buscar por nome..."
+                    placeholder="Buscar por #..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="form-input mr-2"
