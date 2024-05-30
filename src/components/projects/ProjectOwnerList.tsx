@@ -1,25 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { FiEdit } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
-import { getMyProjects } from '../../services/projectService';
-import { getProjectSituationDescription, getProjectVisibilityDescription, getProjectVisibilityList, getProjectSituationList, getProjectSituationColor } from '../../types/ProjectData';
-import PainelContainer from '../base/PainelContainer';
-import TitleContainer from '../base/TitleContainer';
-import ProjectsForm from './Form';
-import { ProjectData } from '../../types/ProjectData';
-import { FormDialogBaseExtendsRef } from '../base/FormDialogBase';
+import React, { useEffect, useRef, useState } from "react";
+import { FiEdit } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { getMyProjects } from "../../services/projectService";
+import { getProjectSituationDescription, getProjectVisibilityDescription, getProjectSituationList, getProjectSituationColor } from "../../types/ProjectData";
+import PainelContainer from "../base/PainelContainer";
+import TitleContainer from "../base/TitleContainer";
+import ProjectForm from "./ProjectForm";
+import { ProjectData } from "../../types/ProjectData";
+import { FormDialogBaseExtendsRef } from "../base/FormDialogBase";
 
-function ProjectsOwnerList() {
+const ProjectOwnerList: React.FC = () => {
+
   const navigate = useNavigate();
   const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
 
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
   const [selectedSituation, setSelectedSituation] = useState<number | null>(1);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const situations = getProjectSituationList();
-  situations.push({ name: 'Todos', id: null });
+  situations.push({ name: "Todos", id: null });
 
   useEffect(() => {
     loadProjects();
@@ -31,7 +32,7 @@ function ProjectsOwnerList() {
       const response = await getMyProjects();
       setProjects(response?.data || []);
     } catch (error) {
-      console.error('Erro ao carregar projetos:', error);
+      console.error("Erro ao carregar projetos:", error);
     } finally {
       setLoadingProjects(false);
     }
@@ -39,7 +40,7 @@ function ProjectsOwnerList() {
 
   const handleClickNewProject = () => {
     formDialogRef.current?.setData({});
-    formDialogRef.current?.getDialogBase().current.openDialog();
+    formDialogRef.current?.openDialog();
   };
 
   const handleClickManageProject = (event: React.MouseEvent, project: ProjectData) => {
@@ -52,7 +53,7 @@ function ProjectsOwnerList() {
     event.preventDefault();
     event.stopPropagation();
     formDialogRef.current?.setData(project);
-    formDialogRef.current?.getDialogBase().current.openDialog();
+    formDialogRef.current?.openDialog();
   };
 
   const handleClickSelectSituation = (situation: number | null) => {
@@ -134,9 +135,9 @@ function ProjectsOwnerList() {
         </div>
       )}
 
-      <ProjectsForm ref={formDialogRef} callbackSubmit={loadProjects} />
+      <ProjectForm ref={formDialogRef} callbackSubmit={loadProjects} />
     </PainelContainer>
   );
 }
 
-export default ProjectsOwnerList;
+export default ProjectOwnerList;

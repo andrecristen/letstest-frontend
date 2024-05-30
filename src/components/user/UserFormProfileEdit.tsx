@@ -10,7 +10,7 @@ import notifyService from '../../services/notifyService';
 import { useNavigate } from 'react-router-dom';
 import TitleContainer from '../base/TitleContainer';
 
-const ProfileEdit = () => {
+const UserFormProfileEdit = () => {
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<UserData>();
     const [loading, setLoading] = useState<boolean>(true);
@@ -112,4 +112,4 @@ const ProfileEdit = () => {
     );
 };
 
-export default ProfileEdit;
+export default UserFormProfileEdit;

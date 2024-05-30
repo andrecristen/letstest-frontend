@@ -16,6 +16,7 @@ interface PainelNavbarProps {
 }
 
 const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
+
   const navigate = useNavigate();
   const location = useLocation();
 

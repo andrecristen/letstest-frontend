@@ -87,7 +87,7 @@ const TestExecutionForm = () => {
     return (
         <PainelContainer>
             <TitleContainer title="Testar Caso de Teste" />
-            <LoadingOverlay show={loadingTemplates || loadingTestCase}/>
+            <LoadingOverlay show={loadingTemplates || loadingTestCase} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
 
                 <div className="py-2">

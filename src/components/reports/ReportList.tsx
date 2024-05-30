@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import PainelContainer from "../base/PainelContainer";
 import TitleContainer from "../base/TitleContainer";
 import { getReportsByTestExecution } from "../../services/reportService";
@@ -8,7 +8,7 @@ import { ReportData } from "../../types/ReportData";
 import { FiStar } from "react-icons/fi";
 
 const ReportList: React.FC = () => {
-    const navigate = useNavigate();
+
     const { testExecutionId } = useParams<{ testExecutionId: string }>();
     const [reports, setReports] = useState<ReportData[]>([]);
     const [loadingReports, setLoadingReports] = useState<boolean>(true);

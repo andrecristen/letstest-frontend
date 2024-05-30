@@ -43,12 +43,12 @@ const EnvironmentList: React.FC = () => {
 
     const handleClickNewEnvironment = () => {
         formDialogRef.current?.setData({});
-        formDialogRef.current?.getDialogBase().current.openDialog();
+        formDialogRef.current?.openDialog();
     };
 
     const handleClickEnvironment = (environment: EnvironmentData) => {
         formDialogRef.current?.setData(environment);
-        formDialogRef.current?.getDialogBase().current.openDialog();
+        formDialogRef.current?.openDialog();
     };
 
     return (

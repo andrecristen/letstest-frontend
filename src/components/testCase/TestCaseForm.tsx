@@ -105,7 +105,7 @@ const TestCaseForm = () => {
     return (
         <PainelContainer>
             <TitleContainer title="Caso de Teste" />
-            <LoadingOverlay show={loadingTemplates || loadingTestCase}/>
+            <LoadingOverlay show={loadingTemplates || loadingTestCase} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
                     <div className="py-2">

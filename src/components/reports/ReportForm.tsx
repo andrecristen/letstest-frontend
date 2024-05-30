@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState, useImperativeHandle } from "react";
+import React, { useRef, useState, useImperativeHandle } from "react";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { createReport } from '../../services/reportService';
 import FormDialogBase, { FormDialogBaseRef } from "../base/FormDialogBase"
@@ -21,9 +21,8 @@ const ReportForm = React.forwardRef<any, any>((props, ref) => {
     const reportTypes = getReportTypeList();
 
     useImperativeHandle(ref, () => ({
-        getDialogBase: () => {
-            return formDialogRef;
-        }
+        openDialog: () => formDialogRef.current?.openDialog(),
+        closeDialog: () => formDialogRef.current?.closeDialog(),
     }));
 
     const onSubmit: SubmitHandler<ReportData> = async (data) => {

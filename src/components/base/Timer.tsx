@@ -10,6 +10,7 @@ interface TimerProps {
 }
 
 const Timer: React.FC<TimerProps> = ({ title, onChange, onStart, onStop, onReset }) => {
+
     const [isRunning, setIsRunning] = useState(false);
     const [timeElapsed, setTimeElapsed] = useState(0);
     const [isInitial, setIsInitial] = useState(true);

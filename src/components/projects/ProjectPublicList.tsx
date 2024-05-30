@@ -9,7 +9,8 @@ import TitleContainer from '../base/TitleContainer';
 import { ProjectData } from '../../types/ProjectData';
 import notifyService from '../../services/notifyService';
 
-const ProjectsPublicList = () => {
+const ProjectPublicList: React.FC = () => {
+
     const [projects, setProjects] = useState<ProjectData[]>([]);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -128,4 +129,4 @@ const ProjectsPublicList = () => {
     );
 };
 
-export default ProjectsPublicList;
+export default ProjectPublicList;

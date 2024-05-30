@@ -8,7 +8,7 @@ import notifyService from '../../services/notifyService';
 import { RegisterData } from '../../types/RegisterData';
 import '../../styles/form.css';
 
-const Register = () => {
+const UserFormRegister = () => {
 
     const navigate = useNavigate();
 
@@ -127,4 +127,4 @@ const Register = () => {
     );
 };
 
-export default Register;
+export default UserFormRegister;

@@ -1,22 +1,21 @@
-import React, { Fragment, useRef, useState, useImperativeHandle, ForwardedRef, RefObject } from "react";
+import React, { useRef, useImperativeHandle } from "react";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { EnvironmentData } from "../../types/EnvironmentData"
 import { createEnvironment, updateEnvironment } from '../../services/environmentService';
-import FormDialogBase, { FormDialogBaseRef } from "../base/FormDialogBase"
+import FormDialogBase, { FormDialogBaseExtendsRef, FormDialogBaseRef } from "../base/FormDialogBase"
 import { getEnvironmentSituationList } from "../../types/EnvironmentData";
 import notifyService from '../../services/notifyService';
 
 const EnvironmentForm = React.forwardRef<any, any>((props, ref) => {
 
-    const formDialogRef = useRef<FormDialogBaseRef>(null);
+    const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
     const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<EnvironmentData>()
     const environmentTypes = getEnvironmentSituationList();
     const updateId = watch('id');
 
     useImperativeHandle(ref, () => ({
-        getDialogBase: () => {
-            return formDialogRef;
-        },
+        openDialog: () => formDialogRef.current?.openDialog(),
+        closeDialog: () => formDialogRef.current?.closeDialog(),
         setData: (data: EnvironmentData) => {
             reset();
             Object.keys(data).forEach((key: string) => {

@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getByProjectAndSituation, accept, reject, remove, invite } from '../../services/involvementService';
-import {
-    InvolvementData,
-    InvolvementSituationEnum,
-    InvolvementTypeEnum,
-    getInvolvementSituationList,
-} from '../../types/InvolvementData';
+import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList, } from '../../types/InvolvementData';
 import PainelContainer from '../base/PainelContainer';
 import TitleContainer from '../base/TitleContainer';
 import { FiCheckCircle, FiMail, FiUserX, FiTrash, FiUser, FiEye } from 'react-icons/fi';
@@ -17,7 +12,8 @@ interface InvolvementManagementListProps {
     title: string;
 }
 
-const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
+const InvolvementList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
+    
     const navigate = useNavigate();
     const { projectId } = useParams();
     const [selectedSituation, setSelectedSituation] = useState<InvolvementSituationEnum>(InvolvementSituationEnum.Aceito);
@@ -206,4 +202,4 @@ const InvolvementManagementList: React.FC<InvolvementManagementListProps> = ({ t
     );
 };
 
-export default InvolvementManagementList;
+export default InvolvementList;

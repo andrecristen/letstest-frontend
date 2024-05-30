@@ -6,9 +6,9 @@ import PainelContainer from '../base/PainelContainer';
 import TitleContainer from '../base/TitleContainer';
 import { ProjectData } from '../../types/ProjectData';
 
-function ProjectsTestList() {
-    const navigate = useNavigate();
+const ProjectTesterList: React.FC = () => {
 
+    const navigate = useNavigate();
     const [projects, setProjects] = useState<ProjectData[]>([]);
     const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -86,4 +86,4 @@ function ProjectsTestList() {
     );
 }
 
-export default ProjectsTestList;
+export default ProjectTesterList;

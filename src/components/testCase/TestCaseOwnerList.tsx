@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import TestCaseItem from "./Item";
+import TestCaseItem from "./TestCaseItem";
 import PainelContainer from "../base/PainelContainer";
 import TitleContainer from "../base/TitleContainer";
 import { TestCaseData } from "../../types/TestCaseData";
 import { getAllByProjects } from "../../services/testCaseService";
 
 const TestCaseProjectOwnerList: React.FC = () => {
+
     const navigate = useNavigate();
     const { projectId } = useParams();
     const [testCases, setTestCases] = useState<TestCaseData[]>([]);

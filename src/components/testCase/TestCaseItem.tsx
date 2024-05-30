@@ -58,9 +58,6 @@ const TestCaseItem: React.FC<TestCaseItemProps> = ({ id, name, onEdit, onView, o
                     </button>
                 ) : null}
 
-
-
-
             </div>
         </div>
     );

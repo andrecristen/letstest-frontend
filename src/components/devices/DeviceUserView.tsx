@@ -6,7 +6,8 @@ import LoadingOverlay from '../base/LoadingOverlay';
 import { DeviceData } from '../../types/DeviceData';
 import { getMy } from '../../services/deviceService';
 
-const DeviceUser: React.FC = () => {
+const DeviceUserView: React.FC = () => {
+
     const [devices, setDevices] = useState<DeviceData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -30,4 +31,4 @@ const DeviceUser: React.FC = () => {
     );
 };
 
-export default DeviceUser;
+export default DeviceUserView;

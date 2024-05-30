@@ -29,7 +29,7 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution, is
 
     const handleClickAddReport = (event: React.MouseEvent) => {
         event.preventDefault();
-        formDialogRef.current?.getDialogBase().current.openDialog();
+        formDialogRef.current?.openDialog();
     };
 
     const handleClickListReports = (event: React.MouseEvent, testExecution: TestExecutionData) => {

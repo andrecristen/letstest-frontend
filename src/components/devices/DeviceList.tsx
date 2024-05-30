@@ -11,6 +11,7 @@ interface DeviceListProps {
 }
 
 const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
+
     const handleDelete = async (device: DeviceData) => {
         if (device.id) {
             const response = await remove(device.id);

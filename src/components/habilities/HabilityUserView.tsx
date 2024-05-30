@@ -6,7 +6,8 @@ import LoadingOverlay from '../base/LoadingOverlay';
 import { HabilityData } from '../../types/HabilityData';
 import { getMy } from '../../services/habilityService';
 
-const HabilityUser: React.FC = () => {
+const HabilityUserView: React.FC = () => {
+    
     const [habilities, setHabilities] = useState<HabilityData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -30,4 +31,4 @@ const HabilityUser: React.FC = () => {
     );
 };
 
-export default HabilityUser;
+export default HabilityUserView;

@@ -11,6 +11,7 @@ interface DeviceFormProps {
 }
 
 const DeviceForm: React.FC<DeviceFormProps> = ({ onDeviceAdded }) => {
+  
   const { register, handleSubmit, reset, formState: { errors } } = useForm<Omit<DeviceData, 'id' | 'userId'>>();
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);

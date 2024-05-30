@@ -7,6 +7,7 @@ interface TitleContainerProps {
 }
 
 const TitleContainer: React.FC<TitleContainerProps> = ({ title }) => {
+
   const navigate = useNavigate();
 
   const handleBack = () => {

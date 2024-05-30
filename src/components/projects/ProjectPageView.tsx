@@ -1,12 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-    FiEdit,
-    FiFilePlus,
-    FiFileText,
-    FiMonitor,
-    FiUser,
-    FiUserPlus,
-} from 'react-icons/fi';
+import { FiEdit, FiFilePlus, FiFileText, FiMonitor, FiUser, FiUserPlus } from 'react-icons/fi';
 import { useNavigate, useParams } from 'react-router-dom';
 import logo from '../../assets/logo-transparente.png';
 import { getProjectById } from '../../services/projectService';
@@ -16,13 +9,13 @@ import {
 } from '../../types/ProjectData';
 import notifyService from '../../services/notifyService';
 import TitleContainer from '../base/TitleContainer';
-import ProjectsForm from './Form';
+import ProjectForm from './ProjectForm';
 import { FormDialogBaseExtendsRef } from '../base/FormDialogBase';
 import PainelContainer from '../base/PainelContainer';
 import { ProjectData } from '../../types/ProjectData';
 import LoadingOverlay from '../base/LoadingOverlay';
 
-const ProjectsDetailView: React.FC = () => {
+const ProjectPageView: React.FC = () => {
     const { projectId } = useParams();
     const navigate = useNavigate();
     const [project, setProject] = useState<ProjectData | null>(null);
@@ -44,7 +37,7 @@ const ProjectsDetailView: React.FC = () => {
     const handleEditClick = (event: React.MouseEvent) => {
         event.preventDefault();
         formDialogRef.current?.setData(project);
-        formDialogRef.current?.getDialogBase().current.openDialog();
+        formDialogRef.current?.openDialog();
     };
 
     const navigateTo = (route: string) => {
@@ -134,9 +127,9 @@ const ProjectsDetailView: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <ProjectsForm ref={formDialogRef} callbackSubmit={loadProject} />
+            <ProjectForm ref={formDialogRef} callbackSubmit={loadProject} />
         </PainelContainer>
     );
 };
 
-export default ProjectsDetailView;
+export default ProjectPageView;

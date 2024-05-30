@@ -13,7 +13,7 @@ import { getDevicesByUserId } from '../../services/deviceService';
 import DeviceList from '../devices/DeviceList';
 import { DeviceData } from '../../types/DeviceData';
 
-const ProfileView = () => {
+const UserFormProfileView = () => {
 
     const { register, setValue, formState: { errors } } = useForm<UserData>();
     const [habilities, setHabilities] = useState<HabilityData[]>([]);
@@ -91,4 +91,4 @@ const ProfileView = () => {
     );
 };
 
-export default ProfileView;
+export default UserFormProfileView;

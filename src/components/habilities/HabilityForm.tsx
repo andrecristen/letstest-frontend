@@ -11,6 +11,7 @@ interface HabilityFormProps {
 }
 
 const HabilityForm: React.FC<HabilityFormProps> = ({ onHabilityAdded }) => {
+
     const { register, handleSubmit, reset, formState: { errors } } = useForm<Omit<HabilityData, 'id' | 'userId'>>();
     const [loading, setLoading] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState<boolean>(false);

@@ -13,6 +13,7 @@ interface FileUploadProps {
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, required = false, multiple = false }) => {
+    
     const [uploading, setUploading] = useState<boolean>(false);
     const [progress, setProgress] = useState<number>(0);
     const [filesToUpload, setFilesToUpload] = useState<File[]>([]);

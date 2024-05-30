@@ -11,6 +11,7 @@ interface HabilityListProps {
 }
 
 const HabilityList: React.FC<HabilityListProps> = ({ habilities, onDelete }) => {
+
     const handleDelete = async (hability: HabilityData) => {
         if (hability.id) {
             const response = await remove(hability.id);
