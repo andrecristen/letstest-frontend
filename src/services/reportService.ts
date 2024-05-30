@@ -1,10 +1,10 @@
-import { ReportData } from "../types/ReportData";
-import apiTokenService from "./apiTokenService";
+import { ReportData } from "../models/ReportData";
+import apiTokenProvider from "../infra/http-request/apiTokenProvider";
 
 export const createReport = async (testExecutionId: number, body: ReportData) => {
-    return await apiTokenService.post('/report/' + testExecutionId, body);
+    return await apiTokenProvider.post('/report/' + testExecutionId, body);
 };
 
 export const getReportsByTestExecution = async (testExecutionId: number) => {
-    return await apiTokenService.get('/report/test-execution/' + testExecutionId);
+    return await apiTokenProvider.get('/report/test-execution/' + testExecutionId);
 };

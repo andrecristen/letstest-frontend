@@ -1,18 +1,18 @@
-import { TemplateData } from "../types/TemplateData";
-import apiTokenService from "./apiTokenService";
+import { TemplateData } from "../models/TemplateData";
+import apiTokenProvider from "../infra/http-request/apiTokenProvider";
 
 export const getAllByProject = async (projectId: number) => {
-    return await apiTokenService.get('/template/' + projectId + '/all');
+    return await apiTokenProvider.get('/template/' + projectId + '/all');
 };
 
 export const getAllByProjectAndType = async (projectId: number, type: number) => {
-    return await apiTokenService.get('/template/' + projectId + '/' + type);
+    return await apiTokenProvider.get('/template/' + projectId + '/' + type);
 };
 
 export const getById = async (templateId: number) => {
-    return await apiTokenService.get('/template/' + templateId);
+    return await apiTokenProvider.get('/template/' + templateId);
 };
 
 export const create = async (projectId: number, data: TemplateData) => {
-    return await apiTokenService.post('/template/' + projectId, data);
+    return await apiTokenProvider.post('/template/' + projectId, data);
 }

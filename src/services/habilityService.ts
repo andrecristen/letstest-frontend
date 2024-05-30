@@ -1,19 +1,19 @@
-import { HabilityData } from "../types/HabilityData";
-import apiTokenService from "./apiTokenService";
-import tokenService from "./tokenService";
+import { HabilityData } from "../models/HabilityData";
+import apiTokenProvider from "../infra/http-request/apiTokenProvider";
+import tokenProvider from "../infra/tokenProvider";
 
 export const getMy = async () => {
-    return await getHabilitiesByUserId(tokenService.getSessionUserId());
+    return await getHabilitiesByUserId(tokenProvider.getSessionUserId());
 };
 
 export const getHabilitiesByUserId = async (userId: number) => {
-    return await apiTokenService.get('/hability/' + userId);
+    return await apiTokenProvider.get('/hability/' + userId);
 };
 
 export const create = async (data: HabilityData) => {
-    return await apiTokenService.post('/hability/' + tokenService.getSessionUserId(), data);
+    return await apiTokenProvider.post('/hability/' + tokenProvider.getSessionUserId(), data);
 }
 
 export const remove = async (id: number) => {
-    return await apiTokenService.delete('/hability/' + id);
+    return await apiTokenProvider.delete('/hability/' + id);
 }

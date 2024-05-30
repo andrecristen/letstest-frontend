@@ -1,29 +1,29 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // Others
-import { InvolvementTypeEnum } from '../types/InvolvementData';
+import { InvolvementTypeEnum } from '../models/InvolvementData';
 // Views
-import UserFormLogin from "./user/UserFormLogin";
-import Dashboard from "./Dashboard";
-import ProjectOwnerList from "./projects/ProjectOwnerList";
-import UserFormRegister from "./user/UserFormRegister";
-import ProjectPageView from "./projects/ProjectPageView";
-import InvolvementOwnerList from "./involvement/InvolvementOwnerList";
-import ProjectPublicList from "./projects/ProjectPublicList";
-import TemplateEditor from "./templates/TemplateEditor";
-import TemplateManagementList from "./templates/ManagementList";
-import TestCaseProjectOwnerList from "./testCase/TestCaseOwnerList";
-import TestCaseForm from "./testCase/TestCaseForm";
-import ProjectTesterList from "./projects/ProjectTesterList";
-import TestCaseProjectTesterList from "./testCase/TestCaseTesterList";
-import TestExecutionForm from "./testExecution/TestExecutionForm";
-import TestExecutionList from "./testExecution/TestExecutionList";
-import UserFormProfileEdit from "./user/UserFormProfileEdit";
-import DeviceUserView from "./devices/DeviceUserView";
-import HabilityUserView from "./habilities/HabilityUserView";
-import UserFormProfileView from "./user/UserFormProfileView";
-import EnvironmentList from "./environment/EnvironmentList";
-import ReportList from "./reports/ReportList";
-import InvolvementPendingView from "./involvement/InvolvementPendingView";
+import UserFormLogin from "../pages/user/UserFormLogin";
+import Dashboard from "../pages/Dashboard";
+import ProjectOwnerList from "../pages/projects/ProjectOwnerList";
+import UserFormRegister from "../pages/user/UserFormRegister";
+import ProjectPageView from "../pages/projects/ProjectPageView";
+import InvolvementOwnerList from "../pages/involvement/InvolvementOwnerList";
+import ProjectPublicList from "../pages/projects/ProjectPublicList";
+import TemplateEditor from "../pages/templates/TemplateEditor";
+import TemplateManagementList from "../pages/templates/ManagementList";
+import TestCaseProjectOwnerList from "../pages/testCase/TestCaseOwnerList";
+import TestCaseForm from "../pages/testCase/TestCaseForm";
+import ProjectTesterList from "../pages/projects/ProjectTesterList";
+import TestCaseProjectTesterList from "../pages/testCase/TestCaseTesterList";
+import TestExecutionForm from "../pages/testExecution/TestExecutionForm";
+import TestExecutionList from "../pages/testExecution/TestExecutionList";
+import UserFormProfileEdit from "../pages/user/UserFormProfileEdit";
+import DeviceUserView from "../pages/devices/DeviceUserView";
+import HabilityUserView from "../pages/habilities/HabilityUserView";
+import UserFormProfileView from "../pages/user/UserFormProfileView";
+import EnvironmentList from "../pages/environment/EnvironmentList";
+import ReportList from "../pages/reports/ReportList";
+import InvolvementPendingView from "../pages/involvement/InvolvementPendingView";
 
 const AppRoutes = () => {
 
