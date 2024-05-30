@@ -4,6 +4,8 @@ import { Operation } from "../templates/CustomizableRow";
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from "../templates/CustomizableTable";
 import { TestExecutionData } from "../../types/TestExecutionData";
 import { useNavigate } from "react-router-dom";
+import { FormDialogBaseExtendsRef } from "../base/FormDialogBase";
+import ReportForm from "../reports/ReportForm";
 
 interface TestExecutionItemProps {
     testExecution: TestExecutionData;
@@ -13,6 +15,7 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
 
     const navigate = useNavigate();
     const customizableTableTestExecutionRef = useRef<CustomizableTableRef>(null);
+    const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
 
     useEffect(() => {
         const newRows: CustomizableTableRows[] = Object.values(testExecution.data);
@@ -22,6 +25,11 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
     const handleClickProfileUser = (testExecution: TestExecutionData) => {
         navigate("/profile/" + testExecution.user?.id);
     }
+
+    const handleEditReport = (event: React.MouseEvent) => {
+        event.preventDefault();
+        formDialogRef.current?.getDialogBase().current.openDialog();
+    };
 
     const formatTime = (seconds: number): string => {
         const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
@@ -51,7 +59,7 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
                 />
             </div>
             <div className="w-full mt-2">
-                <button className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800">
+                <button onClick={(event) => { handleEditReport(event) }} className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800">
                     <FiStar className="mr-2" />
                     Avaliar
                 </button>
@@ -62,6 +70,7 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution }) 
                     Avaliações
                 </button>
             </div>
+            <ReportForm ref={formDialogRef} testExecution={testExecution} />
         </div>
     );
 };
