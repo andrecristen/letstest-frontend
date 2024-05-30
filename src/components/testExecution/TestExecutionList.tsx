@@ -65,6 +65,7 @@ const TestExecutionList: React.FC = () => {
                     {filteredTestExecutions.map((testExecutions) => (
                         <TestExecutionItem
                             testExecution={testExecutions}
+                            isUserView={isUserView}
                         />
                     ))}
                 </div>
