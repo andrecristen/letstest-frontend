@@ -7,15 +7,15 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { TemplateData, getTemplateTypeList } from '../../models/TemplateData';
 import { create, getById } from '../../services/templatesService';
 import notifyProvider from '../../infra/notifyProvider';
-import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from './CustomizableTable';
-import { Operation } from './CustomizableRow';
+import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from '../../components/CustomizableTable/CustomizableTable';
+import { Operation } from '../../components/CustomizableTable/CustomizableRow';
 import LoadingOverlay from "../../components/LoadingOverlay";
 
 const TemplateForm = () => {
 
     const customizableTableRef = useRef<CustomizableTableRef>(null);
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
-    const { register, handleSubmit, setValue, getValues, reset } = useForm<TemplateData>();
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm<TemplateData>();
     const [isLoadedTemplateCopy, setIsLoadedTemplateCopy] = useState<boolean>(false);
     const [loadingTemplate, setLoadingTemplate] = useState<boolean>(false);
     const { projectId, templateIdCopy } = useParams();
@@ -74,35 +74,38 @@ const TemplateForm = () => {
     return (
         <PainelContainer>
             <TitleContainer title={isViewMode ? "Visualizar Template" : "Personalizar Template"} />
-            <LoadingOverlay show={loadingTemplate}/>
+            <LoadingOverlay show={loadingTemplate} />
             <form name={'template'} onSubmit={handleSubmit(onSubmit)}>
                 <div className="py-2">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
                     <input
-                        {...register("name")}
-                        required
+                        {...register('name', { required: 'Nome é obrigatório' })}
                         disabled={isViewMode}
-                        className="form-input"
+                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         placeholder="Nome"
                     />
+                    {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
                 <div className="py-2">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Descrição</label>
                     <textarea
-                        {...register("description")}
+                        {...register("description", { required: 'Descrição é obrigatória' })}
                         rows={5}
-                        required
                         disabled={isViewMode}
-                        className="form-input"
+                        className={`mt-1 block w-full px-3 py-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         placeholder="Descrição"
                     />
+                    {errors.description && <span className="text-red-500 text-sm">{errors.description.message}</span>}
                 </div>
                 <div className="py-2">
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo</label>
                     <select
                         {...register('type', {
+                            required: 'Tipo é obrigatório',
                             setValueAs: (value) => parseInt(value),
                         })}
-                        required
                         disabled={isViewMode}
-                        className="form-input"
+                        className={`mt-1 block w-full px-3 py-2 border ${errors.type ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     >
                         <option disabled value="null">Selecione o tipo do template</option>
                         {getTemplateTypeList().map((type) => (
@@ -111,6 +114,7 @@ const TemplateForm = () => {
                             </option>
                         ))}
                     </select>
+                    {errors.type && <span className="text-red-500 text-sm">{errors.type.message}</span>}
                 </div>
                 <fieldset className="border rounded p-4">
                     <legend className="text-lg font-semibold">Definição do Template:</legend>

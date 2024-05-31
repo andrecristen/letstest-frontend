@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { FiEdit, FiPlusCircle, FiTrash, FiXSquare } from 'react-icons/fi';
 import notifyProvider from '../../infra/notifyProvider';
 import EditForm, { Column, ColumnType } from './ColumnFormEditor';
-import FileUpload from '../../components/FileUpload';
+import FileUpload from '../FileUpload';
 import CustomizableTable, { CustomizableTableRows } from './CustomizableTable';
 import { FileData } from '../../models/FileData';
-import FileViewer from '../../components/FileViewer';
+import FileViewer from '../FileViewer';
 
 export enum Operation {
   Edit = 'Edição',

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import FormDialogBase from "../../components/FormDialogBase";
+import FormDialogBase from "../FormDialogBase";
 import { CustomizableTableRows } from "./CustomizableTable";
 import { FileData } from "../../models/FileData";
 

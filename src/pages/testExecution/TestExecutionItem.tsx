@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { FiFileText, FiList, FiStar } from "react-icons/fi";
-import { Operation } from "../templates/CustomizableRow";
-import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from "../templates/CustomizableTable";
+import { Operation } from "../../components/CustomizableTable/CustomizableRow";
+import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from "../../components/CustomizableTable/CustomizableTable";
 import { TestExecutionData } from "../../models/TestExecutionData";
 import { useNavigate } from "react-router-dom";
 import { FormDialogBaseExtendsRef } from "../../components/FormDialogBase";
