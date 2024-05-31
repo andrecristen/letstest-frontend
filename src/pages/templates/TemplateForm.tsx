@@ -9,6 +9,7 @@ import { create, getById } from '../../services/templatesService';
 import notifyProvider from '../../infra/notifyProvider';
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from './CustomizableTable';
 import { Operation } from './CustomizableRow';
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const TemplateForm = () => {
 
@@ -16,6 +17,7 @@ const TemplateForm = () => {
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
     const { register, handleSubmit, setValue, getValues, reset } = useForm<TemplateData>();
     const [isLoadedTemplateCopy, setIsLoadedTemplateCopy] = useState<boolean>(false);
+    const [loadingTemplate, setLoadingTemplate] = useState<boolean>(false);
     const { projectId, templateIdCopy } = useParams();
     const navigate = useNavigate();
 
@@ -31,6 +33,7 @@ const TemplateForm = () => {
     const loadOfCopy = async () => {
         setIsLoadedTemplateCopy(true);
         if (templateIdCopy) {
+            setLoadingTemplate(true);
             const templateCopyData = await getById(parseInt(templateIdCopy));
             if (templateCopyData?.data?.data) {
                 if (isViewMode) {
@@ -41,6 +44,7 @@ const TemplateForm = () => {
                 const newRows: CustomizableTableRows[] = Object.values(templateCopyData.data.data);
                 customizableTableRef.current?.setRows(newRows);
             }
+            setLoadingTemplate(false);
         }
     }
 
@@ -55,6 +59,7 @@ const TemplateForm = () => {
             data.data = Object.fromEntries(
                 rows.map(item => [item.id, item])
             );
+            setLoadingTemplate(true);
             const response = await create(parseInt(projectId ? projectId : "0"), data);
             if (response?.status == 201) {
                 notifyProvider.success("Template criado com sucesso");
@@ -62,12 +67,14 @@ const TemplateForm = () => {
             } else {
                 notifyProvider.error("Erro ao criar template, tente novamente");
             }
+            setLoadingTemplate(false);
         }
     }
 
     return (
         <PainelContainer>
             <TitleContainer title={isViewMode ? "Visualizar Template" : "Personalizar Template"} />
+            <LoadingOverlay show={loadingTemplate}/>
             <form name={'template'} onSubmit={handleSubmit(onSubmit)}>
                 <div className="py-2">
                     <input
