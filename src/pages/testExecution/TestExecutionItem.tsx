@@ -52,6 +52,7 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution, is
                     <p className="text-sm font-medium text-purple-900"># {testExecution.id}</p>
                     <p className="text-sm text-gray-500">Testado por: <a href="" className="border-b border-purple-400" onClick={() => { handleClickProfileUser(testExecution) }}>{testExecution.user?.name}</a></p>
                     <p className="text-sm text-gray-500">Tempo de execução: {formatTime(testExecution.testTime)}</p>
+                    <p className="text-sm text-gray-500">Dispositivo de execução: {testExecution.device?.model} ({testExecution.device?.brand} - {testExecution.device?.system})</p>
                 </div>
             </div>
             <div className="w-full">

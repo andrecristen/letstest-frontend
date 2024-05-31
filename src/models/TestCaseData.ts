@@ -3,5 +3,6 @@ export type TestCaseData = {
     name: string;
     data: Object;
     templateId?: number;
+    deviceId?: number;
     projectId: number;
 };

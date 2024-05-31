@@ -3,13 +3,14 @@ import { FiCheckSquare, FiPlay, FiSkipBack, FiVideo } from 'react-icons/fi';
 
 interface TimerProps {
     title: string;
+    disabled?: boolean;
     onChange: (timeElapsed: number) => void;
     onStart?: () => void;
     onStop?: () => void;
     onReset?: () => void;
 }
 
-const Timer: React.FC<TimerProps> = ({ title, onChange, onStart, onStop, onReset }) => {
+const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onStop, onReset }) => {
 
     const [isRunning, setIsRunning] = useState(false);
     const [timeElapsed, setTimeElapsed] = useState(0);
@@ -113,7 +114,7 @@ const Timer: React.FC<TimerProps> = ({ title, onChange, onStart, onStop, onReset
             <h1 className="text-2xl font-bold mb-4">{title}</h1>
             <p className="text-xl mb-4">Tempo decorrido: {formatTime(timeElapsed)}</p>
             {isInitial ? (
-                <button type="button" onClick={handleStart} className="action-button-blue m-2">
+                <button disabled={disabled} type="button" onClick={handleStart} className="action-button-blue m-2">
                     <FiPlay className="m-2 text-2xl" /> {timeElapsed ? "Continuar" : "Inicializar"}
                 </button>
             ) : (
