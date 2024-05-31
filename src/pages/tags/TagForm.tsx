@@ -49,7 +49,7 @@ const TagForm = () => {
 
     const onSubmit: SubmitHandler<TagData> = async (data) => {
         try {
-            debugger;
+            setLoadingTag(true);
             if (!tagValues.length) {
                 notifyProvider.error("Necessário ao menos um valor criado.");
                 return;
@@ -65,6 +65,8 @@ const TagForm = () => {
             }
         } catch (error) {
             notifyProvider.error(`Erro ao ${data.id ? 'alterar' : 'criar'} Campo Personalizado, tente novamente`);
+        } finally {
+            setLoadingTag(false);
         }
     };
 
