@@ -10,7 +10,7 @@ import notifyProvider from '../../infra/notifyProvider';
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from './CustomizableTable';
 import { Operation } from './CustomizableRow';
 
-const TemplateEditor = () => {
+const TemplateForm = () => {
 
     const customizableTableRef = useRef<CustomizableTableRef>(null);
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
@@ -125,4 +125,4 @@ const TemplateEditor = () => {
     );
 };
 
-export default TemplateEditor;
+export default TemplateForm;

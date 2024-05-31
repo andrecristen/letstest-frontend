@@ -9,8 +9,8 @@ import UserFormRegister from "../pages/user/UserFormRegister";
 import ProjectPageView from "../pages/projects/ProjectPageView";
 import InvolvementOwnerList from "../pages/involvement/InvolvementOwnerList";
 import ProjectPublicList from "../pages/projects/ProjectPublicList";
-import TemplateEditor from "../pages/templates/TemplateEditor";
-import TemplateManagementList from "../pages/templates/ManagementList";
+import TemplateForm from "../pages/templates/TemplateForm";
+import TemplateList from "../pages/templates/TemplateList";
 import TestCaseProjectOwnerList from "../pages/testCase/TestCaseOwnerList";
 import TestCaseForm from "../pages/testCase/TestCaseForm";
 import ProjectTesterList from "../pages/projects/ProjectTesterList";
@@ -43,10 +43,10 @@ const AppRoutes = () => {
                 <Route path="/project/detail/:projectId" element={<ProjectPageView />}></Route>
                 <Route path="/project/testers/:projectId" element={<InvolvementOwnerList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
                 <Route path="/project/managers/:projectId" element={<InvolvementOwnerList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
-                <Route path="/project/templates/:projectId" element={<TemplateManagementList />}></Route>
-                <Route path="/project/templates/:projectId/add" element={<TemplateEditor />}></Route>
-                <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateEditor />}></Route>
-                <Route path="/project/templates/:projectId/view/:templateIdCopy" element={<TemplateEditor />}></Route>
+                <Route path="/project/templates/:projectId" element={<TemplateList />}></Route>
+                <Route path="/project/templates/:projectId/add" element={<TemplateForm />}></Route>
+                <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateForm />}></Route>
+                <Route path="/project/templates/:projectId/view/:templateIdCopy" element={<TemplateForm />}></Route>
                 <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
                 <Route path="/project/environments/:projectId" element={<EnvironmentList />}></Route>
                 <Route path="/project/tags/:projectId" element={<TagList />}></Route>

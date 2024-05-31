@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PainelContainer from "../../components/PainelContainer";
 import TitleContainer from "../../components/TitleContainer";
-import TemplateItem from "./Item";
+import TemplateItem from "./TemplateItem";
 import { TemplateData } from "../../models/TemplateData";
 import { getAllByProject } from "../../services/templatesService";
 
-const TemplateManagementList: React.FC = () => {
+const TemplateList: React.FC = () => {
     const navigate = useNavigate();
     const { projectId } = useParams();
     const [templates, setTemplates] = useState<TemplateData[]>([]);
@@ -78,4 +78,4 @@ const TemplateManagementList: React.FC = () => {
     );
 };
 
-export default TemplateManagementList;
+export default TemplateList;
