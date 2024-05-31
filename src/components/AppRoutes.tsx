@@ -25,6 +25,7 @@ import EnvironmentList from "../pages/environment/EnvironmentList";
 import ReportList from "../pages/reports/ReportList";
 import InvolvementPendingView from "../pages/involvement/InvolvementPendingView";
 import TagList from "../pages/tags/TagList";
+import TagForm from "../pages/tags/TagForm";
 
 const AppRoutes = () => {
 
@@ -49,6 +50,9 @@ const AppRoutes = () => {
                 <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
                 <Route path="/project/environments/:projectId" element={<EnvironmentList />}></Route>
                 <Route path="/project/tags/:projectId" element={<TagList />}></Route>
+                <Route path="/project/tags/:projectId/add" element={<TagForm />}></Route>
+                <Route path="/project/tags/:projectId/view/:tagId" element={<TagForm />}></Route>
+                <Route path="/project/tags/:projectId/edit/:tagId" element={<TagForm />}></Route>
                 <Route path="/test-case/:projectId/add" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/view" element={<TestCaseForm />}></Route>

@@ -70,6 +70,7 @@ const TagList: React.FC = () => {
                             key={tag.id}
                             tag={tag}
                             onView={() => navigate(`/project/tags/${projectId}/view/${tag.id}`)}
+                            onEdit={() => navigate(`/project/tags/${projectId}/edit/${tag.id}`)}
                         />
                     ))}
                 </div>

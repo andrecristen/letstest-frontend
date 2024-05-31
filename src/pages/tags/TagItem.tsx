@@ -6,11 +6,9 @@ interface TagItemProps {
     tag: TagData
     onEdit?: () => void;
     onView?: () => void;
-    onTestExecutions?: () => void;
-    onExecuteTest?: () => void;
 }
 
-const TagItem: React.FC<TagItemProps> = ({ tag, onEdit, onView, onTestExecutions, onExecuteTest }) => {
+const TagItem: React.FC<TagItemProps> = ({ tag, onEdit, onView }) => {
     return (
         <div className="card-flex">
             <div className="card-flex-details-container">
@@ -37,24 +35,6 @@ const TagItem: React.FC<TagItemProps> = ({ tag, onEdit, onView, onTestExecutions
                         className="action-button-green"
                     >
                         <FiEye className="w-5 h-5 mr-2" /> Visualizar
-                    </button>
-                ) : null}
-
-                {onTestExecutions ? (
-                    <button
-                        onClick={onTestExecutions}
-                        className="action-button-teal"
-                    >
-                        <FiPackage className="w-5 h-5 mr-2" /> Execuções
-                    </button>
-                ) : null}
-
-                {onExecuteTest ? (
-                    <button
-                        onClick={onExecuteTest}
-                        className="action-button-purple"
-                    >
-                        <FiPlayCircle className="w-5 h-5 mr-2" /> Testar
                     </button>
                 ) : null}
 

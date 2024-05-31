@@ -8,3 +8,14 @@ export type TagData = {
     projectId?: number | null;
     tagValues?: TagValueData[] | null;
 };
+
+export enum TagSituation {
+    Ativo = 1,
+    Arquivado = 2,
+}
+
+export const getTagSituationList = () => {
+    return Object.keys(TagSituation)
+        .filter(key => isNaN(Number(key)))
+        .map(key => ({ name: key, id: TagSituation[key as keyof typeof TagSituation] }));
+}
