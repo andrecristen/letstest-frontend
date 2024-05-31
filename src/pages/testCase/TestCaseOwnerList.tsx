@@ -64,8 +64,7 @@ const TestCaseProjectOwnerList: React.FC = () => {
                     {filteredTestCases.map((testCase) => (
                         <TestCaseItem
                             key={testCase.id}
-                            id={testCase.id}
-                            name={testCase.name}
+                            testCase={testCase}
                             onEdit={() => navigate(`/test-case/${testCase.id}/edit`)}
                             onView={() => navigate(`/test-case/${testCase.id}/view`)}
                             onTestExecutions={() => navigate(`/test-executions/${testCase.id}`)}

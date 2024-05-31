@@ -5,57 +5,87 @@ import notifyProvider from '../../infra/notifyProvider';
 import PainelContainer from '../../components/PainelContainer';
 import TitleContainer from '../../components/TitleContainer';
 import { TestCaseData } from '../../models/TestCaseData';
-import { FiSave } from 'react-icons/fi';
+import { FiPlusCircle, FiSave } from 'react-icons/fi';
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from '../templates/CustomizableTable';
 import { Operation } from '../templates/CustomizableRow';
 import { TemplateData, TemplateTypeEnum } from '../../models/TemplateData';
 import { getAllByProjectAndType } from '../../services/templatesService';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import { EnvironmentData } from "../../models/EnvironmentData";
+import { getAllByProjects } from '../../services/environmentService';
 
 const TestCaseForm = () => {
     const { projectId, testCaseId } = useParams();
-    const { register, handleSubmit, setValue, getValues, watch } = useForm<TestCaseData>();
+    const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<TestCaseData>();
     const customizableTableRef = useRef<CustomizableTableRef>(null);
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
     const [templates, setTemplates] = useState<TemplateData[]>([]);
+    const [environments, setEnvironments] = useState<EnvironmentData[]>([]);
     const [loadingTemplates, setLoadingTemplates] = useState(false);
     const [loadingTestCase, setLoadingTestCase] = useState(false);
+    const [loadingEnvironments, setLoadingEnvironments] = useState(false);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
     const updateId = watch('id');
+    const updatedProjectId = watch('projectId');
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
 
     useEffect(() => {
         load();
-    }, []);
+    }, [projectId, testCaseId, updatedProjectId]);
 
-    const getProjectId = () => parseInt(projectId ?? '0', 10);
-    const getTestCaseId = () => parseInt(testCaseId ?? '0', 10);
+    const getProjectId = () => parseInt(projectId || updatedProjectId + "", 10);
+    const getTestCaseId = () => parseInt(testCaseId || '0', 10);
 
     const load = async () => {
         if (getProjectId()) {
-            setLoadingTemplates(true);
-            const response = await getAllByProjectAndType(
-                getProjectId(),
-                TemplateTypeEnum['Definição de casos de teste']
-            );
+            await getTemplates();
+            await getEnvironments();
+        }
+        if (getTestCaseId()) {
+            await getTestCase();
+        }
+    };
+
+    const getTemplates = async () => {
+        setLoadingTemplates(true);
+        try {
+            const response = await getAllByProjectAndType(getProjectId(), TemplateTypeEnum['Definição de casos de teste']);
             const newTemplates = response?.data || [];
             setTemplates(newTemplates);
             if (!newTemplates.length) {
                 notifyProvider.info("Não há nenhum template para Definição de casos de teste para o seu projeto, certifique-se de criar ao menos.");
             }
+        } finally {
             setLoadingTemplates(false);
-        } else if (getTestCaseId()) {
-            setLoadingTestCase(true);
+        }
+    };
+
+    const getTestCase = async () => {
+        setLoadingTestCase(true);
+        try {
             const response = await getById(getTestCaseId());
-            setValue('id', response?.data.id);
-            setValue('name', response?.data.name);
-            const newRows: CustomizableTableRows[] = Object.values(response?.data.data);
-            customizableTableRef.current?.setRows(newRows);
+            const testCase = response?.data;
+            setValue('id', testCase.id);
+            setValue('name', testCase.name);
+            setValue('projectId', testCase.projectId);
+            setValue('environmentId', testCase.environmentId);
+            customizableTableRef.current?.setRows(Object.values(testCase.data));
+        } finally {
             setLoadingTestCase(false);
+        }
+    };
+
+    const getEnvironments = async () => {
+        setLoadingEnvironments(true);
+        try {
+            const response = await getAllByProjects(getProjectId());
+            setEnvironments(response?.data || []);
+        } finally {
+            setLoadingEnvironments(false);
         }
     };
 
@@ -64,51 +94,42 @@ const TestCaseForm = () => {
             notifyProvider.error('Necessário ao menos uma linha para confirmação.');
             return;
         }
-
-        if (isViewMode) {
-            return; // Visualização não deve persistir nada
-        }
+        if (isViewMode) return;
 
         data.data = Object.fromEntries(rows.map((item) => [item.id, item]));
-        delete data.templateId; // Apenas para uso em tela, API não precisa.
+        delete data.templateId;
 
         try {
-            let response;
-            if (data.id) {
-                response = await update(data.id, data);
-            } else {
-                response = await create(getProjectId(), data);
-            }
-
-            if (response?.status === 200 || response?.status === 201) {
-                notifyProvider.success(
-                    `Caso de teste ${data.id ? 'alterado' : 'criado'} com sucesso`
-                );
+            const response = data.id ? await update(data.id, data) : await create(getProjectId(), data);
+            const success = response?.status === 200 || response?.status === 201;
+            if (success) {
+                notifyProvider.success(`Caso de teste ${data.id ? 'alterado' : 'criado'} com sucesso`);
                 navigate(-1);
             } else {
                 throw new Error('Erro inesperado');
             }
         } catch (error) {
-            notifyProvider.error(
-                `Erro ao ${data.id ? 'alterar' : 'criar'} Caso de teste, tente novamente`
-            );
+            notifyProvider.error(`Erro ao ${data.id ? 'alterar' : 'criar'} Caso de teste, tente novamente`);
         }
     };
 
     const handleChangeTemplate = () => {
-        const template = templates.find(
-            (item) => item.id === getValues('templateId')
-        );
+        const template = templates.find((item) => item.id === getValues('templateId'));
         customizableTableRef.current?.setRows(template ? Object.values(template.data) : []);
     };
+
+    const handleClickNewEnvironment = () => {
+        navigate("/project/environments/" + getProjectId());
+    }
 
     return (
         <PainelContainer>
             <TitleContainer title="Caso de Teste" />
-            <LoadingOverlay show={loadingTemplates || loadingTestCase} />
+            <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingEnvironments} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
                     <div className="py-2">
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">#</label>
                         <input
                             {...register('id')}
                             disabled
@@ -117,24 +138,47 @@ const TestCaseForm = () => {
                         />
                     </div>
                 )}
-                <div className="py-2">
+                <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
                     <input
-                        {...register('name', { required: true })}
-                        className="form-input"
+                        type="text"
+                        id="name"
                         disabled={isViewMode}
-                        placeholder="Nome do Caso de Teste"
+                        {...register('name', { required: 'Nome é obrigatório' })}
+                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     />
+                    {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+                </div>
+                <div className="py-2">
+                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">Ambiente de teste<button className="p-2 mt-2 text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button></label>
+                    <select
+                        {...register('environmentId', {
+                            required: 'Ambiente de teste é obrigatório',
+                            setValueAs: (value) => parseInt(value, 10),
+                        })}
+                        disabled={isViewMode}
+                        className={`mt-1 block w-full px-3 py-2 border ${errors.environmentId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                    >
+                        <option value="">Selecione o ambiente</option>
+                        {environments.map((environment) => (
+                            <option key={environment.id} value={environment.id}>
+                                {environment.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.environmentId && <span className="text-red-500 text-sm">{errors.environmentId.message}</span>}
                 </div>
                 {!getTestCaseId() && (
                     <div className="py-2">
+                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">Template</label>
                         <select
                             {...register('templateId', {
+                                required: 'Template é obrigatório',
                                 setValueAs: (value) => parseInt(value, 10),
                                 onChange: handleChangeTemplate,
                             })}
-                            required
                             disabled={isViewMode}
-                            className="form-input"
+                            className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         >
                             <option value="">Selecione o template</option>
                             {templates.map((template) => (
@@ -143,6 +187,7 @@ const TestCaseForm = () => {
                                 </option>
                             ))}
                         </select>
+                        {errors.templateId && <span className="text-red-500 text-sm">{errors.templateId.message}</span>}
                     </div>
                 )}
                 <div className="py-2">

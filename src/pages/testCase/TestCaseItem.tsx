@@ -1,23 +1,26 @@
 import React from "react";
 import { FiEdit, FiEye, FiPackage, FiFileText, FiPlayCircle } from "react-icons/fi";
+import { TestCaseData } from "../../models/TestCaseData";
 
 interface TestCaseItemProps {
-    id?: number;
-    name: string;
+    testCase: TestCaseData
     onEdit?: () => void;
     onView?: () => void;
     onTestExecutions?: () => void;
     onExecuteTest?: () => void;
 }
 
-const TestCaseItem: React.FC<TestCaseItemProps> = ({ id, name, onEdit, onView, onTestExecutions, onExecuteTest }) => {
+const TestCaseItem: React.FC<TestCaseItemProps> = ({ testCase, onEdit, onView, onTestExecutions, onExecuteTest }) => {
     return (
         <div className="card-flex">
             <div className="card-flex-details-container">
                 <FiFileText className="text-lg text-purple-700" />
                 <div className="ml-3">
-                    <p className="text-sm font-medium text-purple-900"># {id}</p>
-                    <p className="font-bold text-lg text-purple-700">{name}</p>
+                    <p className="text-sm font-medium text-purple-900"># {testCase.id}</p>
+                    <p className="font-bold text-lg text-purple-700">{testCase.name}</p>
+                    <p className="my-2 text-sm text-gray-500">Ambiente de Teste</p>
+                    <p className="ml-2 text-sm text-gray-500">Nome: {testCase.environment?.name}</p>
+                    <p className="ml-2 text-sm text-gray-500">Descrição: {testCase.environment?.description}</p>
                 </div>
             </div>
 

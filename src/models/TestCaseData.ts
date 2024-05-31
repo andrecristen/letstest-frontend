@@ -1,3 +1,5 @@
+import { EnvironmentData } from "./EnvironmentData";
+
 export type TestCaseData = {
     id?: number;
     name: string;
@@ -5,4 +7,6 @@ export type TestCaseData = {
     templateId?: number;
     deviceId?: number;
     projectId: number;
+    environmentId?: number;
+    environment?: EnvironmentData
 };

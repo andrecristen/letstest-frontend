@@ -57,8 +57,7 @@ const TestCaseProjectTesterList: React.FC = () => {
                     {filteredTestCases.map((testCase) => (
                         <TestCaseItem
                             key={testCase.id}
-                            id={testCase.id}
-                            name={testCase.name}
+                            testCase={testCase}
                             onView={() => navigate(`/test-case/${testCase.id}/view`)}
                             onExecuteTest={() => navigate(`/test-executions/test/${projectId}/${testCase.id}`)}
                             onTestExecutions={() => navigate(`/test-executions/${testCase.id}/my`)}
