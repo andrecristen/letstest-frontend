@@ -24,6 +24,7 @@ import UserFormProfileView from "../pages/user/UserFormProfileView";
 import EnvironmentList from "../pages/environment/EnvironmentList";
 import ReportList from "../pages/reports/ReportList";
 import InvolvementPendingView from "../pages/involvement/InvolvementPendingView";
+import TagList from "../pages/tags/TagList";
 
 const AppRoutes = () => {
 
@@ -47,6 +48,7 @@ const AppRoutes = () => {
                 <Route path="/project/templates/:projectId/view/:templateIdCopy" element={<TemplateEditor />}></Route>
                 <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
                 <Route path="/project/environments/:projectId" element={<EnvironmentList />}></Route>
+                <Route path="/project/tags/:projectId" element={<TagList />}></Route>
                 <Route path="/test-case/:projectId/add" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/view" element={<TestCaseForm />}></Route>
