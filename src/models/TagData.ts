@@ -1,7 +1,7 @@
 import { TagValueData } from "./TagValueData";
 
 export type TagData = {
-    id: number;
+    id?: number;
     name: string;
     situation: number;
     commentary?: string | null;

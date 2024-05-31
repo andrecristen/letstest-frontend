@@ -1,8 +1,8 @@
 export type TagValueData = {
-    id: number;
+    id?: number;
     name: string;
     situation: number;
-    tagId: number;
+    tagId?: number;
     commentary?: string | null;
     data?: Object | null;
     projectId?: number | null;
