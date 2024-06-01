@@ -1,7 +1,7 @@
 export type TestScenarioData = {
     id?: number;
     name: string;
-    data: Object;
+    data?: Object;
     templateId?: number;
-    projectId: number;
+    projectId?: number;
 };

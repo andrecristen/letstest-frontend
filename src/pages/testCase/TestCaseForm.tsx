@@ -14,6 +14,8 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { EnvironmentData } from "../../models/EnvironmentData";
 import { getAllByProjects } from '../../services/environmentService';
+import { getAllTestScenariosByProjects } from '../../services/testScenario';
+import { TestScenarioData } from '../../models/TestScenarioData';
 
 const TestCaseForm = () => {
     const { projectId, testCaseId } = useParams();
@@ -22,9 +24,11 @@ const TestCaseForm = () => {
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
     const [templates, setTemplates] = useState<TemplateData[]>([]);
     const [environments, setEnvironments] = useState<EnvironmentData[]>([]);
+    const [testScenarios, setTestScenarios] = useState<TestScenarioData[]>([]);
     const [loadingTemplates, setLoadingTemplates] = useState(false);
     const [loadingTestCase, setLoadingTestCase] = useState(false);
     const [loadingEnvironments, setLoadingEnvironments] = useState(false);
+    const [loadingTestScenarios, setLoadingTestScenarios] = useState(false);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
@@ -44,6 +48,7 @@ const TestCaseForm = () => {
         if (getProjectId()) {
             await getTemplates();
             await getEnvironments();
+            await getTestScenarios();
         }
         if (getTestCaseId()) {
             await getTestCase();
@@ -73,6 +78,7 @@ const TestCaseForm = () => {
             setValue('name', testCase.name);
             setValue('projectId', testCase.projectId);
             setValue('environmentId', testCase.environmentId);
+            setValue('testScenarioId', testCase.testScenarioId);
             customizableTableRef.current?.setRows(Object.values(testCase.data));
         } finally {
             setLoadingTestCase(false);
@@ -86,6 +92,16 @@ const TestCaseForm = () => {
             setEnvironments(response?.data || []);
         } finally {
             setLoadingEnvironments(false);
+        }
+    };
+
+    const getTestScenarios = async () => {
+        setLoadingTestScenarios(true);
+        try {
+            const response = await getAllTestScenariosByProjects(getProjectId());
+            setTestScenarios(response?.data || []);
+        } finally {
+            setLoadingTestScenarios(false);
         }
     };
 
@@ -122,13 +138,17 @@ const TestCaseForm = () => {
         navigate("/project/environments/" + getProjectId());
     }
 
+    const handleClickNewTestScenario = () => {
+        navigate("/test-scenario/" + getProjectId() + "/add");
+    }
+
     return (
         <PainelContainer>
             <TitleContainer title="Caso de Teste" />
-            <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingEnvironments} />
+            <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingEnvironments || loadingTestScenarios} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
-                    <div className="py-2">
+                    <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700">#</label>
                         <input
                             {...register('id')}
@@ -149,8 +169,8 @@ const TestCaseForm = () => {
                     />
                     {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
-                <div className="py-2">
-                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">Ambiente de teste {!isViewMode ? (<button className="p-2 mt-2 text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
+                <div>
+                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">Ambiente de teste {!isViewMode ? (<button className="text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
                     <select
                         {...register('environmentId', {
                             required: 'Ambiente de teste é obrigatório',
@@ -167,6 +187,26 @@ const TestCaseForm = () => {
                         ))}
                     </select>
                     {errors.environmentId && <span className="text-red-500 text-sm">{errors.environmentId.message}</span>}
+                </div>
+                <div>
+                    <label htmlFor="testScenarioId" className="block text-sm font-medium text-gray-700">Cenário de teste {!isViewMode ? (<button className="text-lg" onClick={handleClickNewTestScenario} type="button"><FiPlusCircle /></button>) : null}</label>
+                    <select
+                        id='testScenarioId'
+                        {...register('testScenarioId', {
+                            required: 'Cenário de teste é obrigatório',
+                            setValueAs: (value) => parseInt(value, 10),
+                        })}
+                        disabled={isViewMode}
+                        className={`mt-1 block w-full px-3 py-2 border ${errors.testScenarioId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                    >
+                        <option value="">Selecione o cenário de testes</option>
+                        {testScenarios.map((testScenario) => (
+                            <option key={testScenario.id} value={testScenario.id}>
+                                {testScenario.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.testScenarioId && <span className="text-red-500 text-sm">{errors.testScenarioId.message}</span>}
                 </div>
                 {!getTestCaseId() && (
                     <div className="py-2">
