@@ -30,6 +30,16 @@ const TestCaseItem: React.FC<TestCaseItemProps> = ({ testCase, onEdit, onView, o
             </div>
 
             <div className="card-flex-actions-container">
+
+                {testCase.testScenario?.id ? (
+                    <button
+                        onClick={() => navigate("/test-scenario/" + testCase.testScenario?.id + "/view")}
+                        className="action-button-red"
+                    >
+                        <FiMove className="w-5 h-5 mr-2" /> Cenário
+                    </button>
+                ) : null}
+
                 {onEdit ? (
                     <button
                         onClick={onEdit}
@@ -63,15 +73,6 @@ const TestCaseItem: React.FC<TestCaseItemProps> = ({ testCase, onEdit, onView, o
                         className="action-button-purple"
                     >
                         <FiPlayCircle className="w-5 h-5 mr-2" /> Testar
-                    </button>
-                ) : null}
-
-                {testCase.testScenario?.id ? (
-                    <button
-                        onClick={() => navigate("/test-scenario/" + testCase.testScenario?.id + "/view")}
-                        className="action-button-red"
-                    >
-                        <FiMove className="w-5 h-5 mr-2" /> Cenário
                     </button>
                 ) : null}
 

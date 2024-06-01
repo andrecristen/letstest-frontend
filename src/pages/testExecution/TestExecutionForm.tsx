@@ -23,6 +23,7 @@ const TestExecutionForm = () => {
 
     const { projectId, testCaseId } = useParams();
     const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<TestCaseData>();
+    const customizableTableScenarioCaseRef = useRef<CustomizableTableRef>(null);
     const customizableTableTestCaseRef = useRef<CustomizableTableRef>(null);
     const customizableTableTestExecutionRef = useRef<CustomizableTableRef>(null);
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
@@ -74,8 +75,12 @@ const TestExecutionForm = () => {
         const response = await getById(getTestCaseId());
         setValue('id', response?.data.id);
         setValue('name', response?.data.name);
-        const newRows: CustomizableTableRows[] = Object.values(response?.data.data);
-        customizableTableTestCaseRef.current?.setRows(newRows);
+        const newRowsTestCase: CustomizableTableRows[] = Object.values(response?.data.data);
+        customizableTableTestCaseRef.current?.setRows(newRowsTestCase);
+        if (response?.data.testScenario?.data) {
+            const newRowsTestScenario: CustomizableTableRows[] = Object.values(response?.data.testScenario?.data);
+            customizableTableScenarioCaseRef.current?.setRows(newRowsTestScenario);
+        }
         setLoadingTestCase(false);
     }
 
@@ -131,6 +136,16 @@ const TestExecutionForm = () => {
                 </div>
                 <div className="py-2">
                     <fieldset className="border rounded p-4">
+                        <legend className="text-lg font-semibold">Definição do Cenário de Teste:</legend>
+                        <CustomizableTable
+                            ref={customizableTableScenarioCaseRef}
+                            operation={Operation.View}
+                            onChange={() => { }}
+                        />
+                    </fieldset>
+                </div>
+                <div className="py-2">
+                    <fieldset className="border rounded p-4">
                         <legend className="text-lg font-semibold">Definição do Caso de Teste:</legend>
                         <CustomizableTable
                             ref={customizableTableTestCaseRef}
@@ -140,7 +155,7 @@ const TestExecutionForm = () => {
                     </fieldset>
                 </div>
                 <div>
-                    <label htmlFor="deviceId" className="block text-sm font-medium text-gray-700">Dispositivo de execução<button className="p-2 mt-2 text-lg" onClick={handleClickNewDevice} type="button"><FiPlusCircle /></button></label>
+                    <label htmlFor="deviceId" className="block text-sm font-medium text-gray-700">Dispositivo de execução <button className="text-lg" onClick={handleClickNewDevice} type="button"><FiPlusCircle /></button></label>
                     <select
                         id="deviceId"
                         required
