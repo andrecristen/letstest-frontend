@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FiEdit, FiFilePlus, FiFileText, FiInbox, FiMonitor, FiUser, FiUserPlus } from 'react-icons/fi';
+import { FiEdit, FiFilePlus, FiFileText, FiInbox, FiMonitor, FiMove, FiUser, FiUserPlus } from 'react-icons/fi';
 import { useNavigate, useParams } from 'react-router-dom';
 import logo from '../../assets/logo-transparente.png';
 import { getProjectById } from '../../services/projectService';
@@ -104,6 +104,14 @@ const ProjectPageView: React.FC = () => {
                     >
                         <FiUser className="w-12 h-12 mx-auto mb-2 text-purple-600" />
                         <h3 className="text-center text-lg font-semibold text-purple-600">Testadores</h3>
+                    </div>
+
+                    <div
+                        onClick={() => navigateTo('test-scenarios')}
+                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
+                    >
+                        <FiMove className="w-12 h-12 mx-auto mb-2 text-purple-600" />
+                        <h3 className="text-center text-lg font-semibold text-purple-600">Cenários de Teste</h3>
                     </div>
 
                     <div

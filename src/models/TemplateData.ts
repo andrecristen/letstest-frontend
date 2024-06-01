@@ -9,6 +9,7 @@ export type TemplateData = {
 
 
 export enum TemplateTypeEnum {
+    "Definição de cenários de teste" = 3,
     "Definição de casos de teste" = 1,
     "Execução de casos de teste" = 2,
 }

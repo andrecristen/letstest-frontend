@@ -26,6 +26,8 @@ import ReportList from "../pages/reports/ReportList";
 import InvolvementPendingView from "../pages/involvement/InvolvementPendingView";
 import TagList from "../pages/tags/TagList";
 import TagForm from "../pages/tags/TagForm";
+import TestScenarioList from "../pages/testScenario/TestScenarioList";
+import TestScenarioForm from "../pages/testScenario/TestScenarioForm";
 
 const AppRoutes = () => {
 
@@ -47,6 +49,7 @@ const AppRoutes = () => {
                 <Route path="/project/templates/:projectId/add" element={<TemplateForm />}></Route>
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateForm />}></Route>
                 <Route path="/project/templates/:projectId/view/:templateIdCopy" element={<TemplateForm />}></Route>
+                <Route path="/project/test-scenarios/:projectId" element={<TestScenarioList />}></Route>
                 <Route path="/project/test-cases/:projectId" element={<TestCaseProjectOwnerList />}></Route>
                 <Route path="/project/environments/:projectId" element={<EnvironmentList />}></Route>
                 <Route path="/project/tags/:projectId" element={<TagList />}></Route>
@@ -56,6 +59,9 @@ const AppRoutes = () => {
                 <Route path="/test-case/:projectId/add" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/edit" element={<TestCaseForm />}></Route>
                 <Route path="/test-case/:testCaseId/view" element={<TestCaseForm />}></Route>
+                <Route path="/test-scenario/:projectId/add" element={<TestScenarioForm />}></Route>
+                <Route path="/test-scenario/:testScenarioId/edit" element={<TestScenarioForm />}></Route>
+                <Route path="/test-scenario/:testScenarioId/view" element={<TestScenarioForm />}></Route>
                 <Route path="/test-executions/:testCaseId" element={<TestExecutionList />}></Route>
                 {/* Tester */}
                 <Route path="/my-test-projects" element={<ProjectTesterList />}></Route>
