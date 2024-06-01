@@ -25,7 +25,7 @@ const UserFormLogin = () => {
             if (response?.status == 200) {
                 tokenProvider.setSession(response.data.token, response.data.userId);
                 notifyProvider.success("Login realizado com sucesso");
-                navigate("/dashboard");
+                navigate("/find-new-projects");
                 return;
             } else if (response?.data.error) {
                 notifyProvider.error(response?.data.error);

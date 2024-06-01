@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { InvolvementTypeEnum } from '../models/InvolvementData';
 // Views
 import UserFormLogin from "../pages/user/UserFormLogin";
-import Dashboard from "../pages/Dashboard";
 import ProjectOwnerList from "../pages/projects/ProjectOwnerList";
 import UserFormRegister from "../pages/user/UserFormRegister";
 import ProjectPageView from "../pages/projects/ProjectPageView";
@@ -39,7 +38,6 @@ const AppRoutes = () => {
                 <Route path="/login" element={<UserFormLogin />}></Route>
                 <Route path="/register" element={<UserFormRegister />}></Route>
                 {/* Private Access */}
-                <Route path="/dashboard" element={<Dashboard />}></Route>
                 {/* Manager */}
                 <Route path="/my-owner-projects" element={<ProjectOwnerList />}></Route>
                 <Route path="/project/detail/:projectId" element={<ProjectPageView />}></Route>
