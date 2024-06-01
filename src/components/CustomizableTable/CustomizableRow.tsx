@@ -6,6 +6,7 @@ import FileUpload from '../FileUpload';
 import CustomizableTable, { CustomizableTableRows } from './CustomizableTable';
 import { FileData } from '../../models/FileData';
 import FileViewer from '../FileViewer';
+import TagRender from "../TagRender";
 
 export enum Operation {
   Edit = 'Edição',
@@ -13,6 +14,7 @@ export enum Operation {
   View = 'Visualizar',
 }
 export interface CustomizableRowProps {
+  projectId?: number;
   columns?: Column[],
   operation?: Operation,
   minColumnCount: number;
@@ -21,7 +23,7 @@ export interface CustomizableRowProps {
   hiddeColumnsActions?: boolean;
 }
 
-const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, minColumnCount, maxColumnCount, onChange, hiddeColumnsActions }) => {
+const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, operation, minColumnCount, maxColumnCount, onChange, hiddeColumnsActions }) => {
   const [columnsRow, setcolumnsRow] = useState<Column[]>(columns || []);
   const [editColumnIndex, setEditColumnIndex] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -61,7 +63,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
     }
   };
 
-  const updateColumnContent = (index: number, content: string) => {
+  const updateColumnContent = (index: number, content: string | number) => {
     const updatedcolumnsRow = [...columnsRow];
     updatedcolumnsRow[index].content = content;
     applyUpdateColumnsRow(updatedcolumnsRow);
@@ -80,6 +82,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
   }
 
   const toggleEditForm = (index: number) => {
+    debugger;
     if (editColumnIndex === index && isEditing) {
       setEditColumnIndex(null);
       setIsEditing(false);
@@ -118,6 +121,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
         <div key={`column` + column.id} className="w-full flex-auto border-r border-gray-300 p-2 relative">
           {editColumnIndex === index ? (
             <EditForm
+              projectId={projectId}
               column={column}
               onFinish={() => toggleEditForm(index)}
             />
@@ -167,6 +171,9 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ columns, operation, m
               )}
               {column.type === ColumnType.Table && (
                 <CustomizableTable defaultRows={column.rows} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
+              )}
+              {column.type === ColumnType.Tag && (
+                <TagRender operation={getOperation()} tagId={column.tagId || 0} onChange={(tagValueId) => updateColumnContent(index, tagValueId)} />
               )}
             </>
           )}

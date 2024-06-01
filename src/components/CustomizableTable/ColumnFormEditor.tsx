@@ -1,10 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import FormDialogBase from "../FormDialogBase";
 import { CustomizableTableRows } from "./CustomizableTable";
 import { FileData } from "../../models/FileData";
+import { TagData } from "../../models/TagData";
+import { getTagsByProject } from "../../services/tagService";
+import LoadingOverlay from "../LoadingOverlay";
 
 interface EditFormProps {
+    projectId?: number;
     column: Column;
     onFinish: () => void;
 }
@@ -13,6 +17,7 @@ export enum ColumnType {
     Label = 'Label',
     Text = 'Texto',
     LongText = 'Texto Longo',
+    Tag = 'Campo Personalizado',
     List = 'Lista',
     Table = 'Tabela',
     Empty = 'Espaço',
@@ -23,10 +28,11 @@ export enum ColumnType {
 export interface Column {
     id: number;
     type: ColumnType;
-    content: string;
+    content: string | number;
     placeholder?: string;
     rows?: CustomizableTableRows[];
     files?: FileData[];
+    tagId?: number;
 }
 
 const TYPES_CONTENT_EDIT = [
@@ -50,9 +56,11 @@ export const getColumnTypeList = () => {
         .map(key => ({ name: key, id: ColumnType[key as keyof typeof ColumnType] }));
 }
 
-const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
+const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
 
     const { register, handleSubmit, setValue, watch } = useForm<Column>();
+    const [tags, setTags] = useState<TagData[]>([]);
+    const [loadingTags, setLoadingTags] = useState<boolean>(false);
 
     const updateType = watch("type");
 
@@ -60,13 +68,30 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
         Object.keys(column).forEach((key) => {
             setValue(key as keyof Column, column[key as keyof Column]);
         });
+        loadTags();
     }, [column, setValue]);
 
+    const loadTags = async () => {
+        if (projectId) {
+            setLoadingTags(true);
+            try {
+                const response = await getTagsByProject(projectId);
+                setTags(response?.data || []);
+            } catch (error) {
+                console.error("Erro ao carregar tags:", error);
+            } finally {
+                setLoadingTags(false);
+            }
+        }
+    };
+
     const callOnSubmit: SubmitHandler<Column> = async (data, event) => {
+        debugger;
         event?.preventDefault();
         event?.stopPropagation();
         column.type = data.type;
         column.content = data.content;
+        column.tagId = data.tagId;
         column.placeholder = data.placeholder;
         onFinish();
     };
@@ -78,6 +103,7 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
             cancel={onFinish}
             title="Editar Coluna"
         >
+            <LoadingOverlay show={loadingTags} />
             <div className="py-2">
                 <select
                     {...register("type")}
@@ -87,7 +113,7 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
                     <option disabled value="null">Tipo da coluna</option>
                     {getColumnTypeList().map((type) => {
                         return (
-                            <option value={type.id}>{type.id}</option>
+                            <option key={'columnType' + type.id} value={type.id}>{type.id}</option>
                         );
                     })}
                 </select>
@@ -109,6 +135,22 @@ const EditForm: React.FC<EditFormProps> = ({ column, onFinish }) => {
                         className="form-input"
                         placeholder="Texto de Ajuda"
                     />
+                </div>
+            ) : null}
+            {updateType == ColumnType.Tag ? (
+                <div className="py-2">
+                    <select
+                        {...register("tagId", { setValueAs: (value) => parseInt(value) })}
+                        required
+                        className="form-input"
+                    >
+                        <option value="">Selecione o campo personalizado</option>
+                        {tags.map((tag) => {
+                            return (
+                                <option key={'tag' + tag.id} value={tag.id}>{tag.name}</option>
+                            );
+                        })}
+                    </select>
                 </div>
             ) : null}
 

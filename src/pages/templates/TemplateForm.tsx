@@ -48,10 +48,15 @@ const TemplateForm = () => {
         }
     }
 
+    function getProjectId(): number {
+        return parseInt(projectId ? projectId : "0");
+    }
+
     const onSubmit: SubmitHandler<TemplateData> = async (data, event) => {
         event?.preventDefault();
         event?.stopPropagation();
         if (event?.target?.attributes?.name?.nodeValue == "template") {
+            debugger;
             if (!rows.length) {
                 notifyProvider.error("Necessário ao menos uma linha para confirmação.");
                 return;
@@ -60,7 +65,7 @@ const TemplateForm = () => {
                 rows.map(item => [item.id, item])
             );
             setLoadingTemplate(true);
-            const response = await create(parseInt(projectId ? projectId : "0"), data);
+            const response = await create(getProjectId(), data);
             if (response?.status == 201) {
                 notifyProvider.success("Template criado com sucesso");
                 navigate(-1);
@@ -120,6 +125,7 @@ const TemplateForm = () => {
                     <legend className="text-lg font-semibold">Definição do Template:</legend>
                     <hr />
                     <CustomizableTable
+                        projectId={getProjectId()}
                         ref={customizableTableRef}
                         operation={isViewMode ? Operation.View : Operation.Edit}
                         onChange={(rows: CustomizableTableRows[]) => { setRows(rows) }}

@@ -8,6 +8,7 @@ export interface CustomizableTableRows extends CustomizableRowProps {
 }
 
 interface CustomizableTableProps {
+    projectId?: number;
     operation: Operation,
     onChange: (CustomizableTableRows: CustomizableTableRows[]) => void;
     maxColumnCount?: number;
@@ -49,8 +50,8 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
     const [customizableTableRows, setRows] = useState<CustomizableTableRows[]>(getDefaultsRows());
 
     useEffect(() => {
-        
-      }, [customizableTableRows]);
+
+    }, [customizableTableRows]);
 
     const updateRow = (index: number, updatedColumns: any[]) => {
         const updatedRows = [...customizableTableRows];
@@ -89,6 +90,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
                 <div key={row.id} className={(!props.forceHiddeColumnsActions ? "odd:bg-gray-200" : "") + " flex justify-between items-center"}>
                     <CustomizableRow
                         key={`row` + row.id}
+                        projectId={props.projectId}
                         operation={props.operation}
                         columns={row.columns}
                         minColumnCount={row.minColumnCount}
