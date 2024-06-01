@@ -150,7 +150,7 @@ const TestCaseForm = () => {
                     {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
                 <div className="py-2">
-                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">Ambiente de teste<button className="p-2 mt-2 text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button></label>
+                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">Ambiente de teste {!isViewMode ? (<button className="p-2 mt-2 text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
                     <select
                         {...register('environmentId', {
                             required: 'Ambiente de teste é obrigatório',
