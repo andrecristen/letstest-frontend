@@ -82,7 +82,6 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
   }
 
   const toggleEditForm = (index: number) => {
-    debugger;
     if (editColumnIndex === index && isEditing) {
       setEditColumnIndex(null);
       setIsEditing(false);
@@ -173,7 +172,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
                 <CustomizableTable defaultRows={column.rows} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
               )}
               {column.type === ColumnType.Tag && (
-                <TagRender operation={getOperation()} tagId={column.tagId || 0} onChange={(tagValueId) => updateColumnContent(index, tagValueId)} />
+                <TagRender tagValueId={parseInt(column.content + "")} operation={getOperation()} tagId={column.tagId || 0} onChange={(tagValueId) => updateColumnContent(index, tagValueId)} />
               )}
             </>
           )}

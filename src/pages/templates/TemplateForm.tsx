@@ -56,7 +56,6 @@ const TemplateForm = () => {
         event?.preventDefault();
         event?.stopPropagation();
         if (event?.target?.attributes?.name?.nodeValue == "template") {
-            debugger;
             if (!rows.length) {
                 notifyProvider.error("Necessário ao menos uma linha para confirmação.");
                 return;

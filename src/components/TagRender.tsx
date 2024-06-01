@@ -8,19 +8,19 @@ import onChange = toast.onChange;
 
 interface TagRenderProps {
     tagId: number;
+    tagValueId: number;
     onChange: (tagValueId: number) => void;
     operation: Operation
 }
 
-const TagRender: React.FC<TagRenderProps> = ({ tagId, onChange, operation }) => {
+const TagRender: React.FC<TagRenderProps> = ({ tagId, tagValueId, onChange, operation }) => {
 
     const [tag, setTag] = useState<TagData>();
     const [loadingTag, setLoadingTag] = useState(false);
 
 
     useEffect(() => {
-        debugger;
-        onChange(0);
+        onChange(tagValueId || 0);
         load();
     }, [tagId]);
 
@@ -37,6 +37,12 @@ const TagRender: React.FC<TagRenderProps> = ({ tagId, onChange, operation }) => 
         }
     };
 
+    const handleOnchange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newValue = parseInt(e.target.value);
+        onChange(newValue);
+        tagValueId = newValue;
+    }
+
     return (
         <div>
             <LoadingOverlay show={loadingTag} />
@@ -44,7 +50,8 @@ const TagRender: React.FC<TagRenderProps> = ({ tagId, onChange, operation }) => 
                 required={operation == Operation.FillIn}
                 disabled={operation == Operation.Edit}
                 className="form-input"
-                onChange={e => onChange(parseInt(e.target.value))}
+                onChange={e => handleOnchange(e)}
+                value={tagValueId}
             >
                 <option value="">Selecione o valor</option>
                 {tag?.tagValues && tag.tagValues.map((tagValue) => {
