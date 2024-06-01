@@ -13,7 +13,7 @@ interface InvolvementManagementListProps {
 }
 
 const InvolvementOwnerList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
-    
+
     const navigate = useNavigate();
     const { projectId } = useParams();
     const [selectedSituation, setSelectedSituation] = useState<InvolvementSituationEnum>(InvolvementSituationEnum.Aceito);
@@ -147,7 +147,23 @@ const InvolvementOwnerList: React.FC<InvolvementManagementListProps> = ({ type, 
     return (
         <PainelContainer>
             <TitleContainer title={title} />
-
+            <div className="w-full flex items-center mt-4">
+                <input
+                    type="email"
+                    disabled={inviting}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="E-mail do usuário para convite"
+                    className="h-12 w-10/12 border border-purple-400 rounded-l py-2 px-3 focus:outline-none"
+                />
+                <button
+                    disabled={inviting}
+                    className="h-12 w-2/12 bg-purple-600 text-white flex items-center justify-center rounded-r hover:bg-purple-700 transition-colors"
+                    onClick={handleInvite}
+                >
+                    <FiMail className="w-6 h-6" />
+                </button>
+            </div>
             <div className="flex flex-wrap border-b mb-4">
                 {situations.map((situation) => (
                     <div
@@ -162,26 +178,6 @@ const InvolvementOwnerList: React.FC<InvolvementManagementListProps> = ({ type, 
                     </div>
                 ))}
             </div>
-
-            {selectedSituation === InvolvementSituationEnum.Enviado && (
-                <div className="w-full flex items-center mt-4">
-                    <input
-                        type="email"
-                        disabled={inviting}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="E-mail do usuário para convite"
-                        className="h-12 w-10/12 border border-purple-400 rounded-l py-2 px-3 focus:outline-none"
-                    />
-                    <button
-                        disabled={inviting}
-                        className="h-12 w-2/12 bg-purple-600 text-white flex items-center justify-center rounded-r hover:bg-purple-700 transition-colors"
-                        onClick={handleInvite}
-                    >
-                        <FiMail className="w-6 h-6" />
-                    </button>
-                </div>
-            )}
 
             {loadingInvolvements ? (
                 <div className="text-center text-purple-600">Carregando envolvimentos...</div>
