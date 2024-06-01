@@ -41,7 +41,7 @@ const ProjectTesterList: React.FC = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title="Testar Projetos" />
+            <TitleContainer title="Testar Projetos" textHelp="Projetos que você é responsável pelos testes" />
 
             <div className="flex justify-between mb-4">
                 <input

@@ -68,7 +68,7 @@ const ProjectOwnerList: React.FC = () => {
 
   return (
     <PainelContainer>
-      <TitleContainer title="Gerenciar Projetos" />
+      <TitleContainer title="Gerenciar Projetos" textHelp="Projetos que você é resposável pelo gerenciamento"/>
 
       <div className="flex justify-between mb-4">
         <input

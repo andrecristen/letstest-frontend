@@ -8,13 +8,14 @@ interface InvolvementPendingProps {
     typeSituation: InvolvementSituationEnum;
     callback: () => void;
     title: string;
+    textHelp?: string;
 }
 
-const InvolvementPendingList: React.FC<InvolvementPendingProps> = ({ involvements, typeSituation, callback, title }) => {
+const InvolvementPendingList: React.FC<InvolvementPendingProps> = ({ involvements, typeSituation, callback, title, textHelp }) => {
 
     return (
         <div>
-            <TitleContainer title={title} />
+            <TitleContainer title={title} textHelp={textHelp} />
             <div className="grid grid-cols-1 gap-6 mt-4 p-6">
                 {involvements.length > 0 ? (
                     involvements.map(involvement => (

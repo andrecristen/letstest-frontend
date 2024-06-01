@@ -68,7 +68,7 @@ const ProjectPublicList: React.FC = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title="Encontrar Projetos" />
+            <TitleContainer title="Encontrar Projetos" textHelp='Encontre projetos públicos e solicite a participação como testador'/>
             <div className="flex justify-end mb-4">
                 <button
                     type="button"
