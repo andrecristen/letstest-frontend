@@ -85,7 +85,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
     }
 
     return (
-        <div className="pt-4">
+        <div>
             {customizableTableRows.map((row, index) => (
                 <div key={row.id} className={(!props.forceHiddeColumnsActions ? "odd:bg-gray-200" : "") + " flex justify-between items-center"}>
                     <CustomizableRow

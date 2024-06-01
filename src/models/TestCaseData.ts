@@ -1,4 +1,5 @@
 import { EnvironmentData } from "./EnvironmentData";
+import { TestExecutionData } from "./TestExecutionData";
 import { TestScenarioData } from "./TestScenarioData";
 
 export type TestCaseData = {
@@ -12,4 +13,5 @@ export type TestCaseData = {
     environment?: EnvironmentData
     testScenarioId?: number;
     testScenario?: TestScenarioData;
+    testExecutions?: TestExecutionData[];
 };

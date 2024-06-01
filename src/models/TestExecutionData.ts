@@ -1,4 +1,5 @@
 import { DeviceData } from "./DeviceData";
+import { ReportData } from "./ReportData";
 import { UserData } from "./UserData";
 
 export type TestExecutionData = {
@@ -11,4 +12,5 @@ export type TestExecutionData = {
     deviceId?: number;
     user?: UserData;
     device?: DeviceData;
+    reports?: ReportData[];
 };

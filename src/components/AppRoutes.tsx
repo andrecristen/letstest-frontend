@@ -27,6 +27,7 @@ import TagList from "../pages/tags/TagList";
 import TagForm from "../pages/tags/TagForm";
 import TestScenarioList from "../pages/testScenario/TestScenarioList";
 import TestScenarioForm from "../pages/testScenario/TestScenarioForm";
+import ProjectOverView from "../pages/projects/ProjectOverView";
 
 const AppRoutes = () => {
 
@@ -43,6 +44,7 @@ const AppRoutes = () => {
                 <Route path="/project/detail/:projectId" element={<ProjectPageView />}></Route>
                 <Route path="/project/testers/:projectId" element={<InvolvementOwnerList title="Testadores" type={InvolvementTypeEnum.Testador} />}></Route>
                 <Route path="/project/managers/:projectId" element={<InvolvementOwnerList title="Gerentes" type={InvolvementTypeEnum.Gerente} />}></Route>
+                <Route path="/project/overview/:projectId" element={<ProjectOverView />}></Route>
                 <Route path="/project/templates/:projectId" element={<TemplateList />}></Route>
                 <Route path="/project/templates/:projectId/add" element={<TemplateForm />}></Route>
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateForm />}></Route>

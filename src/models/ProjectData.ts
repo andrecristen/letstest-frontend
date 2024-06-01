@@ -1,3 +1,4 @@
+import { TestScenarioData } from "./TestScenarioData";
 import { UserData } from "./UserData";
 
 export type ProjectData = {
@@ -8,6 +9,7 @@ export type ProjectData = {
     situation: number;
     creatorId?: number;
     creator?: UserData;
+    testScenarios?: TestScenarioData[];
 }
 
 export enum ProjectVisibilityEnum {
