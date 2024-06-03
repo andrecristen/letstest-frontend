@@ -4,7 +4,7 @@ import { getOverviewProject } from '../../services/projectService';
 import notifyProvider from '../../infra/notifyProvider';
 import TitleContainer from '../../components/TitleContainer';
 import PainelContainer from '../../components/PainelContainer';
-import { ProjectData } from '../../models/ProjectData';
+import { ProjectData, getProjectSituationDescription, getProjectVisibilityDescription } from '../../models/ProjectData';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import CustomizableTable, { CustomizableTableRows } from '../../components/CustomizableTable/CustomizableTable';
 import { Operation } from '../../components/CustomizableTable/CustomizableRow';
@@ -97,11 +97,11 @@ const ProjectOverView: React.FC = () => {
                         </div>
                         <div className="mb-4">
                             <p className="text-lg font-semibold">Visibilidade:</p>
-                            <p className="text-gray-700">{project.visibility}</p>
+                            <p className="text-gray-700">{getProjectVisibilityDescription(project.visibility)}</p>
                         </div>
                         <div className="mb-4">
                             <p className="text-lg font-semibold">Situação:</p>
-                            <p className="text-gray-700">{project.situation}</p>
+                            <p className="text-gray-700">{getProjectSituationDescription(project.situation)}</p>
                         </div>
                         <div className="mb-4 col-span-2">
                             <p className="text-lg font-semibold">Criador:</p>
