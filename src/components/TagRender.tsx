@@ -1,9 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {getTagById} from "../services/tagService";
-import {TagData} from "../models/TagData";
+import {TagData, TagSituation} from "../models/TagData";
 import LoadingOverlay from "./LoadingOverlay";
 import {Operation} from "./CustomizableTable/CustomizableRow";
 import {toast} from "react-toastify";
+import Tooltip from "./Tooltip";
 
 interface TagRenderProps {
     tagId: number;
@@ -12,7 +13,7 @@ interface TagRenderProps {
     operation: Operation
 }
 
-const TagRender: React.FC<TagRenderProps> = ({ tagId, tagValueId, onChange, operation }) => {
+const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, operation}) => {
 
     const [tag, setTag] = useState<TagData>();
     const [loadingTag, setLoadingTag] = useState(false);
@@ -44,21 +45,35 @@ const TagRender: React.FC<TagRenderProps> = ({ tagId, tagValueId, onChange, oper
 
     return (
         <div>
-            <LoadingOverlay show={loadingTag} />
-            <select
-                required={operation == Operation.FillIn}
-                disabled={operation == Operation.Edit || operation == Operation.View}
-                className="form-input"
-                onChange={e => handleOnchange(e)}
-                value={tagValueId}
-            >
-                <option value="">Selecione o valor</option>
-                {tag?.tagValues && tag.tagValues.map((tagValue) => {
-                    return (
-                        <option key={"tagValue" + tagValue.id} value={tagValue.id}>{tagValue.name}</option>
-                    );
-                })}
-            </select>
+            <LoadingOverlay show={loadingTag}/>
+            <div className="flex items-center space-x-2">
+                <select
+                    required={operation == Operation.FillIn}
+                    disabled={operation == Operation.Edit || operation == Operation.View}
+                    className="form-input"
+                    onChange={e => handleOnchange(e)}
+                    value={tagValueId}
+                >
+                    <option value="">Selecione o valor</option>
+                    <optgroup label="Ativos">
+                        {tag?.tagValues && tag.tagValues.filter(tagValue => tagValue.situation == TagSituation.Ativo).map((tagValue) => {
+                            return (
+                                <option key={"tagValue" + tagValue.id}
+                                        value={tagValue.id}>{tagValue.name} {tagValue.commentary ? (" (" + tagValue.commentary + ")") : null}</option>
+                            );
+                        })}
+                    </optgroup>
+                    <optgroup label="Arquivados">
+                        {tag?.tagValues && tag.tagValues.filter(tagValue => tagValue.situation == TagSituation.Arquivado).map((tagValue) => {
+                            return (
+                                <option key={"tagValue" + tagValue.id}
+                                        value={tagValue.id}>{tagValue.name} {tagValue.commentary ? (" (" + tagValue.commentary + ")") : null}</option>
+                            );
+                        })}
+                    </optgroup>
+                </select>
+                {tag?.commentary ? (<Tooltip text={tag?.commentary}/>) : null}
+            </div>
         </div>
     );
 };
