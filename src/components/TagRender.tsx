@@ -66,7 +66,7 @@ const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, opera
                     <optgroup label="Arquivados">
                         {tag?.tagValues && tag.tagValues.filter(tagValue => tagValue.situation == TagSituation.Arquivado).map((tagValue) => {
                             return (
-                                <option key={"tagValue" + tagValue.id}
+                                <option disabled={true} key={"tagValue" + tagValue.id}
                                         value={tagValue.id}>{tagValue.name} {tagValue.commentary ? (" (" + tagValue.commentary + ")") : null}</option>
                             );
                         })}
