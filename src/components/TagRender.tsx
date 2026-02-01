@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {getTagById} from "../services/tagService";
 import {TagData, TagSituation} from "../models/TagData";
 import LoadingOverlay from "./LoadingOverlay";
@@ -14,30 +14,56 @@ interface TagRenderProps {
     operation: Operation
 }
 
+const tagCache = new Map<number, TagData>();
+const inFlightRequests = new Map<number, Promise<TagData | undefined>>();
+
 const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, operation}) => {
 
     const {t} = useTranslation();
     const [tag, setTag] = useState<TagData>();
     const [loadingTag, setLoadingTag] = useState(false);
+    const lastFetchedIdRef = useRef<number | null>(null);
+
 
 
     const load = useCallback(async () => {
         if (tagId) {
+            debugger;
+            if (lastFetchedIdRef.current === tagId) {
+                return;
+            }
+            const cached = tagCache.get(tagId);
+            if (cached) {
+                setTag(cached);
+                lastFetchedIdRef.current = tagId;
+                return;
+            }
             setLoadingTag(true);
             try {
-                const response = await getTagById(tagId);
-                const tag = response?.data;
-                setTag(tag);
+                let request = inFlightRequests.get(tagId);
+                if (!request) {
+                    request = getTagById(tagId).then((response) => response?.data);
+                    inFlightRequests.set(tagId, request);
+                }
+                const fetched = await request;
+                if (fetched) {
+                    tagCache.set(tagId, fetched);
+                }
+                setTag(fetched);
+                lastFetchedIdRef.current = tagId;
             } finally {
+                inFlightRequests.delete(tagId);
                 setLoadingTag(false);
             }
+        } else {
+            setTag(undefined);
+            lastFetchedIdRef.current = null;
         }
     }, [tagId]);
 
     useEffect(() => {
-        onChange(tagValueId || 0);
         load();
-    }, [load, onChange, tagId, tagValueId]);
+    }, [load]);
 
     const handleOnchange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newValue = parseInt(e.target.value, 10);

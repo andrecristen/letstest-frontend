@@ -31,6 +31,10 @@ const TestCaseForm = () => {
     const [loadingTestCase, setLoadingTestCase] = useState(false);
     const [loadingEnvironments, setLoadingEnvironments] = useState(false);
     const [loadingTestScenarios, setLoadingTestScenarios] = useState(false);
+    const [resolvedProjectId, setResolvedProjectId] = useState<number | null>(null);
+    const lastLoadedTestCaseIdRef = useRef<number | null>(null);
+    const lastLoadedProjectIdRef = useRef<number | null>(null);
+    const loadedTestCaseRefs = useRef<{ environmentId?: number; testScenarioId?: number } | null>(null);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
@@ -39,7 +43,10 @@ const TestCaseForm = () => {
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
 
-    const getProjectId = useCallback(() => parseInt(projectId || `${updatedProjectId}`, 10), [projectId, updatedProjectId]);
+    const getProjectId = useCallback(() => {
+        const paramId = parseInt(projectId || "0", 10);
+        return paramId || resolvedProjectId || 0;
+    }, [projectId, resolvedProjectId]);
     const getTestCaseId = useCallback(() => parseInt(testCaseId || '0', 10), [testCaseId]);
 
     const getTemplates = useCallback(async () => {
@@ -66,7 +73,14 @@ const TestCaseForm = () => {
             setValue('projectId', testCase.projectId);
             setValue('environmentId', testCase.environmentId);
             setValue('testScenarioId', testCase.testScenarioId);
+            loadedTestCaseRefs.current = {
+                environmentId: testCase.environmentId,
+                testScenarioId: testCase.testScenarioId
+            };
             customizableTableRef.current?.setRows(Object.values(testCase.data));
+            if (testCase?.projectId) {
+                setResolvedProjectId(testCase.projectId);
+            }
         } finally {
             setLoadingTestCase(false);
         }
@@ -93,19 +107,37 @@ const TestCaseForm = () => {
     }, [getProjectId]);
 
     const load = useCallback(async () => {
-        if (getProjectId()) {
+        const currentTestCaseId = getTestCaseId();
+        if (currentTestCaseId && lastLoadedTestCaseIdRef.current !== currentTestCaseId) {
+            lastLoadedTestCaseIdRef.current = currentTestCaseId;
+            await getTestCase();
+        }
+
+        const currentProjectId = getProjectId();
+        if (currentProjectId && lastLoadedProjectIdRef.current !== currentProjectId) {
+            lastLoadedProjectIdRef.current = currentProjectId;
             await getTemplates();
             await getEnvironments();
             await getTestScenarios();
-        }
-        if (getTestCaseId()) {
-            await getTestCase();
         }
     }, [getProjectId, getTestCaseId, getTemplates, getEnvironments, getTestScenarios, getTestCase]);
 
     useEffect(() => {
         load();
     }, [load]);
+
+    useEffect(() => {
+        if (!loadedTestCaseRefs.current) return;
+        const { environmentId, testScenarioId } = loadedTestCaseRefs.current;
+
+        if (environmentId && environments.some((environment) => environment.id === environmentId)) {
+            setValue('environmentId', environmentId);
+        }
+
+        if (testScenarioId && testScenarios.some((testScenario) => testScenario.id === testScenarioId)) {
+            setValue('testScenarioId', testScenarioId);
+        }
+    }, [environments, testScenarios, setValue]);
 
     const onSubmit: SubmitHandler<TestCaseData> = async (data) => {
         if (!rows.length) {

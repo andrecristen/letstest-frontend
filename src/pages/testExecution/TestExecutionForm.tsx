@@ -36,6 +36,7 @@ const TestExecutionForm = () => {
     const [loadingDevices, setLoadingDevices] = useState(false);
     const [timerFinished, setTimerFinished] = useState<Boolean>(false);
     const [timerTime, setTimerTime] = useState<number>(0);
+    const lastLoadedTestCaseIdRef = useRef<number | null>(null);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
@@ -86,7 +87,9 @@ const TestExecutionForm = () => {
         if (getProjectId()) {
             await getTemplates();
         }
-        if (getTestCaseId()) {
+        const currentTestCaseId = getTestCaseId();
+        if (currentTestCaseId && lastLoadedTestCaseIdRef.current !== currentTestCaseId) {
+            lastLoadedTestCaseIdRef.current = currentTestCaseId;
             await getTestCase();
         }
         await getDevices();

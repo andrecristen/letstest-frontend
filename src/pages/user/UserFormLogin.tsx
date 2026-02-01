@@ -54,9 +54,6 @@ const UserFormLogin = () => {
             <img src={logo} alt="Logo login" className="h-16" />
           </button>
           <div className="space-y-3">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ocean">
-              Letstest
-            </p>
             <h1 className="font-display text-3xl text-ink sm:text-4xl">
               {t("auth.loginTitle")}
             </h1>
