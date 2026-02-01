@@ -24,7 +24,7 @@ import {
   markNotificationRead,
   NotificationItem,
 } from "../services/notificationService";
-import { io, Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 
 interface Menu {
   name: string;
@@ -85,7 +85,6 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
   useEffect(() => {
     loadUnreadCount();
-    const baseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
     let pollId: number | undefined;
 
     pollId = window.setInterval(() => {
