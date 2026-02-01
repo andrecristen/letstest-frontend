@@ -91,7 +91,7 @@ const TestScenarioForm = () => {
         } finally {
             setLoadingProject(false);
         }
-    }, [getProjectId]);
+    }, [getProjectId, getTestScenarioId, setValue]);
 
     const load = useCallback(async () => {
         if (getProjectId()) {

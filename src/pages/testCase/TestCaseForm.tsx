@@ -18,7 +18,7 @@ import { getAllTestScenariosByProjects } from '../../services/testScenario';
 import { TestScenarioData } from '../../models/TestScenarioData';
 import { useTranslation } from 'react-i18next';
 import { getProjectById } from '../../services/projectService';
-import { ApprovalStatusEnum, getApprovalStatusLabel, getApprovalStatusVariant } from '../../models/ApprovalStatus';
+import { ApprovalStatusEnum } from '../../models/ApprovalStatus';
 
 const TestCaseForm = () => {
     const { t } = useTranslation();
@@ -35,7 +35,6 @@ const TestCaseForm = () => {
     const [loadingTestScenarios, setLoadingTestScenarios] = useState(false);
     const [loadingProject, setLoadingProject] = useState(false);
     const [approvalEnabled, setApprovalEnabled] = useState(false);
-    const [approvalStatus, setApprovalStatus] = useState<number | null>(null);
     const [hasExecutions, setHasExecutions] = useState(false);
     const [resolvedProjectId, setResolvedProjectId] = useState<number | null>(null);
     const lastLoadedTestCaseIdRef = useRef<number | null>(null);
@@ -80,7 +79,6 @@ const TestCaseForm = () => {
             setValue('environmentId', testCase.environmentId);
             setValue('testScenarioId', testCase.testScenarioId);
             setValue('dueDate', testCase.dueDate ? testCase.dueDate.split("T")[0] : "");
-            setApprovalStatus(testCase.approvalStatus ?? ApprovalStatusEnum.Draft);
             setHasExecutions((testCase.testExecutions || []).length > 0);
             loadedTestCaseRefs.current = {
                 environmentId: testCase.environmentId,
@@ -105,9 +103,7 @@ const TestCaseForm = () => {
             const enabled = Boolean(project?.approvalEnabled && project?.approvalTestCaseEnabled);
             setApprovalEnabled(enabled);
             if (!enabled) {
-                setApprovalStatus(ApprovalStatusEnum.Approved);
-            } else if (!getTestCaseId()) {
-                setApprovalStatus(ApprovalStatusEnum.Draft);
+                return;
             }
         } finally {
             setLoadingProject(false);

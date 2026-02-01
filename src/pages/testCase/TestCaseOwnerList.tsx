@@ -73,7 +73,7 @@ const TestCaseProjectOwnerList: React.FC = () => {
         setScenarioDraft(null);
     };
 
-    const loadTestScenarios = async () => {
+    const loadTestScenarios = useCallback(async () => {
         if (!projectId) return;
         try {
             const response = await getAllTestScenariosByProjects(parseInt(projectId, 10), 1, 200);
@@ -81,11 +81,11 @@ const TestCaseProjectOwnerList: React.FC = () => {
         } catch {
             notifyProvider.error(t("testScenario.loadError"));
         }
-    };
+    }, [projectId, t]);
 
     React.useEffect(() => {
         loadTestScenarios();
-    }, [projectId]);
+    }, [loadTestScenarios]);
 
     return (
         <PainelContainer>

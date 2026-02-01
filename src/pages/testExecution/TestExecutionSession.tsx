@@ -36,13 +36,13 @@ const TestExecutionSession: React.FC = () => {
     const getTestCaseId = useCallback(() => parseInt(testCaseId ?? "0", 10), [testCaseId]);
     const getProjectId = useCallback(() => parseInt(projectId ?? "0", 10), [projectId]);
 
-    const resolveStatus = (assignmentData: typeof assignment): AssignmentStatus => {
+    const resolveStatus = useCallback((assignmentData: typeof assignment): AssignmentStatus => {
         if (!assignmentData) return "idle";
         if (assignmentData.finishedAt) return "finished";
         if (assignmentData.lastPausedAt) return "paused";
         if (assignmentData.startedAt) return "running";
         return "idle";
-    };
+    }, []);
 
     const load = useCallback(async () => {
         const currentId = getTestCaseId();
@@ -78,7 +78,7 @@ const TestExecutionSession: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [getTestCaseId, t]);
+    }, [getTestCaseId, t, resolveStatus]);
 
     useEffect(() => {
         load();
@@ -95,6 +95,7 @@ const TestExecutionSession: React.FC = () => {
     }, [status, assignment?.startedAt, assignment?.finishedAt, assignment?.lastPausedAt]);
 
     const elapsedSeconds = useMemo(() => {
+        const _ = tick;
         if (!assignment?.startedAt) return 0;
         const end = assignment.finishedAt
             ? assignment.finishedAt
