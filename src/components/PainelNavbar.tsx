@@ -9,6 +9,7 @@ import {
   FiLogOut,
   FiMail,
   FiGlobe,
+  FiBarChart2,
 } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -125,6 +126,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   ] as const;
 
   const menus: Menu[] = [
+    { name: t("nav.dashboard"), route: "/dashboard", icon: <FiBarChart2 /> },
     { name: t("nav.findProjects"), route: "/find-new-projects", icon: <FiSearch /> },
     { name: t("nav.manageProjects"), route: "/my-owner-projects", icon: <FiGitPullRequest /> },
     { name: t("nav.testProjects"), route: "/my-test-projects", icon: <FiPlay /> },

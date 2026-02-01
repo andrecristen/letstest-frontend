@@ -29,6 +29,7 @@ import TagForm from "../pages/tags/TagForm";
 import TestScenarioList from "../pages/testScenario/TestScenarioList";
 import TestScenarioForm from "../pages/testScenario/TestScenarioForm";
 import ProjectOverView from "../pages/projects/ProjectOverView";
+import ProjectDashboard from "../pages/dashboard/ProjectDashboard";
 import { useTranslation } from "react-i18next";
 
 const AppRoutes = () => {
@@ -43,6 +44,7 @@ const AppRoutes = () => {
                 <Route path="/register" element={<UserFormRegister />}></Route>
                 {/* Private Access */}
                 {/* Manager */}
+                <Route path="/dashboard" element={<ProjectDashboard />}></Route>
                 <Route path="/my-owner-projects" element={<ProjectOwnerList />}></Route>
                 <Route path="/project/detail/:projectId" element={<ProjectPageView />}></Route>
                 <Route path="/project/testers/:projectId" element={<InvolvementOwnerList title={t("projects.testersLabel")} type={InvolvementTypeEnum.Tester} />}></Route>

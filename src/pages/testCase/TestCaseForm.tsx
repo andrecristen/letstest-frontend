@@ -39,7 +39,6 @@ const TestCaseForm = () => {
 
     const updateTemplate = watch('templateId');
     const updateId = watch('id');
-    const updatedProjectId = watch('projectId');
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
 
