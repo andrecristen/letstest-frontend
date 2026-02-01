@@ -130,7 +130,7 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ open, onClose, projec
   return (
     <>
       <LoadingOverlay show={invitingUserId !== null} />
-      <Modal open={open} onClose={onClose} className="max-w-screen-2xl w-full">
+      <Modal open={open} onClose={onClose} className="my-6 max-w-screen-2xl w-full">
         <div className="flex max-h-screen flex-col space-y-6">
           <div className="space-y-2">
             <h3 className="font-display text-xl text-ink">{t("involvement.inviteModalTitle")}</h3>
