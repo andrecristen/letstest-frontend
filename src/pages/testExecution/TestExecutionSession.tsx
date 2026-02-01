@@ -26,7 +26,7 @@ const TestExecutionSession: React.FC = () => {
         totalPausedSeconds?: number;
         finishedAt?: Date | null;
     } | null>(null);
-    const [tick, setTick] = useState(0);
+    const [now, setNow] = useState(Date.now());
     const [testCaseName, setTestCaseName] = useState("");
     const [environmentName, setEnvironmentName] = useState("");
     const [environmentDescription, setEnvironmentDescription] = useState("");
@@ -89,7 +89,7 @@ const TestExecutionSession: React.FC = () => {
             return;
         }
         const interval = setInterval(() => {
-            setTick((prev) => prev + 1);
+            setNow(Date.now());
         }, 1000);
         return () => clearInterval(interval);
     }, [status, assignment?.startedAt, assignment?.finishedAt, assignment?.lastPausedAt]);
@@ -100,11 +100,11 @@ const TestExecutionSession: React.FC = () => {
             ? assignment.finishedAt
             : assignment.lastPausedAt
                 ? assignment.lastPausedAt
-                : new Date();
+                : new Date(now);
         const totalPaused = assignment.totalPausedSeconds ?? 0;
         const diff = Math.floor((end.getTime() - assignment.startedAt.getTime()) / 1000) - totalPaused;
         return Math.max(0, diff);
-    }, [assignment, tick]);
+    }, [assignment, now]);
 
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
