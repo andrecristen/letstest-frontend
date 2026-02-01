@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { AuthData } from "../../models/AuthData";
 import { api } from "./apiBaseProvider";
 import { RegisterData } from "../../models/RegisterData";

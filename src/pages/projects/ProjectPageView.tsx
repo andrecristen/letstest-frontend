@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FiDownload, FiEdit, FiFilePlus, FiFileText, FiInbox, FiMonitor, FiMove, FiUser, FiUserPlus } from 'react-icons/fi';
 import { useNavigate, useParams } from 'react-router-dom';
 import logo from '../../assets/logo-transparente.png';
@@ -24,18 +24,18 @@ const ProjectPageView: React.FC = () => {
     const [project, setProject] = useState<ProjectData | null>(null);
     const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
 
-    useEffect(() => {
-        loadProject();
-    }, []);
-
-    const loadProject = async () => {
+    const loadProject = useCallback(async () => {
         try {
             const response = await getProjectById(parseInt(projectId || '0'));
             setProject(response?.data);
         } catch (error) {
             notifyProvider.error(t('projects.loadError'));
         }
-    };
+    }, [projectId, t]);
+
+    useEffect(() => {
+        loadProject();
+    }, [loadProject]);
 
     const handleEditClick = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -89,7 +89,7 @@ const ProjectPageView: React.FC = () => {
                                 </Badge>
                             </div>
                             <p className="text-sm text-ink/60">{project.description}</p>
-                            {project.creatorId == tokenProvider.getSessionUserId() ? (
+                            {project.creatorId === tokenProvider.getSessionUserId() ? (
                                 <div className="flex justify-end">
                                     <Button onClick={handleEditClick} leadingIcon={<FiEdit />}>
                                         {t('common.edit')}

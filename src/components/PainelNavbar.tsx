@@ -164,10 +164,10 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
           {menus.map((menu) => {
             const isActive = menu.route === menuSelected;
             return (
-              <a
+              <button
                 key={menu.name}
+                type="button"
                 onClick={(event) => handleClickMenu(event, menu.route)}
-                href="#"
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all",
                   isActive
@@ -178,7 +178,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
               >
                 <span className="text-lg">{menu.icon}</span>
                 {isMenuOpen && <span className="font-medium">{menu.name}</span>}
-              </a>
+              </button>
             );
           })}
         </div>

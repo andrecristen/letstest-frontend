@@ -10,9 +10,10 @@ import { useTranslation } from 'react-i18next';
 
 interface HabilityFormProps {
     onHabilityAdded: () => void;
+    variant?: "section" | "compact";
 }
 
-const HabilityForm: React.FC<HabilityFormProps> = ({ onHabilityAdded }) => {
+const HabilityForm: React.FC<HabilityFormProps> = ({ onHabilityAdded, variant = "section" }) => {
 
     const { t } = useTranslation();
     const { register, handleSubmit, reset, formState: { errors } } = useForm<Omit<HabilityData, 'id' | 'userId'>>();
@@ -37,16 +38,22 @@ const HabilityForm: React.FC<HabilityFormProps> = ({ onHabilityAdded }) => {
     };
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("habilities.header")}</p>
-                    <h2 className="font-display text-xl text-ink">{t("habilities.newTitle")}</h2>
+        <div className={variant === "section" ? "space-y-4" : ""}>
+            {variant === "section" ? (
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("habilities.header")}</p>
+                        <h2 className="font-display text-xl text-ink">{t("habilities.newTitle")}</h2>
+                    </div>
+                    <Button type="button" onClick={openForm} leadingIcon={<FiPlus />}>
+                        {t("common.add")}
+                    </Button>
                 </div>
+            ) : (
                 <Button type="button" onClick={openForm} leadingIcon={<FiPlus />}>
-                    {t("common.add")}
+                    {t("habilities.addButton")}
                 </Button>
-            </div>
+            )}
             <FormDialogBase
                 ref={dialogRef}
                 title={t("habilities.newTitle")}

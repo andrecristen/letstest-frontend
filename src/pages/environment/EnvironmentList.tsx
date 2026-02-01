@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import EnvironmentItem from "./EnvironmentItem";
 import PainelContainer from "../../components/PainelContainer";
 import TitleContainer from "../../components/TitleContainer";
@@ -17,7 +17,6 @@ import { FiFilter, FiPlus, FiXCircle } from "react-icons/fi";
 const EnvironmentList: React.FC = () => {
 
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { projectId } = useParams();
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [filterDraft, setFilterDraft] = useState(searchTerm);

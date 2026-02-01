@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FiCopy, FiEdit, FiPlus, FiTrash, FiXSquare } from 'react-icons/fi';
 import notifyProvider from '../../infra/notifyProvider';
 import EditForm, { Column, ColumnType } from './ColumnFormEditor';
@@ -58,21 +58,28 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
     files: column.files ? [...column.files] : undefined,
   });
 
-  useEffect(() => {
-    if (!appliedInitialColumnCount && !columnsRow.length) {
-      addColumn();
-      setAppliedInitialColumnCount(true);
+  const applyUpdateColumnsRow = useCallback((updatedcolumnsRow: Column[]) => {
+    setcolumnsRow(updatedcolumnsRow);
+    if (onChange) {
+      onChange(updatedcolumnsRow);
     }
-  }, [columnsRow]);
+  }, [onChange]);
 
-  const addColumn = () => {
+  const addColumn = useCallback(() => {
     if (columnsRow.length < maxColumnCount) {
       const updatedcolumnsRow = [...columnsRow, { id: getIdColumn(), type: ColumnType.Text, content: '' }];
       applyUpdateColumnsRow(updatedcolumnsRow);
     } else {
       notifyProvider.info(t('customTable.maxColumnsInfo', { count: maxColumnCount }));
     }
-  };
+  }, [applyUpdateColumnsRow, columnsRow, maxColumnCount, t]);
+
+  useEffect(() => {
+    if (!appliedInitialColumnCount && !columnsRow.length) {
+      addColumn();
+      setAppliedInitialColumnCount(true);
+    }
+  }, [addColumn, appliedInitialColumnCount, columnsRow.length]);
 
   const deleteColumn = (index: number) => {
     if (columnsRow.length > minColumnCount) {
@@ -149,23 +156,16 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
     }
   };
 
-  const applyUpdateColumnsRow = (updatedcolumnsRow: Column[]) => {
-    setcolumnsRow(updatedcolumnsRow);
-    if (onChange) {
-      onChange(updatedcolumnsRow);
-    }
-  }
-
   const isEdit = () => {
-    return operation == Operation.Edit;
+    return operation === Operation.Edit;
   }
 
   const isFillIn = () => {
-    return operation == Operation.FillIn;
+    return operation === Operation.FillIn;
   }
 
   const isView = () => {
-    return operation == Operation.View;
+    return operation === Operation.View;
   }
 
   const getOperation = () => {
@@ -184,15 +184,15 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
         >
           {showHeader ? (
             <div
-              className={`flex items-center justify-between border-b border-ink/10 px-2 py-1 text-[11px] uppercase tracking-[0.2em] text-ink/50 ${operation == Operation.Edit && !hiddeColumnsActions ? "cursor-move" : ""}`}
-              draggable={operation == Operation.Edit && !hiddeColumnsActions}
+              className={`flex items-center justify-between border-b border-ink/10 px-2 py-1 text-[11px] uppercase tracking-[0.2em] text-ink/50 ${operation === Operation.Edit && !hiddeColumnsActions ? "cursor-move" : ""}`}
+              draggable={operation === Operation.Edit && !hiddeColumnsActions}
               onDragStart={() => handleDragStart(index)}
               onDragOver={(event) => event.preventDefault()}
               onDrop={() => handleDrop(index)}
               onDragEnd={handleDragEnd}
             >
               <span className="flex-1 text-center">{getColumnLabel(index)}</span>
-              {operation == Operation.Edit && !hiddeColumnsActions ? (
+              {operation === Operation.Edit && !hiddeColumnsActions ? (
                 <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                   <button
                     type="button"
@@ -281,7 +281,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
                 <FileViewer files={column.files || []} />
               )}
               {column.type === ColumnType.List && (
-                <CustomizableTable defaultRows={column.rows} maxColumnCount={1} forceHiddeColumnsActions={true} forceShowAddRows={getOperation() == Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
+                <CustomizableTable defaultRows={column.rows} maxColumnCount={1} forceHiddeColumnsActions={true} forceShowAddRows={getOperation() === Operation.FillIn} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
               )}
               {column.type === ColumnType.Table && (
                 <CustomizableTable defaultRows={column.rows} operation={getOperation()} onChange={(rows) => { updateColumnRows(rows, index) }} />
@@ -294,7 +294,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
           </div>
         </div>
       ))}
-      {operation == Operation.Edit && maxColumnCount > 1 ? (
+      {operation === Operation.Edit && maxColumnCount > 1 ? (
         <button
           type="button"
           onClick={addColumn}

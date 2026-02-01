@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { create, getById, update } from '../../services/testCaseService';
 import notifyProvider from '../../infra/notifyProvider';
@@ -39,25 +39,10 @@ const TestCaseForm = () => {
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
 
-    useEffect(() => {
-        load();
-    }, [projectId, testCaseId, updatedProjectId]);
+    const getProjectId = useCallback(() => parseInt(projectId || `${updatedProjectId}`, 10), [projectId, updatedProjectId]);
+    const getTestCaseId = useCallback(() => parseInt(testCaseId || '0', 10), [testCaseId]);
 
-    const getProjectId = () => parseInt(projectId || updatedProjectId + "", 10);
-    const getTestCaseId = () => parseInt(testCaseId || '0', 10);
-
-    const load = async () => {
-        if (getProjectId()) {
-            await getTemplates();
-            await getEnvironments();
-            await getTestScenarios();
-        }
-        if (getTestCaseId()) {
-            await getTestCase();
-        }
-    };
-
-    const getTemplates = async () => {
+    const getTemplates = useCallback(async () => {
         setLoadingTemplates(true);
         try {
             const response = await getAllByProjectAndType(getProjectId(), TemplateTypeEnum.TestCaseDefinition, 1, 200);
@@ -69,9 +54,9 @@ const TestCaseForm = () => {
         } finally {
             setLoadingTemplates(false);
         }
-    };
+    }, [getProjectId, t]);
 
-    const getTestCase = async () => {
+    const getTestCase = useCallback(async () => {
         setLoadingTestCase(true);
         try {
             const response = await getById(getTestCaseId());
@@ -85,9 +70,9 @@ const TestCaseForm = () => {
         } finally {
             setLoadingTestCase(false);
         }
-    };
+    }, [getTestCaseId, setValue]);
 
-    const getEnvironments = async () => {
+    const getEnvironments = useCallback(async () => {
         setLoadingEnvironments(true);
         try {
             const response = await getAllByProjects(getProjectId(), 1, 200);
@@ -95,9 +80,9 @@ const TestCaseForm = () => {
         } finally {
             setLoadingEnvironments(false);
         }
-    };
+    }, [getProjectId]);
 
-    const getTestScenarios = async () => {
+    const getTestScenarios = useCallback(async () => {
         setLoadingTestScenarios(true);
         try {
             const response = await getAllTestScenariosByProjects(getProjectId(), 1, 200);
@@ -105,7 +90,22 @@ const TestCaseForm = () => {
         } finally {
             setLoadingTestScenarios(false);
         }
-    };
+    }, [getProjectId]);
+
+    const load = useCallback(async () => {
+        if (getProjectId()) {
+            await getTemplates();
+            await getEnvironments();
+            await getTestScenarios();
+        }
+        if (getTestCaseId()) {
+            await getTestCase();
+        }
+    }, [getProjectId, getTestCaseId, getTemplates, getEnvironments, getTestScenarios, getTestCase]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     const onSubmit: SubmitHandler<TestCaseData> = async (data) => {
         if (!rows.length) {

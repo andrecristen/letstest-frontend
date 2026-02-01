@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { getById } from '../../services/testCaseService';
 import { create } from '../../services/testExecutionService';
@@ -41,24 +41,10 @@ const TestExecutionForm = () => {
     const updateTemplate = watch('templateId');
     const updateDevice = watch('deviceId');
 
-    useEffect(() => {
-        load();
-    }, []);
+    const getProjectId = useCallback(() => parseInt(projectId ?? '0', 10), [projectId]);
+    const getTestCaseId = useCallback(() => parseInt(testCaseId ?? '0', 10), [testCaseId]);
 
-    const getProjectId = () => parseInt(projectId ?? '0', 10);
-    const getTestCaseId = () => parseInt(testCaseId ?? '0', 10);
-
-    const load = async () => {
-        if (getProjectId()) {
-            await getTemplates();
-        }
-        if (getTestCaseId()) {
-            await getTestCase();
-        }
-        await getDevices();
-    };
-
-    async function getTemplates() {
+    const getTemplates = useCallback(async () => {
         setLoadingTemplates(true);
         const response = await getAllByProjectAndType(
             getProjectId(),
@@ -72,9 +58,9 @@ const TestExecutionForm = () => {
             notifyProvider.info(t("testExecution.noTemplatesInfo"));
         }
         setLoadingTemplates(false);
-    }
+    }, [getProjectId, t]);
 
-    async function getTestCase() {
+    const getTestCase = useCallback(async () => {
         setLoadingTestCase(true);
         const response = await getById(getTestCaseId());
         setValue('id', response?.data.id);
@@ -86,15 +72,29 @@ const TestExecutionForm = () => {
             customizableTableScenarioCaseRef.current?.setRows(newRowsTestScenario);
         }
         setLoadingTestCase(false);
-    }
+    }, [getTestCaseId, setValue]);
 
-    async function getDevices() {
+    const getDevices = useCallback(async () => {
         setLoadingDevices(true);
         const response = await getDevicesByUserId(tokenProvider.getSessionUserId(), 1, 200);
         const devices = response?.data?.data || [];
         setDevices(devices);
         setLoadingDevices(false);
-    }
+    }, []);
+
+    const load = useCallback(async () => {
+        if (getProjectId()) {
+            await getTemplates();
+        }
+        if (getTestCaseId()) {
+            await getTestCase();
+        }
+        await getDevices();
+    }, [getProjectId, getTestCaseId, getTemplates, getTestCase, getDevices]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     const onSubmit: SubmitHandler<TestCaseData> = async (data) => {
         let dataSend: TestExecutionData = {

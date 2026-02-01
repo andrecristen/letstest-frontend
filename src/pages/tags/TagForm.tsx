@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import notifyProvider from '../../infra/notifyProvider';
 import PainelContainer from '../../components/PainelContainer';
@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 const TagForm = () => {
     const { t } = useTranslation();
     const { projectId, tagId } = useParams();
-    const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<TagData>();
+    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<TagData>();
     const [loadingTag, setLoadingTag] = useState(false);
     const [tagValues, setTagValues] = useState<TagValueData[]>([]);
     const navigate = useNavigate();
@@ -26,18 +26,14 @@ const TagForm = () => {
     const isViewMode = location.pathname.includes("view");
     const isAddMode = location.pathname.includes("add");
 
-    useEffect(() => {
-        load();
-    }, [projectId, tagId]);
-
     const getProjectId = () => parseInt(projectId || updatedProjectId + "", 10);
-    const getTagId = () => parseInt(tagId || "0", 10);
 
-    const load = async () => {
-        if (getTagId()) {
+    const load = useCallback(async () => {
+        const tagNumericId = parseInt(tagId || "0", 10);
+        if (tagNumericId) {
             setLoadingTag(true);
             try {
-                const response = await getTagById(getTagId());
+                const response = await getTagById(tagNumericId);
                 const tag = response?.data;
                 setValue('id', tag.id);
                 setValue('name', tag.name);
@@ -48,7 +44,11 @@ const TagForm = () => {
                 setLoadingTag(false);
             }
         }
-    };
+    }, [tagId, setValue]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     const onSubmit: SubmitHandler<TagData> = async (data) => {
         try {

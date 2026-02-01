@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import PainelContainer from '../../components/PainelContainer';
 import { UserData } from '../../models/UserData';
@@ -53,18 +53,18 @@ const UserFormProfileView = () => {
         { enabled: Boolean(userId) }
     );
 
-    useEffect(() => {
-        load();
-    }, []);
-
-    const load = async () => {
+    const load = useCallback(async () => {
         const responseUser = await getById(parseInt(userId || "0", 10));
         setValue('id', responseUser?.data.id);
         setValue('name', responseUser?.data.name);
         setValue('email', responseUser?.data.email);
         setValue('bio', responseUser?.data.bio);
         setLoading(false);
-    };
+    }, [setValue, userId]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     return (
         <PainelContainer>

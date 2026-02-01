@@ -23,6 +23,7 @@ export const useInfiniteList = <T>(
   const lastLoadedPageRef = useRef(0);
   const loadPageRef = useRef(loadPage);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const depsRef = useRef<DependencyList>(deps);
 
   useEffect(() => {
     loadPageRef.current = loadPage;
@@ -63,9 +64,16 @@ export const useInfiniteList = <T>(
 
   useEffect(() => {
     if (!enabled) return;
-    reset();
-    load(1);
-  }, [enabled, reset, load, ...deps]);
+    const prevDeps = depsRef.current;
+    const depsChanged =
+      prevDeps.length !== deps.length ||
+      deps.some((dep, index) => dep !== prevDeps[index]);
+    if (depsChanged) {
+      depsRef.current = deps;
+      reset();
+      load(1);
+    }
+  }, [deps, enabled, reset, load]);
 
   useEffect(() => {
     if (!sentinelRef.current || !enabled || !hasNext) return;

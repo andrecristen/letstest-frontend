@@ -29,7 +29,7 @@ const ReportForm = React.forwardRef<any, any>((props, ref) => {
 
     const onSubmit: SubmitHandler<ReportData> = async (data) => {
         const response = await createReport(props.testExecution?.id, data);
-        if (response?.status == 201) {
+        if (response?.status === 201) {
             notifyProvider.success(t("reports.createSuccess"));
         } else {
             notifyProvider.error(t("reports.createError"));

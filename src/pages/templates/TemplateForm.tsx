@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FiSave } from 'react-icons/fi';
 import PainelContainer from '../../components/PainelContainer';
 import TitleContainer from '../../components/TitleContainer';
@@ -27,13 +27,7 @@ const TemplateForm = () => {
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
 
-    useEffect(() => {
-        if (!isLoadedTemplateCopy) {
-            loadOfCopy();
-        }
-    }, [rows]);
-
-    const loadOfCopy = async () => {
+    const loadOfCopy = useCallback(async () => {
         setIsLoadedTemplateCopy(true);
         if (templateIdCopy) {
             setLoadingTemplate(true);
@@ -49,7 +43,13 @@ const TemplateForm = () => {
             }
             setLoadingTemplate(false);
         }
-    }
+    }, [templateIdCopy, isViewMode, setValue]);
+
+    useEffect(() => {
+        if (!isLoadedTemplateCopy) {
+            loadOfCopy();
+        }
+    }, [isLoadedTemplateCopy, loadOfCopy]);
 
     function getProjectId(): number {
         return parseInt(projectId ? projectId : "0");
@@ -58,7 +58,7 @@ const TemplateForm = () => {
     const onSubmit: SubmitHandler<TemplateData> = async (data, event) => {
         event?.preventDefault();
         event?.stopPropagation();
-        if (event?.target?.attributes?.name?.nodeValue == "template") {
+        if (event?.target?.attributes?.name?.nodeValue === "template") {
             if (!rows.length) {
                 notifyProvider.error(t("templates.minRowRequired"));
                 return;
@@ -68,7 +68,7 @@ const TemplateForm = () => {
             );
             setLoadingTemplate(true);
             const response = await create(getProjectId(), data);
-            if (response?.status == 201) {
+            if (response?.status === 201) {
                 notifyProvider.success(t("templates.createSuccess"));
                 navigate(-1);
             } else {

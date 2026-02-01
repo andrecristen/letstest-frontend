@@ -10,9 +10,10 @@ import { useTranslation } from 'react-i18next';
 
 interface DeviceFormProps {
   onDeviceAdded: () => void;
+  variant?: "section" | "compact";
 }
 
-const DeviceForm: React.FC<DeviceFormProps> = ({ onDeviceAdded }) => {
+const DeviceForm: React.FC<DeviceFormProps> = ({ onDeviceAdded, variant = "section" }) => {
   const { t } = useTranslation();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<Omit<DeviceData, 'id' | 'userId'>>();
   const dialogRef = useRef<FormDialogBaseExtendsRef>(null);
@@ -36,16 +37,22 @@ const DeviceForm: React.FC<DeviceFormProps> = ({ onDeviceAdded }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("devices.header")}</p>
-          <h2 className="font-display text-xl text-ink">{t("devices.newTitle")}</h2>
+    <div className={variant === "section" ? "space-y-4" : ""}>
+      {variant === "section" ? (
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("devices.header")}</p>
+            <h2 className="font-display text-xl text-ink">{t("devices.newTitle")}</h2>
+          </div>
+          <Button type="button" onClick={openForm} leadingIcon={<FiPlus />}>
+            {t("common.add")}
+          </Button>
         </div>
+      ) : (
         <Button type="button" onClick={openForm} leadingIcon={<FiPlus />}>
-          {t("common.add")}
+          {t("devices.addButton")}
         </Button>
-      </div>
+      )}
       <FormDialogBase
         ref={dialogRef}
         title={t("devices.newTitle")}

@@ -84,6 +84,9 @@ const pt = {
   devices: {
     header: "Dispositivos",
     newTitle: "Novo dispositivo",
+    addButton: "Adicionar dispositivo",
+    searchLabel: "Buscar por dispositivo",
+    searchPlaceholder: "Marca, modelo ou sistema",
     addSuccess: "Dispositivo adicionado com sucesso.",
     addError: "Erro ao adicionar dispositivo, tente novamente",
     deleteSuccess: "Dispositivo excluido com sucesso.",
@@ -95,6 +98,9 @@ const pt = {
   habilities: {
     header: "Habilidades",
     newTitle: "Nova habilidade",
+    addButton: "Adicionar habilidade",
+    searchLabel: "Buscar por habilidade",
+    searchPlaceholder: "Buscar por habilidade...",
     addSuccess: "Habilidade adicionada com sucesso.",
     addError: "Erro ao adicionar habilidade, tente novamente",
     descriptionLabel: "Descricao",

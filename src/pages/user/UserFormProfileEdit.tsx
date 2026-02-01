@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import PainelContainer from '../../components/PainelContainer';
 import { FiSmartphone, FiSmile } from 'react-icons/fi';
@@ -19,10 +19,6 @@ const UserFormProfileEdit = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        load();
-    }, []);
-
     const onSubmit: SubmitHandler<UserData> = async (data) => {
         const response = await update(tokenProvider.getSessionUserId(), data);
         if (response?.status === 200 || response?.status === 201) {
@@ -32,14 +28,18 @@ const UserFormProfileEdit = () => {
         }
     };
 
-    const load = async () => {
+    const load = useCallback(async () => {
         const response = await getMe();
         setValue('id', response?.data.id);
         setValue('name', response?.data.name);
         setValue('email', response?.data.email);
         setValue('bio', response?.data.bio);
         setLoading(false);
-    };
+    }, [setValue]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     return (
         <PainelContainer>

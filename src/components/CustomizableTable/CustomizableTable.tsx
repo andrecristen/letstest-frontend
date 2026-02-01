@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useState } from 'react';
+import React, { useImperativeHandle, useState } from 'react';
 import { FiCopy, FiPlus, FiTrash } from 'react-icons/fi';
 import CustomizableRow, { CustomizableRowProps, Operation } from './CustomizableRow';
 import notifyProvider from '../../infra/notifyProvider';
@@ -41,7 +41,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
 
     const getDefaultsRows = (): CustomizableTableRows[] => {
         let defaultRows: CustomizableTableRows[] = props.defaultRows ?? [];
-        if (props.operation == Operation.Edit) {
+        if (props.operation === Operation.Edit) {
             defaultRows = [
                 { id: getIdRow(), minColumnCount: 1, maxColumnCount: getMaxColumnCount(), columns: [] },
             ];
@@ -51,10 +51,6 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
 
     const [customizableTableRows, setRows] = useState<CustomizableTableRows[]>(getDefaultsRows());
     const [draggedRowIndex, setDraggedRowIndex] = useState<number | null>(null);
-
-    useEffect(() => {
-
-    }, [customizableTableRows]);
 
     const updateRow = (index: number, updatedColumns: any[]) => {
         const updatedRows = [...customizableTableRows];
@@ -149,7 +145,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
                     {props.operation !== Operation.View ? (
                         <div
                             className="flex min-w-[40px] flex-col items-center justify-center rounded-md border border-ink/10 bg-paper/70 text-xs font-semibold text-ink/60 cursor-move"
-                            draggable={props.operation == Operation.Edit || props.forceShowAddRows}
+                            draggable={props.operation === Operation.Edit || props.forceShowAddRows}
                             onDragStart={() => handleRowDragStart(index)}
                             onDragEnd={handleRowDragEnd}
                         >
@@ -166,7 +162,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
                         hiddeColumnsActions={props.forceHiddeColumnsActions}
                         onChange={(updatedColumns) => updateRow(index, updatedColumns)}
                     />
-                    {props.operation == Operation.Edit || props.forceShowAddRows ? (
+                    {props.operation === Operation.Edit || props.forceShowAddRows ? (
                         <div className="flex flex-col overflow-hidden rounded-lg border border-ink/10 bg-paper/70">
                             <button
                                 type="button"
@@ -188,7 +184,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
                     ) : null}
                 </div>
             ))}
-            {props.operation == Operation.Edit || props.forceShowAddRows ? (
+            {props.operation === Operation.Edit || props.forceShowAddRows ? (
                 <button
                     type="button"
                     onClick={addRow}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import FormDialogBase from "../FormDialogBase";
 import { CustomizableTableRows } from "./CustomizableTable";
@@ -89,14 +89,7 @@ const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
         label: t(COLUMN_TYPE_LABEL_KEYS[type]),
     }));
 
-    useEffect(() => {
-        Object.keys(column).forEach((key) => {
-            setValue(key as keyof Column, column[key as keyof Column]);
-        });
-        loadTags();
-    }, [column, setValue]);
-
-    const loadTags = async () => {
+    const loadTags = useCallback(async () => {
         if (projectId) {
             setLoadingTags(true);
             try {
@@ -108,7 +101,14 @@ const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
                 setLoadingTags(false);
             }
         }
-    };
+    }, [projectId, t]);
+
+    useEffect(() => {
+        Object.keys(column).forEach((key) => {
+            setValue(key as keyof Column, column[key as keyof Column]);
+        });
+        loadTags();
+    }, [column, loadTags, setValue]);
 
     const callOnSubmit: SubmitHandler<Column> = async (data, event) => {
         event?.preventDefault();
@@ -148,16 +148,16 @@ const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
                 </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-                {TYPES_CONTENT_EDIT.some((columnType) => columnType == updateType) ? (
+                {TYPES_CONTENT_EDIT.some((columnType) => columnType === updateType) ? (
                     <Field label={t("customTable.contentLabel")}>
                         <Input
                             {...register("content")}
-                            required={TYPES_CONTENT_EDIT_REQUIRED.some((columnType) => columnType == updateType)}
+                            required={TYPES_CONTENT_EDIT_REQUIRED.some((columnType) => columnType === updateType)}
                             placeholder={t("customTable.contentPlaceholder")}
                         />
                     </Field>
                 ) : null}
-                {TYPES_CONTENT_PLACEHOLDER.some((columnType) => columnType == updateType) ? (
+                {TYPES_CONTENT_PLACEHOLDER.some((columnType) => columnType === updateType) ? (
                     <Field label={t("customTable.placeholderLabel")}>
                         <Input
                             {...register("placeholder")}
@@ -165,7 +165,7 @@ const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
                         />
                     </Field>
                 ) : null}
-                {updateType == ColumnType.Tag ? (
+                {updateType === ColumnType.Tag ? (
                     <Field label={t("customTable.tagLabel")}>
                         <Select
                             {...register("tagId", { setValueAs: (value) => parseInt(value, 10) })}
@@ -180,7 +180,7 @@ const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
                         </Select>
                     </Field>
                 ) : null}
-                {updateType == ColumnType.LongText ? (
+                {updateType === ColumnType.LongText ? (
                     <Field label={t("customTable.previewLabel")} hint={t("customTable.previewHint")}>
                         <Textarea
                             value={String(watch("content") ?? "")}

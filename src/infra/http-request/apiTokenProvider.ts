@@ -13,7 +13,7 @@ const getExtraConfigs = () => {
 };
 
 const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigate>) => {
-    if (error.response?.status == 401) {
+    if (error.response?.status === 401) {
         tokenProvider.removeSession();
         notifyProvider.info("Sua sessão é inválida, por favor efetue login novamente.");
         navigate("/login");

@@ -22,7 +22,6 @@ import HabilityUserView from "../pages/habilities/HabilityUserView";
 import UserFormProfileView from "../pages/user/UserFormProfileView";
 import EnvironmentList from "../pages/environment/EnvironmentList";
 import ReportList from "../pages/reports/ReportList";
-import InvolvementPendingView from "../pages/involvement/InvolvementPendingView";
 import InvolvementInvitationsView from "../pages/involvement/InvolvementInvitationsView";
 import InvolvementRequestsView from "../pages/involvement/InvolvementRequestsView";
 import TagList from "../pages/tags/TagList";

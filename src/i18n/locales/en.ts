@@ -84,6 +84,9 @@ const en = {
   devices: {
     header: "Devices",
     newTitle: "New device",
+    addButton: "Add device",
+    searchLabel: "Search devices",
+    searchPlaceholder: "Brand, model, or system",
     addSuccess: "Device added successfully.",
     addError: "Unable to add device, try again",
     deleteSuccess: "Device deleted successfully.",
@@ -95,6 +98,9 @@ const en = {
   habilities: {
     header: "Skills",
     newTitle: "New skill",
+    addButton: "Add skill",
+    searchLabel: "Search skills",
+    searchPlaceholder: "Search skills...",
     addSuccess: "Skill added successfully.",
     addError: "Unable to add skill, try again",
     descriptionLabel: "Description",

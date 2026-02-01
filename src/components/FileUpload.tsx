@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { AxiosProgressEvent } from 'axios';
 import notifyProvider from '../infra/notifyProvider';
 import { upload } from '../services/fileService';
@@ -30,7 +30,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, req
         }
     };
 
-    const uploadFile = async () => {
+    const uploadFile = useCallback(async () => {
         try {
             setUploading(true);
             const formData = new FormData();
@@ -66,7 +66,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, req
             setProgress(0);
             setFilesToUpload([]);
         }
-    };
+    }, [currentFileIndex, filesToUpload, onChange, t, uploadedFiles]);
 
     const clearCurrentSelectedFiles = () => {
         if (fileInputRef.current) {
@@ -78,7 +78,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, req
         if (filesToUpload.length > 0 && currentFileIndex < filesToUpload.length) {
             uploadFile();
         }
-    }, [filesToUpload, currentFileIndex]);
+    }, [filesToUpload, currentFileIndex, uploadFile]);
 
     const handleRemoveFile = (id: number) => {
         setUploadedFiles(uploadedFiles.filter((file) => file.id !== id));

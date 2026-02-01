@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { getOverviewProject } from '../../services/projectService';
 import notifyProvider from '../../infra/notifyProvider';
 import TitleContainer from '../../components/TitleContainer';
@@ -16,24 +16,23 @@ import { useTranslation } from 'react-i18next';
 const ProjectOverView: React.FC = () => {
     const { t } = useTranslation();
     const { projectId } = useParams();
-    const navigate = useNavigate();
     const [project, setProject] = useState<ProjectData | null>(null);
     const [exporting, setExporting] = useState<boolean>(false);
     const exportRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    useEffect(() => {
-        loadProject();
-    }, []);
-
-    const loadProject = async () => {
+    const loadProject = useCallback(async () => {
         try {
             const response = await getOverviewProject(parseInt(projectId || '0'));
             setProject(response?.data);
         } catch (error) {
             notifyProvider.error(t('projectOverview.loadError'));
         }
-    };
+    }, [projectId, t]);
+
+    useEffect(() => {
+        loadProject();
+    }, [loadProject]);
 
     const convertToCustomizableTableRows = (data: any): CustomizableTableRows[] => {
         return Object.values(data).map((item: any) => ({

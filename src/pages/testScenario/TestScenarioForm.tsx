@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import notifyProvider from '../../infra/notifyProvider';
 import PainelContainer from '../../components/PainelContainer';
@@ -31,23 +31,10 @@ const TestScenarioForm = () => {
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
 
-    useEffect(() => {
-        load();
-    }, [projectId, testScenarioId, updatedProjectId]);
+    const getProjectId = useCallback(() => parseInt(projectId || `${updatedProjectId}`, 10), [projectId, updatedProjectId]);
+    const getTestScenarioId = useCallback(() => parseInt(testScenarioId || '0', 10), [testScenarioId]);
 
-    const getProjectId = () => parseInt(projectId || updatedProjectId + "", 10);
-    const getTestScenarioId = () => parseInt(testScenarioId || '0', 10);
-
-    const load = async () => {
-        if (getProjectId()) {
-            await getTemplates();
-        }
-        if (getTestScenarioId()) {
-            await getTestScenario();
-        }
-    };
-
-    const getTemplates = async () => {
+    const getTemplates = useCallback(async () => {
         setLoadingTemplates(true);
         try {
             const response = await getAllByProjectAndType(getProjectId(), TemplateTypeEnum.TestScenarioDefinition, 1, 200);
@@ -59,9 +46,9 @@ const TestScenarioForm = () => {
         } finally {
             setLoadingTemplates(false);
         }
-    };
+    }, [getProjectId, t]);
 
-    const getTestScenario = async () => {
+    const getTestScenario = useCallback(async () => {
         setLoadingTestScenario(true);
         try {
             const response = await getTestScenarioById(getTestScenarioId());
@@ -73,7 +60,20 @@ const TestScenarioForm = () => {
         } finally {
             setLoadingTestScenario(false);
         }
-    };
+    }, [getTestScenarioId, setValue]);
+
+    const load = useCallback(async () => {
+        if (getProjectId()) {
+            await getTemplates();
+        }
+        if (getTestScenarioId()) {
+            await getTestScenario();
+        }
+    }, [getProjectId, getTestScenarioId, getTemplates, getTestScenario]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     const onSubmit: SubmitHandler<TestScenarioData> = async (data) => {
         if (!rows.length) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { FiCheckSquare, FiPlay, FiSkipBack, FiVideo } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 
@@ -20,11 +20,11 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
 
-    let intervalId: NodeJS.Timeout;
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         if (isRunning) {
-            intervalId = setInterval(() => {
+            intervalRef.current = setInterval(() => {
                 setTimeElapsed(prevTime => {
                     const newTime = prevTime + 1;
                     onChange(newTime);
@@ -32,10 +32,18 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
                 });
             }, 1000);
         } else {
-            clearInterval(intervalId);
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
         }
 
-        return () => clearInterval(intervalId);
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
     }, [isRunning, isRecording, onChange]);
 
     const handleStart = () => {

@@ -95,7 +95,7 @@ const InvolvementPendingItem: React.FC<InvolvementPendingItemProps> = ({ involve
                     </div>
                 </div>
             </div>
-            {typeSituation == InvolvementSituationEnum.Received ? (
+            {typeSituation === InvolvementSituationEnum.Received ? (
                 <div className="flex flex-wrap gap-2">
                     <Button
                         type="button"
@@ -115,7 +115,7 @@ const InvolvementPendingItem: React.FC<InvolvementPendingItemProps> = ({ involve
                     </Button>
                 </div>
             ) : null}
-            {typeSituation == InvolvementSituationEnum.Sent ? (
+            {typeSituation === InvolvementSituationEnum.Sent ? (
                 <div className="flex flex-wrap gap-2">
                     <Button
                         type="button"

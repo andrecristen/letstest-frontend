@@ -2,10 +2,10 @@ import React, { useRef, useImperativeHandle } from "react";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { EnvironmentData } from "../../models/EnvironmentData"
 import { createEnvironment, updateEnvironment } from '../../services/environmentService';
-import FormDialogBase, { FormDialogBaseExtendsRef, FormDialogBaseRef } from "../../components/FormDialogBase"
+import FormDialogBase, { FormDialogBaseExtendsRef } from "../../components/FormDialogBase"
 import { getEnvironmentSituationList } from "../../models/EnvironmentData";
 import notifyProvider from '../../infra/notifyProvider';
-import { Button, Field, Input, Select, Textarea } from "../../ui";
+import { Field, Input, Select, Textarea } from "../../ui";
 import { useTranslation } from "react-i18next";
 
 const EnvironmentForm = React.forwardRef<any, any>((props, ref) => {
@@ -30,14 +30,14 @@ const EnvironmentForm = React.forwardRef<any, any>((props, ref) => {
     const onSubmit: SubmitHandler<EnvironmentData> = async (data) => {
         if (data.id) {
             const response = await updateEnvironment(data);
-            if (response?.status == 200) {
+            if (response?.status === 200) {
                 notifyProvider.success(t("environment.updateSuccess"));
             } else {
                 notifyProvider.error(t("environment.updateError"));
             }
         } else {
             const response = await createEnvironment(props.projectId, data);
-            if (response?.status == 201) {
+            if (response?.status === 201) {
                 notifyProvider.success(t("environment.createSuccess"));
             } else {
                 notifyProvider.error(t("environment.createError"));

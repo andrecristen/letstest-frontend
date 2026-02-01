@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {getTagById} from "../services/tagService";
 import {TagData, TagSituation} from "../models/TagData";
 import LoadingOverlay from "./LoadingOverlay";
@@ -21,12 +21,7 @@ const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, opera
     const [loadingTag, setLoadingTag] = useState(false);
 
 
-    useEffect(() => {
-        onChange(tagValueId || 0);
-        load();
-    }, [tagId]);
-
-    const load = async () => {
+    const load = useCallback(async () => {
         if (tagId) {
             setLoadingTag(true);
             try {
@@ -37,12 +32,16 @@ const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, opera
                 setLoadingTag(false);
             }
         }
-    };
+    }, [tagId]);
+
+    useEffect(() => {
+        onChange(tagValueId || 0);
+        load();
+    }, [load, onChange, tagId, tagValueId]);
 
     const handleOnchange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newValue = parseInt(e.target.value);
+        const newValue = parseInt(e.target.value, 10);
         onChange(newValue);
-        tagValueId = newValue;
     }
 
     const selectedTagValue = tag?.tagValues?.find((tagValue) => tagValue.id === tagValueId);
@@ -57,14 +56,14 @@ const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, opera
                     </div>
                 ) : (
                     <Select
-                        required={operation == Operation.FillIn}
-                        disabled={operation == Operation.Edit}
+                        required={operation === Operation.FillIn}
+                        disabled={operation === Operation.Edit}
                         onChange={e => handleOnchange(e)}
                         value={tagValueId}
                     >
                         <option value="">{t("common.selectValue")}</option>
                         <optgroup label={t("tags.activeGroup")}>
-                            {tag?.tagValues && tag.tagValues.filter(tagValue => tagValue.situation == TagSituation.Ativo).map((tagValue) => {
+                            {tag?.tagValues && tag.tagValues.filter(tagValue => tagValue.situation === TagSituation.Ativo).map((tagValue) => {
                                 return (
                                     <option key={"tagValue" + tagValue.id}
                                             value={tagValue.id}>{tagValue.name} {tagValue.commentary ? (" (" + tagValue.commentary + ")") : null}</option>
@@ -72,7 +71,7 @@ const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, opera
                             })}
                         </optgroup>
                         <optgroup label={t("tags.archivedGroup")}>
-                            {tag?.tagValues && tag.tagValues.filter(tagValue => tagValue.situation == TagSituation.Arquivado).map((tagValue) => {
+                            {tag?.tagValues && tag.tagValues.filter(tagValue => tagValue.situation === TagSituation.Arquivado).map((tagValue) => {
                                 return (
                                     <option disabled={true} key={"tagValue" + tagValue.id}
                                             value={tagValue.id}>{tagValue.name} {tagValue.commentary ? (" (" + tagValue.commentary + ")") : null}</option>

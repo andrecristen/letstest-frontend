@@ -24,7 +24,7 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution, is
     useEffect(() => {
         const newRows: CustomizableTableRows[] = Object.values(testExecution.data);
         customizableTableTestExecutionRef.current?.setRows(newRows);
-    }, []);
+    }, [testExecution.data]);
 
     const handleClickProfileUser = (testExecution: TestExecutionData) => {
         navigate("/profile/" + testExecution.user?.id);
