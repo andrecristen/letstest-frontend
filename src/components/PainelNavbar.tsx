@@ -86,30 +86,19 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   useEffect(() => {
     loadUnreadCount();
     const baseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
-    const socket = io(baseUrl, {
-      transports: ["websocket", "polling"],
-      auth: {
-        token: tokenProvider.getSessionToken(),
-      },
-    });
-    socket.on("connect", () => {
-      console.info("[socket] connected", socket.id);
+    let pollId: number | undefined;
+
+    pollId = window.setInterval(() => {
       loadUnreadCount();
-    });
-    socket.on("disconnect", (reason) => {
-      console.info("[socket] disconnected", reason);
-    });
-    socket.on("connect_error", (error) => {
-      console.warn("[socket] connect_error", error?.message ?? error);
-    });
-    socket.on("notification:new", async () => {
-      console.info("[socket] notification:new received");
-      await loadUnreadCount();
-    });
-    socketRef.current = socket;
+    }, 120000);
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
+      if (pollId) {
+        window.clearInterval(pollId);
+      }
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
     };
   }, []);
 
