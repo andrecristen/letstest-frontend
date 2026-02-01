@@ -8,6 +8,8 @@ import { getMyProjects, getOverviewProject, getTestProjects } from "../../servic
 import { ProjectData } from "../../models/ProjectData";
 import { ReportType } from "../../models/ReportData";
 import { TestExecutionData } from "../../models/TestExecutionData";
+import tokenProvider from "../../infra/tokenProvider";
+import { FiFilter, FiXCircle } from "react-icons/fi";
 
 type ExecutionEntry = TestExecutionData & {
   scenarioId?: number;
@@ -18,7 +20,9 @@ type ExecutionEntry = TestExecutionData & {
 
 const ProjectDashboard: React.FC = () => {
   const { t } = useTranslation();
-  const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [managerProjects, setManagerProjects] = useState<ProjectData[]>([]);
+  const [testerProjects, setTesterProjects] = useState<ProjectData[]>([]);
+  const [activeScope, setActiveScope] = useState<"manager" | "tester">("manager");
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [projectOverview, setProjectOverview] = useState<ProjectData | null>(null);
   const [loadingProjects, setLoadingProjects] = useState(false);
@@ -26,10 +30,16 @@ const ProjectDashboard: React.FC = () => {
   const [scenarioFilter, setScenarioFilter] = useState<number | "all">("all");
   const [testerFilter, setTesterFilter] = useState<number | "all">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | ReportType>("all");
+  const [filterDraft, setFilterDraft] = useState({
+    scenario: "all" as number | "all",
+    tester: "all" as number | "all",
+    status: "all" as "all" | ReportType,
+  });
   const [chartRangeDays, setChartRangeDays] = useState<number>(7);
   const [chartRangeMode, setChartRangeMode] = useState<"preset" | "custom">("preset");
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
+  const currentUserId = tokenProvider.getSessionUserId();
 
   const loadProjects = useCallback(async () => {
     setLoadingProjects(true);
@@ -40,16 +50,15 @@ const ProjectDashboard: React.FC = () => {
       ]);
       const ownerProjects = ownerResponse?.data?.data ?? [];
       const testerProjects = testerResponse?.data?.data ?? [];
-      const byId = new Map<number, ProjectData>();
-      [...ownerProjects, ...testerProjects].forEach((project: ProjectData) => {
-        if (project?.id) {
-          byId.set(project.id, project);
-        }
-      });
-      const mergedProjects = Array.from(byId.values());
-      setProjects(mergedProjects);
-      if (!selectedProjectId && mergedProjects.length) {
-        setSelectedProjectId(mergedProjects[0].id ?? null);
+      setManagerProjects(ownerProjects);
+      setTesterProjects(testerProjects);
+
+      const hasManagerProjects = ownerProjects.length > 0;
+      setActiveScope(hasManagerProjects ? "manager" : "tester");
+
+      if (!selectedProjectId) {
+        const defaultProject = (hasManagerProjects ? ownerProjects : testerProjects)[0];
+        setSelectedProjectId(defaultProject?.id ?? null);
       }
     } finally {
       setLoadingProjects(false);
@@ -65,6 +74,7 @@ const ProjectDashboard: React.FC = () => {
       setScenarioFilter("all");
       setTesterFilter("all");
       setStatusFilter("all");
+      setFilterDraft({ scenario: "all", tester: "all", status: "all" });
     } finally {
       setLoadingOverview(false);
     }
@@ -79,6 +89,10 @@ const ProjectDashboard: React.FC = () => {
   }, [loadOverview]);
 
   const scenarios = useMemo(() => projectOverview?.testScenarios ?? [], [projectOverview]);
+
+  const scopedProjects = useMemo(() => {
+    return activeScope === "manager" ? managerProjects : testerProjects;
+  }, [activeScope, managerProjects, testerProjects]);
 
   const executionEntries = useMemo<ExecutionEntry[]>(() => {
     return scenarios.flatMap((scenario) => {
@@ -96,10 +110,15 @@ const ProjectDashboard: React.FC = () => {
     });
   }, [scenarios]);
 
+  const baseExecutions = useMemo(() => {
+    if (activeScope !== "tester") return executionEntries;
+    return executionEntries.filter((execution) => execution.user?.id === currentUserId);
+  }, [activeScope, executionEntries, currentUserId]);
+
   const filteredExecutions = useMemo(() => {
-    return executionEntries.filter((execution) => {
+    return baseExecutions.filter((execution) => {
       if (scenarioFilter !== "all" && execution.scenarioId !== scenarioFilter) return false;
-      if (testerFilter !== "all" && execution.user?.id !== testerFilter) return false;
+      if (activeScope !== "tester" && testerFilter !== "all" && execution.user?.id !== testerFilter) return false;
       if (statusFilter !== "all") {
         const reports = execution.reports ?? [];
         if (!reports.length) return false;
@@ -107,7 +126,7 @@ const ProjectDashboard: React.FC = () => {
       }
       return true;
     });
-  }, [executionEntries, scenarioFilter, testerFilter, statusFilter]);
+  }, [baseExecutions, scenarioFilter, testerFilter, statusFilter, activeScope]);
 
   const reports = useMemo(() => {
     return filteredExecutions.flatMap((execution) => execution.reports ?? []);
@@ -132,6 +151,7 @@ const ProjectDashboard: React.FC = () => {
   }, [filteredExecutions.length, reports, scenarios]);
 
   const testerRanking = useMemo(() => {
+    if (activeScope === "tester") return [];
     const map = new Map<number, { name: string; email?: string; executions: number; approved: number; rejected: number; score: number }>();
     filteredExecutions.forEach((execution) => {
       const user = execution.user;
@@ -165,7 +185,7 @@ const ProjectDashboard: React.FC = () => {
       }))
       .sort((a, b) => b.executions - a.executions)
       .slice(0, 5);
-  }, [filteredExecutions, t]);
+  }, [filteredExecutions, t, activeScope]);
 
   const scenarioFailureRates = useMemo(() => {
     return scenarios
@@ -237,6 +257,7 @@ const ProjectDashboard: React.FC = () => {
   }, [executionChartData]);
 
   const testerOptions = useMemo(() => {
+    if (activeScope === "tester") return [];
     const byId = new Map<number, { id: number; name: string }>();
     executionEntries.forEach((execution) => {
       if (execution.user?.id) {
@@ -247,7 +268,24 @@ const ProjectDashboard: React.FC = () => {
       }
     });
     return Array.from(byId.values());
-  }, [executionEntries, t]);
+  }, [executionEntries, t, activeScope]);
+
+  const myPerformance = useMemo(() => {
+    const myExecutions = filteredExecutions;
+    const myReports = myExecutions.flatMap((execution) => execution.reports ?? []);
+    const approved = myReports.filter((report) => report.type === ReportType.Approved).length;
+    const rejected = myReports.filter((report) => report.type === ReportType.Rejected).length;
+    const averageScore = myReports.length
+      ? Math.round(myReports.reduce((sum, report) => sum + (report.score ?? 0), 0) / myReports.length)
+      : 0;
+
+    return {
+      executions: myExecutions.length,
+      approved,
+      rejected,
+      averageScore,
+    };
+  }, [filteredExecutions]);
 
   const chartDayCount = executionChartData.length || 1;
 
@@ -256,6 +294,20 @@ const ProjectDashboard: React.FC = () => {
     customStartDate &&
     customEndDate &&
     new Date(`${customStartDate}T00:00:00`) > new Date(`${customEndDate}T00:00:00`);
+
+  const applyFilters = () => {
+    setScenarioFilter(filterDraft.scenario);
+    setTesterFilter(filterDraft.tester);
+    setStatusFilter(filterDraft.status);
+  };
+
+  const clearFilters = () => {
+    const reset = { scenario: "all" as const, tester: "all" as const, status: "all" as const };
+    setFilterDraft(reset);
+    setScenarioFilter(reset.scenario);
+    setTesterFilter(reset.tester);
+    setStatusFilter(reset.status);
+  };
 
   return (
     <PainelContainer>
@@ -269,16 +321,34 @@ const ProjectDashboard: React.FC = () => {
               <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.filtersTitle")}</p>
               <h2 className="text-lg font-semibold text-ink">{t("dashboard.filtersSubtitle")}</h2>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setScenarioFilter("all");
-                setTesterFilter("all");
-                setStatusFilter("all");
-              }}
-            >
-              {t("common.clearFilters")}
-            </Button>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {managerProjects.length > 0 && (
+                <Button
+                  variant={activeScope === "manager" ? "primary" : "outline"}
+                  onClick={() => {
+                    setActiveScope("manager");
+                    if (managerProjects.length) {
+                      setSelectedProjectId(managerProjects[0].id ?? null);
+                    }
+                  }}
+                >
+                  {t("dashboard.managerProjects")}
+                </Button>
+              )}
+              {testerProjects.length > 0 && (
+                <Button
+                  variant={activeScope === "tester" ? "primary" : "outline"}
+                  onClick={() => {
+                    setActiveScope("tester");
+                    if (testerProjects.length) {
+                      setSelectedProjectId(testerProjects[0].id ?? null);
+                    }
+                  }}
+                >
+                  {t("dashboard.testerProjects")}
+                </Button>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Field label={t("dashboard.projectLabel")}>
@@ -286,8 +356,8 @@ const ProjectDashboard: React.FC = () => {
                 value={selectedProjectId ?? ""}
                 onChange={(event) => setSelectedProjectId(Number(event.target.value))}
               >
-                {projects.length === 0 && <option value="">{t("dashboard.emptyProjects")}</option>}
-                {projects.map((project) => (
+                {scopedProjects.length === 0 && <option value="">{t("dashboard.emptyProjects")}</option>}
+                {scopedProjects.map((project) => (
                   <option key={project.id} value={project.id}>
                     {project.name}
                   </option>
@@ -296,9 +366,12 @@ const ProjectDashboard: React.FC = () => {
             </Field>
             <Field label={t("dashboard.scenarioLabel")}>
               <Select
-                value={scenarioFilter}
+                value={filterDraft.scenario}
                 onChange={(event) =>
-                  setScenarioFilter(event.target.value === "all" ? "all" : Number(event.target.value))
+                  setFilterDraft((prev) => ({
+                    ...prev,
+                    scenario: event.target.value === "all" ? "all" : Number(event.target.value),
+                  }))
                 }
                 disabled={!scenarios.length}
               >
@@ -310,27 +383,35 @@ const ProjectDashboard: React.FC = () => {
                 ))}
               </Select>
             </Field>
-            <Field label={t("dashboard.testerLabel")}>
-              <Select
-                value={testerFilter}
-                onChange={(event) =>
-                  setTesterFilter(event.target.value === "all" ? "all" : Number(event.target.value))
-                }
-                disabled={!testerOptions.length}
-              >
-                <option value="all">{t("common.all")}</option>
-                {testerOptions.map((tester) => (
-                  <option key={tester.id} value={tester.id}>
-                    {tester.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
+            {activeScope !== "tester" && (
+              <Field label={t("dashboard.testerLabel")}>
+                <Select
+                  value={filterDraft.tester}
+                  onChange={(event) =>
+                    setFilterDraft((prev) => ({
+                      ...prev,
+                      tester: event.target.value === "all" ? "all" : Number(event.target.value),
+                    }))
+                  }
+                  disabled={!testerOptions.length}
+                >
+                  <option value="all">{t("common.all")}</option>
+                  {testerOptions.map((tester) => (
+                    <option key={tester.id} value={tester.id}>
+                      {tester.name}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            )}
             <Field label={t("dashboard.statusLabel")}>
               <Select
-                value={statusFilter}
+                value={filterDraft.status}
                 onChange={(event) =>
-                  setStatusFilter(event.target.value === "all" ? "all" : Number(event.target.value) as ReportType)
+                  setFilterDraft((prev) => ({
+                    ...prev,
+                    status: event.target.value === "all" ? "all" : (Number(event.target.value) as ReportType),
+                  }))
                 }
               >
                 <option value="all">{t("common.all")}</option>
@@ -339,11 +420,21 @@ const ProjectDashboard: React.FC = () => {
               </Select>
             </Field>
           </div>
+          <div className="flex w-full justify-end gap-2 pt-2">
+            <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
+              {t("common.confirm")}
+            </Button>
+            <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
+              {t("common.clearFilters")}
+            </Button>
+          </div>
         </Card>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card className="space-y-4 bg-paper/95 p-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.overviewTitle")}</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+              {activeScope === "tester" ? t("dashboard.myOverviewTitle") : t("dashboard.overviewTitle")}
+            </p>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm text-ink/70">
                 <span>{t("dashboard.totalScenarios")}</span>
@@ -372,37 +463,63 @@ const ProjectDashboard: React.FC = () => {
             </div>
           </Card>
 
-          <Card className="space-y-4 bg-paper/95 p-6">
-            <div className="flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.rankingTitle")}</p>
-              <Badge variant="accent">{t("dashboard.topLabel")}</Badge>
-            </div>
-            {testerRanking.length === 0 ? (
-              <p className="text-sm text-ink/60">{t("dashboard.emptyRanking")}</p>
-            ) : (
+          {activeScope === "tester" ? (
+            <Card className="space-y-4 bg-paper/95 p-6">
+              <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.myPerformanceTitle")}</p>
               <div className="space-y-3">
-                {testerRanking.map((tester, index) => (
-                  <div key={`${tester.name}-${index}`} className="rounded-2xl border border-ink/10 bg-sand/60 p-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-ink">{tester.name}</p>
-                        <p className="text-xs text-ink/60">{tester.email}</p>
-                      </div>
-                      <Badge variant="neutral">{tester.executions}x</Badge>
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink/60">
-                      <span>{t("dashboard.approvals")}: {tester.approved}</span>
-                      <span>{t("dashboard.rejections")}: {tester.rejected}</span>
-                      <span>{t("dashboard.averageScore")}: {tester.averageScore}</span>
-                    </div>
-                  </div>
-                ))}
+                <div className="flex items-center justify-between text-sm text-ink/70">
+                  <span>{t("dashboard.myExecutions")}</span>
+                  <span className="font-semibold text-ink">{myPerformance.executions}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-ink/70">
+                  <span>{t("dashboard.myApprovals")}</span>
+                  <Badge variant="success">{myPerformance.approved}</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm text-ink/70">
+                  <span>{t("dashboard.myRejections")}</span>
+                  <Badge variant="danger">{myPerformance.rejected}</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm text-ink/70">
+                  <span>{t("dashboard.myAverageScore")}</span>
+                  <span className="font-semibold text-ink">{myPerformance.averageScore}</span>
+                </div>
               </div>
-            )}
-          </Card>
+            </Card>
+          ) : (
+            <Card className="space-y-4 bg-paper/95 p-6">
+              <div className="flex items-center justify-between">
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.rankingTitle")}</p>
+                <Badge variant="accent">{t("dashboard.topLabel")}</Badge>
+              </div>
+              {testerRanking.length === 0 ? (
+                <p className="text-sm text-ink/60">{t("dashboard.emptyRanking")}</p>
+              ) : (
+                <div className="space-y-3">
+                  {testerRanking.map((tester, index) => (
+                    <div key={`${tester.name}-${index}`} className="rounded-2xl border border-ink/10 bg-sand/60 p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-ink">{tester.name}</p>
+                          <p className="text-xs text-ink/60">{tester.email}</p>
+                        </div>
+                        <Badge variant="neutral">{tester.executions}x</Badge>
+                      </div>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink/60">
+                        <span>{t("dashboard.approvals")}: {tester.approved}</span>
+                        <span>{t("dashboard.rejections")}: {tester.rejected}</span>
+                        <span>{t("dashboard.averageScore")}: {tester.averageScore}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
 
           <Card className="space-y-4 bg-paper/95 p-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.failureRateTitle")}</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+              {activeScope === "tester" ? t("dashboard.failureRateMineTitle") : t("dashboard.failureRateTitle")}
+            </p>
             {scenarioFailureRates.length === 0 ? (
               <p className="text-sm text-ink/60">{t("dashboard.emptyScenarios")}</p>
             ) : (

@@ -473,6 +473,15 @@ const pt = {
     startDateLabel: "Data inicial",
     endDateLabel: "Data final",
     invalidRange: "Periodo invalido",
+    managerProjects: "Meus projetos",
+    testerProjects: "Projetos testados",
+    myOverviewTitle: "Visao geral do meu trabalho",
+    myPerformanceTitle: "Meu desempenho",
+    myExecutions: "Minhas execucoes",
+    myApprovals: "Minhas aprovacoes",
+    myRejections: "Minhas reprovacoes",
+    myAverageScore: "Minha media de notas",
+    failureRateMineTitle: "Taxa de falhas nos meus testes",
   },
   enums: {
     device: {

@@ -473,6 +473,15 @@ const en = {
     startDateLabel: "Start date",
     endDateLabel: "End date",
     invalidRange: "Invalid range",
+    managerProjects: "My projects",
+    testerProjects: "Tested projects",
+    myOverviewTitle: "My work overview",
+    myPerformanceTitle: "My performance",
+    myExecutions: "My executions",
+    myApprovals: "My approvals",
+    myRejections: "My rejections",
+    myAverageScore: "My average score",
+    failureRateMineTitle: "Failure rate for my tests",
   },
   enums: {
     device: {
