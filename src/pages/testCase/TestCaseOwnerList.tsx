@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TestCaseItem from "./TestCaseItem";
 import PainelContainer from "../../components/PainelContainer";
