@@ -95,7 +95,6 @@ const TestExecutionSession: React.FC = () => {
     }, [status, assignment?.startedAt, assignment?.finishedAt, assignment?.lastPausedAt]);
 
     const elapsedSeconds = useMemo(() => {
-        const _ = tick;
         if (!assignment?.startedAt) return 0;
         const end = assignment.finishedAt
             ? assignment.finishedAt
