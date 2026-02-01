@@ -454,6 +454,7 @@ const en = {
     channelEmail: "Email notifications",
     eventsTitle: "Critical events",
     executionRejected: "Execution rejected",
+    inviteReceived: "Invite received",
     inviteAccepted: "Invite accepted",
     deadlineExceeded: "Deadline exceeded",
     deadlineConfigTitle: "Deadline alerts",

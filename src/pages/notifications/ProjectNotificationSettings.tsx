@@ -45,6 +45,7 @@ const ProjectNotificationSettings: React.FC = () => {
       const response = await updateNotificationSettings(settings.projectId, {
         enableExecutionRejected: settings.enableExecutionRejected,
         enableInviteAccepted: settings.enableInviteAccepted,
+        enableInviteReceived: settings.enableInviteReceived,
         enableDeadlineExceeded: settings.enableDeadlineExceeded,
         enableDeadlineWarning: settings.enableDeadlineWarning,
         deadlineWarningDays: settings.deadlineWarningDays,
@@ -104,6 +105,15 @@ const ProjectNotificationSettings: React.FC = () => {
                     className="h-4 w-4 rounded border-ink/20 text-ocean focus:ring-ocean/30"
                   />
                   {t("notifications.executionRejected")}
+                </label>
+                <label className="flex items-center gap-2 text-sm text-ink/70">
+                  <input
+                    type="checkbox"
+                    checked={settings.enableInviteReceived}
+                    onChange={(event) => updateSetting("enableInviteReceived", event.target.checked)}
+                    className="h-4 w-4 rounded border-ink/20 text-ocean focus:ring-ocean/30"
+                  />
+                  {t("notifications.inviteReceived")}
                 </label>
                 <label className="flex items-center gap-2 text-sm text-ink/70">
                   <input

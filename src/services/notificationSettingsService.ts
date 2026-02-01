@@ -5,6 +5,7 @@ export type NotificationSettings = {
   projectId: number;
   enableExecutionRejected: boolean;
   enableInviteAccepted: boolean;
+  enableInviteReceived: boolean;
   enableDeadlineExceeded: boolean;
   enableDeadlineWarning: boolean;
   deadlineWarningDays: number;

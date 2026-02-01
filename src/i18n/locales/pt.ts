@@ -454,6 +454,7 @@ const pt = {
     channelEmail: "Notificacao por e-mail",
     eventsTitle: "Eventos criticos",
     executionRejected: "Execucao reprovada",
+    inviteReceived: "Convite recebido",
     inviteAccepted: "Convite aceito",
     deadlineExceeded: "Prazo estourado",
     deadlineConfigTitle: "Alertas de prazo",

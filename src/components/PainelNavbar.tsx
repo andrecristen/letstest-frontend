@@ -87,10 +87,13 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     loadUnreadCount();
     const baseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
     const socket = io(baseUrl, {
-      transports: ["websocket"],
+      transports: ["websocket", "polling"],
       auth: {
         token: tokenProvider.getSessionToken(),
       },
+    });
+    socket.on("connect", () => {
+      loadUnreadCount();
     });
     socket.on("notification:new", async () => {
       await loadUnreadCount();
@@ -252,7 +255,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
           <div className="relative flex items-center gap-4">
             <button
               onClick={toggleNotificationMenu}
-              className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
+              className="relative rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
               ref={notificationButtonRef}
               aria-label="Notificacoes"
             >
