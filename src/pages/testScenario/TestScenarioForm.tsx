@@ -13,6 +13,9 @@ import LoadingOverlay from '../../components/LoadingOverlay';
 import { TestScenarioData } from '../../models/TestScenarioData';
 import { createTestScenario, getTestScenarioById, updateTestScenario } from '../../services/testScenario';
 import { useTranslation } from 'react-i18next';
+import { Badge } from '../../ui';
+import { getProjectById } from '../../services/projectService';
+import { ApprovalStatusEnum, getApprovalStatusLabel, getApprovalStatusVariant } from '../../models/ApprovalStatus';
 
 const TestScenarioForm = () => {
     const { t } = useTranslation();
@@ -23,6 +26,10 @@ const TestScenarioForm = () => {
     const [templates, setTemplates] = useState<TemplateData[]>([]);
     const [loadingTemplates, setLoadingTemplates] = useState(false);
     const [loadingTestScenario, setLoadingTestScenario] = useState(false);
+    const [loadingProject, setLoadingProject] = useState(false);
+    const [approvalEnabled, setApprovalEnabled] = useState(false);
+    const [approvalStatus, setApprovalStatus] = useState<number | null>(null);
+    const [hasExecutions, setHasExecutions] = useState(false);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
@@ -30,6 +37,7 @@ const TestScenarioForm = () => {
     const updatedProjectId = watch('projectId');
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
+    const isReadOnly = isViewMode || hasExecutions;
 
     const getProjectId = useCallback(() => parseInt(projectId || `${updatedProjectId}`, 10), [projectId, updatedProjectId]);
     const getTestScenarioId = useCallback(() => parseInt(testScenarioId || '0', 10), [testScenarioId]);
@@ -56,20 +64,44 @@ const TestScenarioForm = () => {
             setValue('id', testScenario.id);
             setValue('name', testScenario.name);
             setValue('projectId', testScenario.projectId);
+            setApprovalStatus(testScenario.approvalStatus ?? ApprovalStatusEnum.Draft);
+            setHasExecutions(Boolean(testScenario.hasExecutions));
             customizableTableRef.current?.setRows(Object.values(testScenario.data));
         } finally {
             setLoadingTestScenario(false);
         }
     }, [getTestScenarioId, setValue]);
 
+    const getProject = useCallback(async () => {
+        const id = getProjectId();
+        if (!id) return;
+        setLoadingProject(true);
+        try {
+            const response = await getProjectById(id);
+            const project = response?.data;
+            const enabled = Boolean(project?.approvalEnabled && project?.approvalScenarioEnabled);
+            setApprovalEnabled(enabled);
+            if (!enabled) {
+                setApprovalStatus(ApprovalStatusEnum.Approved);
+                setValue("approvalStatus", ApprovalStatusEnum.Approved);
+            } else if (!getTestScenarioId()) {
+                setApprovalStatus(ApprovalStatusEnum.Draft);
+                setValue("approvalStatus", ApprovalStatusEnum.Draft);
+            }
+        } finally {
+            setLoadingProject(false);
+        }
+    }, [getProjectId]);
+
     const load = useCallback(async () => {
         if (getProjectId()) {
+            await getProject();
             await getTemplates();
         }
         if (getTestScenarioId()) {
             await getTestScenario();
         }
-    }, [getProjectId, getTestScenarioId, getTemplates, getTestScenario]);
+    }, [getProjectId, getProject, getTestScenarioId, getTemplates, getTestScenario]);
 
     useEffect(() => {
         load();
@@ -80,10 +112,13 @@ const TestScenarioForm = () => {
             notifyProvider.error(t("testScenario.minRowRequired"));
             return;
         }
-        if (isViewMode) return;
+        if (isReadOnly) return;
 
         data.data = Object.fromEntries(rows.map((item) => [item.id, item]));
         delete data.templateId;
+        if (!approvalEnabled) {
+            delete data.approvalStatus;
+        }
         try {
             const response = data.id ? await updateTestScenario(data.id, data) : await createTestScenario(getProjectId(), data);
             const success = response?.status === 200 || response?.status === 201;
@@ -105,10 +140,28 @@ const TestScenarioForm = () => {
         customizableTableRef.current?.setRows(template ? Object.values(template.data) : []);
     };
 
+
     return (
         <PainelContainer>
             <TitleContainer title={t("testScenario.pageTitle")} />
-            <LoadingOverlay show={loadingTemplates || loadingTestScenario} />
+            <LoadingOverlay show={loadingTemplates || loadingTestScenario || loadingProject} />
+            {approvalEnabled && (
+                <div className="rounded-2xl border border-ink/10 bg-paper px-4 py-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm font-semibold text-ink">{t("common.status")}</span>
+                            <Badge variant={getApprovalStatusVariant(approvalStatus)}>
+                                {getApprovalStatusLabel(approvalStatus)}
+                            </Badge>
+                        </div>
+                    </div>
+                    {hasExecutions && (
+                        <p className="mt-2 text-sm text-ink/60">
+                            {t("testScenario.lockedByExecution")}
+                        </p>
+                    )}
+                </div>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
                     <div className="py-2">
@@ -126,7 +179,7 @@ const TestScenarioForm = () => {
                     <input
                         type="text"
                         id="name"
-                        disabled={isViewMode}
+                        disabled={isReadOnly}
                         {...register('name', { required: t("common.nameRequired") })}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     />
@@ -141,7 +194,7 @@ const TestScenarioForm = () => {
                                 setValueAs: (value) => parseInt(value, 10),
                                 onChange: handleChangeTemplate,
                             })}
-                            disabled={isViewMode}
+                            disabled={isReadOnly}
                             className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         >
                             <option value="">{t("common.selectTemplate")}</option>
@@ -152,6 +205,21 @@ const TestScenarioForm = () => {
                             ))}
                         </select>
                         {errors.templateId && <span className="text-red-500 text-sm">{errors.templateId.message}</span>}
+                    </div>
+                )}
+                {!getTestScenarioId() && approvalEnabled && (
+                    <div className="py-2">
+                        <label htmlFor="approvalStatus" className="block text-sm font-medium text-gray-700">{t("common.status")}</label>
+                        <select
+                            id="approvalStatus"
+                            {...register("approvalStatus", {
+                                setValueAs: (value) => parseInt(value, 10),
+                            })}
+                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+                        >
+                            <option value={ApprovalStatusEnum.Draft}>{t("approval.draft")}</option>
+                            <option value={ApprovalStatusEnum.Approved}>{t("approval.approved")}</option>
+                        </select>
                     </div>
                 )}
                 <div className="py-2">
@@ -165,12 +233,12 @@ const TestScenarioForm = () => {
                         )}
                         <CustomizableTable
                             ref={customizableTableRef}
-                            operation={isViewMode ? Operation.View : Operation.FillIn}
+                            operation={isReadOnly ? Operation.View : Operation.FillIn}
                             onChange={setRows}
                         />
                     </fieldset>
                 </div>
-                {!loadingTemplates && !isViewMode && (
+                {!loadingTemplates && !isReadOnly && (
                     <button
                         type="submit"
                         className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"

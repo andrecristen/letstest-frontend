@@ -39,3 +39,7 @@ export const getInvolvementInvitations = async (page = 1, limit = 20) => {
 export const getInvolvementApplied = async (page = 1, limit = 20) => {
     return await apiTokenProvider.get('/involvement/applied', { params: { page, limit } });
 };
+
+export const getProjectTesters = async (projectId: number) => {
+    return await apiTokenProvider.get('/involvement/project/' + projectId + '/testers');
+};

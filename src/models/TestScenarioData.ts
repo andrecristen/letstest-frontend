@@ -6,5 +6,11 @@ export type TestScenarioData = {
     data?: Object;
     templateId?: number;
     projectId?: number;
+    approvalStatus?: number;
+    reviewedAt?: string | null;
+    reviewedById?: number | null;
+    approvedAt?: string | null;
+    approvedById?: number | null;
+    hasExecutions?: boolean;
     testCases?: TestCaseData[];
 };

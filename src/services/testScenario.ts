@@ -20,3 +20,7 @@ export const createTestScenario = async (projectId: number, data: TestScenarioDa
 export const updateTestScenario = async (testScenarioId: number, data: TestScenarioData) => {
     return await apiTokenProvider.put('/test-scenario/' + testScenarioId, data);
 }
+
+export const updateTestScenarioStatus = async (testScenarioId: number, status: number) => {
+    return await apiTokenProvider.put('/test-scenario/' + testScenarioId + '/status', { status });
+}

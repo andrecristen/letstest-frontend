@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { getById } from '../../services/testCaseService';
+import { finishAssignment, getById } from '../../services/testCaseService';
 import { create } from '../../services/testExecutionService';
 import notifyProvider from '../../infra/notifyProvider';
 import PainelContainer from '../../components/PainelContainer';
@@ -13,7 +13,6 @@ import { Operation } from '../../components/CustomizableTable/CustomizableRow';
 import { TemplateData, TemplateTypeEnum } from '../../models/TemplateData';
 import { getAllByProjectAndType } from '../../services/templatesService';
 import { useNavigate, useParams } from 'react-router-dom';
-import Timer from '../../components/Timer';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { DeviceData } from '../../models/DeviceData';
 import { getDevicesByUserId } from "../../services/deviceService";
@@ -34,7 +33,6 @@ const TestExecutionForm = () => {
     const [loadingTemplates, setLoadingTemplates] = useState(false);
     const [loadingTestCase, setLoadingTestCase] = useState(false);
     const [loadingDevices, setLoadingDevices] = useState(false);
-    const [timerFinished, setTimerFinished] = useState<Boolean>(false);
     const [timerTime, setTimerTime] = useState<number>(0);
     const lastLoadedTestCaseIdRef = useRef<number | null>(null);
     const navigate = useNavigate();
@@ -72,6 +70,19 @@ const TestExecutionForm = () => {
             const newRowsTestScenario: CustomizableTableRows[] = Object.values(response?.data.testScenario?.data);
             customizableTableScenarioCaseRef.current?.setRows(newRowsTestScenario);
         }
+        const userId = tokenProvider.getSessionUserId();
+        const assignment = response?.data.assignments?.find((item: any) => item.userId === userId);
+        if (assignment?.startedAt) {
+            const startedAt = new Date(assignment.startedAt);
+            const totalPausedSeconds = assignment.totalPausedSeconds ?? 0;
+            const end = assignment.finishedAt
+                ? new Date(assignment.finishedAt)
+                : assignment.lastPausedAt
+                    ? new Date(assignment.lastPausedAt)
+                    : new Date();
+            const elapsedSeconds = Math.max(0, Math.floor((end.getTime() - startedAt.getTime()) / 1000) - totalPausedSeconds);
+            setTimerTime(elapsedSeconds);
+        }
         setLoadingTestCase(false);
     }, [getTestCaseId, setValue]);
 
@@ -107,8 +118,13 @@ const TestExecutionForm = () => {
         };
         const response = await create(getTestCaseId(), dataSend);
         if (response?.status === 200 || response?.status === 201) {
+            await finishAssignment(getTestCaseId());
             notifyProvider.success(t("testExecution.reportSuccess"));
-            navigate(-1);
+            if (projectId) {
+                navigate(`/project/test/${projectId}`);
+            } else {
+                navigate(-1);
+            }
         } else {
             notifyProvider.error(t("testExecution.reportError"));
         }
@@ -124,6 +140,12 @@ const TestExecutionForm = () => {
     const handleClickNewDevice = () => {
         navigate("/devices");
     }
+
+    const formatTime = (time: number) => {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
 
     return (
         <PainelContainer>
@@ -184,61 +206,72 @@ const TestExecutionForm = () => {
                 {updateDevice ?
                     (
                         <>
-                            <Timer
-                                title={t("testExecution.executeTitle")}
-                                disabled={!updateDevice}
-                                onChange={(value) => { setTimerTime(value) }}
-                                onStart={() => { setTimerFinished(false) }}
-                                onReset={() => { setTimerFinished(false) }}
-                                onStop={() => { setTimerFinished(true); setValue("templateId", undefined); handleChangeTemplate(); }}
-                            />
-                            {timerFinished ? (
-                                <>
-                                    <div>
-                                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>
-                                        <select
-                                            id="templateId"
-                                            {...register('templateId', {
-                                                setValueAs: (value) => parseInt(value),
-                                                required: t("testExecution.templateRequired"),
-                                                onChange: handleChangeTemplate,
-                                            })}
-                                            className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                                        >
-                                            <option value="">{t("common.selectTemplate")}</option>
-                                            {templates.map((template) => (
-                                                <option key={template.id} value={template.id}>
-                                                    {template.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {errors.templateId && <span className="text-red-500 text-sm">{errors.templateId.message}</span>}
-                                    </div>
-                                    <div className="py-2">
-                                        <fieldset className="border rounded p-4">
-                                            <legend className="text-lg font-semibold">{t("testExecution.reportLegend")}</legend>
-                                            {!updateTemplate && (
-                                                <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
-                                                    <strong className="font-bold mr-2">{t("common.attention")}</strong>
-                                                    <span>{t("common.selectTemplateWarning")}</span>
-                                                </div>
-                                            )}
-                                            <CustomizableTable
-                                                ref={customizableTableTestExecutionRef}
-                                                operation={Operation.FillIn}
-                                                onChange={setRows}
-                                            />
-                                        </fieldset>
-                                    </div>
-                                    {!loadingTemplates && updateTemplate ? (
-                                        <button
-                                            type="submit"
-                                            className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
-                                        >
-                                            <FiSave className="mr-2" />
-                                            {t("testExecution.reportButton")}
-                                        </button>
-                                    ) : null}</>
+                            <div>
+                                <label htmlFor="testTime" className="block text-sm font-medium text-gray-700">
+                                    {t("testExecution.executionTimeLabel")}
+                                </label>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <input
+                                        id="testTime"
+                                        type="number"
+                                        min={0}
+                                        step={1}
+                                        value={Math.ceil(timerTime / 60)}
+                                        onChange={(event) => {
+                                            const minutes = Number(event.target.value);
+                                            setTimerTime(Number.isFinite(minutes) ? minutes * 60 : 0);
+                                        }}
+                                        className="mt-1 block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                                    />
+                                    <span className="text-sm text-gray-500">
+                                        {t("testExecution.executionTimeHint", { time: formatTime(timerTime) })}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>
+                                <select
+                                    id="templateId"
+                                    {...register('templateId', {
+                                        setValueAs: (value) => parseInt(value),
+                                        required: t("testExecution.templateRequired"),
+                                        onChange: handleChangeTemplate,
+                                    })}
+                                    className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                                >
+                                    <option value="">{t("common.selectTemplate")}</option>
+                                    {templates.map((template) => (
+                                        <option key={template.id} value={template.id}>
+                                            {template.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.templateId && <span className="text-red-500 text-sm">{errors.templateId.message}</span>}
+                            </div>
+                            <div className="py-2">
+                                <fieldset className="border rounded p-4">
+                                    <legend className="text-lg font-semibold">{t("testExecution.reportLegend")}</legend>
+                                    {!updateTemplate && (
+                                        <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
+                                            <strong className="font-bold mr-2">{t("common.attention")}</strong>
+                                            <span>{t("common.selectTemplateWarning")}</span>
+                                        </div>
+                                    )}
+                                    <CustomizableTable
+                                        ref={customizableTableTestExecutionRef}
+                                        operation={Operation.FillIn}
+                                        onChange={setRows}
+                                    />
+                                </fieldset>
+                            </div>
+                            {!loadingTemplates && updateTemplate ? (
+                                <button
+                                    type="submit"
+                                    className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
+                                >
+                                    <FiSave className="mr-2" />
+                                    {t("testExecution.reportButton")}
+                                </button>
                             ) : null}
                         </>
                     )

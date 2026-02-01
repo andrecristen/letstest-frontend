@@ -1,4 +1,5 @@
 import i18n from "../i18n";
+import { InvolvementData } from "./InvolvementData";
 import { TestScenarioData } from "./TestScenarioData";
 import { UserData } from "./UserData";
 
@@ -9,8 +10,12 @@ export type ProjectData = {
     visibility: number;
     situation: number;
     dueDate?: string | null;
+    approvalEnabled?: boolean;
+    approvalScenarioEnabled?: boolean;
+    approvalTestCaseEnabled?: boolean;
     creatorId?: number;
     creator?: UserData;
+    involvements?: InvolvementData[];
     testScenarios?: TestScenarioData[];
 }
 

@@ -9,14 +9,26 @@ interface TimerProps {
     onStart?: () => void;
     onStop?: () => void;
     onReset?: () => void;
+    onPause?: () => void;
+    onResume?: () => void;
 }
 
-const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onStop, onReset }) => {
+const Timer: React.FC<TimerProps> = ({
+    title,
+    disabled,
+    onChange,
+    onStart,
+    onStop,
+    onReset,
+    onPause,
+    onResume
+}) => {
     const { t } = useTranslation();
 
     const [isRunning, setIsRunning] = useState(false);
     const [timeElapsed, setTimeElapsed] = useState(0);
     const [isInitial, setIsInitial] = useState(true);
+    const [isPaused, setIsPaused] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
 
@@ -49,6 +61,7 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
     const handleStart = () => {
         setIsRunning(true);
         setIsInitial(false);
+        setIsPaused(false);
         if (onStart) {
             onStart();
         }
@@ -57,9 +70,26 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
     const handleStop = () => {
         setIsRunning(false);
         setIsInitial(true);
+        setIsPaused(false);
         stopRecorder();
         if (onStop) {
             onStop();
+        }
+    };
+
+    const handlePause = () => {
+        setIsRunning(false);
+        setIsPaused(true);
+        if (onPause) {
+            onPause();
+        }
+    };
+
+    const handleResume = () => {
+        setIsRunning(true);
+        setIsPaused(false);
+        if (onResume) {
+            onResume();
         }
     };
 
@@ -67,6 +97,7 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
         setTimeElapsed(0);
         setIsRunning(false);
         setIsInitial(true);
+        setIsPaused(false);
         onChange(0);
         stopRecorder();
         if (onReset) {
@@ -129,11 +160,20 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
                 </button>
             ) : (
                 <>
-                    <button type="button" onClick={handleStop} className="action-button-red m-2">
-                        <FiCheckSquare className="m-2 text-2xl" /> {t('timer.finish')}
-                    </button>
+                    {isRunning ? (
+                        <button type="button" onClick={handlePause} className="action-button-teal m-2">
+                            <FiSkipBack className="m-2 text-2xl" /> {t('timer.pause')}
+                        </button>
+                    ) : isPaused ? (
+                        <button type="button" onClick={handleResume} className="action-button-blue m-2">
+                            <FiPlay className="m-2 text-2xl" /> {t('timer.resume')}
+                        </button>
+                    ) : null}
                     <button type="button" onClick={handleReset} className="action-button-teal m-2">
                         <FiSkipBack className="m-2 text-2xl" /> {t('timer.reset')}
+                    </button>
+                    <button type="button" onClick={handleStop} className="action-button-red m-2">
+                        <FiCheckSquare className="m-2 text-2xl" /> {t('timer.finish')}
                     </button>
                     {!isRecording && (
                         <button type="button" onClick={handleRecord} className="action-button-purple m-2">

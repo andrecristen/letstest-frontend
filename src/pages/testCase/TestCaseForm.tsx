@@ -17,6 +17,8 @@ import { getAllByProjects } from '../../services/environmentService';
 import { getAllTestScenariosByProjects } from '../../services/testScenario';
 import { TestScenarioData } from '../../models/TestScenarioData';
 import { useTranslation } from 'react-i18next';
+import { getProjectById } from '../../services/projectService';
+import { ApprovalStatusEnum, getApprovalStatusLabel, getApprovalStatusVariant } from '../../models/ApprovalStatus';
 
 const TestCaseForm = () => {
     const { t } = useTranslation();
@@ -31,6 +33,10 @@ const TestCaseForm = () => {
     const [loadingTestCase, setLoadingTestCase] = useState(false);
     const [loadingEnvironments, setLoadingEnvironments] = useState(false);
     const [loadingTestScenarios, setLoadingTestScenarios] = useState(false);
+    const [loadingProject, setLoadingProject] = useState(false);
+    const [approvalEnabled, setApprovalEnabled] = useState(false);
+    const [approvalStatus, setApprovalStatus] = useState<number | null>(null);
+    const [hasExecutions, setHasExecutions] = useState(false);
     const [resolvedProjectId, setResolvedProjectId] = useState<number | null>(null);
     const lastLoadedTestCaseIdRef = useRef<number | null>(null);
     const lastLoadedProjectIdRef = useRef<number | null>(null);
@@ -41,6 +47,7 @@ const TestCaseForm = () => {
     const updateId = watch('id');
     const location = useLocation();
     const isViewMode = location.pathname.includes("view");
+    const isReadOnly = isViewMode || hasExecutions;
 
     const getProjectId = useCallback(() => {
         const paramId = parseInt(projectId || "0", 10);
@@ -73,6 +80,8 @@ const TestCaseForm = () => {
             setValue('environmentId', testCase.environmentId);
             setValue('testScenarioId', testCase.testScenarioId);
             setValue('dueDate', testCase.dueDate ? testCase.dueDate.split("T")[0] : "");
+            setApprovalStatus(testCase.approvalStatus ?? ApprovalStatusEnum.Draft);
+            setHasExecutions((testCase.testExecutions || []).length > 0);
             loadedTestCaseRefs.current = {
                 environmentId: testCase.environmentId,
                 testScenarioId: testCase.testScenarioId
@@ -85,6 +94,25 @@ const TestCaseForm = () => {
             setLoadingTestCase(false);
         }
     }, [getTestCaseId, setValue]);
+
+    const getProject = useCallback(async () => {
+        const id = getProjectId();
+        if (!id) return;
+        setLoadingProject(true);
+        try {
+            const response = await getProjectById(id);
+            const project = response?.data;
+            const enabled = Boolean(project?.approvalEnabled && project?.approvalTestCaseEnabled);
+            setApprovalEnabled(enabled);
+            if (!enabled) {
+                setApprovalStatus(ApprovalStatusEnum.Approved);
+            } else if (!getTestCaseId()) {
+                setApprovalStatus(ApprovalStatusEnum.Draft);
+            }
+        } finally {
+            setLoadingProject(false);
+        }
+    }, [getProjectId]);
 
     const getEnvironments = useCallback(async () => {
         setLoadingEnvironments(true);
@@ -116,11 +144,12 @@ const TestCaseForm = () => {
         const currentProjectId = getProjectId();
         if (currentProjectId && lastLoadedProjectIdRef.current !== currentProjectId) {
             lastLoadedProjectIdRef.current = currentProjectId;
+            await getProject();
             await getTemplates();
             await getEnvironments();
             await getTestScenarios();
         }
-    }, [getProjectId, getTestCaseId, getTemplates, getEnvironments, getTestScenarios, getTestCase]);
+    }, [getProjectId, getProject, getTestCaseId, getTemplates, getEnvironments, getTestScenarios, getTestCase]);
 
     useEffect(() => {
         load();
@@ -144,7 +173,7 @@ const TestCaseForm = () => {
             notifyProvider.error(t("testCase.minRowRequired"));
             return;
         }
-        if (isViewMode) return;
+        if (isReadOnly) return;
 
         data.data = Object.fromEntries(rows.map((item) => [item.id, item]));
         delete data.templateId;
@@ -178,10 +207,18 @@ const TestCaseForm = () => {
         navigate("/test-scenario/" + getProjectId() + "/add");
     }
 
+
     return (
         <PainelContainer>
             <TitleContainer title={t("testCase.pageTitle")} />
-            <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingEnvironments || loadingTestScenarios} />
+            <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingEnvironments || loadingTestScenarios || loadingProject} />
+            {approvalEnabled && hasExecutions && (
+                <div className="rounded-2xl border border-ink/10 bg-paper px-4 py-3">
+                    <p className="text-sm text-ink/60">
+                        {t("testCase.lockedByExecution")}
+                    </p>
+                </div>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
                     <div>
@@ -199,7 +236,7 @@ const TestCaseForm = () => {
                     <input
                         type="text"
                         id="name"
-                        disabled={isViewMode}
+                        disabled={isReadOnly}
                         {...register('name', { required: t("common.nameRequired") })}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     />
@@ -210,7 +247,7 @@ const TestCaseForm = () => {
                     <input
                         type="date"
                         id="dueDate"
-                        disabled={isViewMode}
+                        disabled={isReadOnly}
                         {...register('dueDate', {
                             setValueAs: (value) => (value ? value : null),
                         })}
@@ -218,13 +255,13 @@ const TestCaseForm = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">{t("common.environmentLabel")} {!isViewMode ? (<button className="text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
+                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">{t("common.environmentLabel")} {!isReadOnly ? (<button className="text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
                     <select
                         {...register('environmentId', {
                             required: t("testCase.environmentRequired"),
                             setValueAs: (value) => parseInt(value, 10),
                         })}
-                        disabled={isViewMode}
+                        disabled={isReadOnly}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.environmentId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     >
                         <option value="">{t("common.selectEnvironment")}</option>
@@ -237,22 +274,24 @@ const TestCaseForm = () => {
                     {errors.environmentId && <span className="text-red-500 text-sm">{errors.environmentId.message}</span>}
                 </div>
                 <div>
-                    <label htmlFor="testScenarioId" className="block text-sm font-medium text-gray-700">{t("common.testScenarioLabel")} {!isViewMode ? (<button className="text-lg" onClick={handleClickNewTestScenario} type="button"><FiPlusCircle /></button>) : null}</label>
+                    <label htmlFor="testScenarioId" className="block text-sm font-medium text-gray-700">{t("common.testScenarioLabel")} {!isReadOnly ? (<button className="text-lg" onClick={handleClickNewTestScenario} type="button"><FiPlusCircle /></button>) : null}</label>
                     <select
                         id='testScenarioId'
                         {...register('testScenarioId', {
                             required: t("testCase.testScenarioRequired"),
                             setValueAs: (value) => parseInt(value, 10),
                         })}
-                        disabled={isViewMode}
+                        disabled={isReadOnly}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.testScenarioId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     >
                         <option value="">{t("common.selectScenario")}</option>
-                        {testScenarios.map((testScenario) => (
-                            <option key={testScenario.id} value={testScenario.id}>
-                                {testScenario.name}
-                            </option>
-                        ))}
+                        {testScenarios
+                            .filter((testScenario) => testScenario.approvalStatus === ApprovalStatusEnum.Approved)
+                            .map((testScenario) => (
+                                <option key={testScenario.id} value={testScenario.id}>
+                                    {testScenario.name}
+                                </option>
+                            ))}
                     </select>
                     {errors.testScenarioId && <span className="text-red-500 text-sm">{errors.testScenarioId.message}</span>}
                 </div>
@@ -265,7 +304,7 @@ const TestCaseForm = () => {
                                 setValueAs: (value) => parseInt(value, 10),
                                 onChange: handleChangeTemplate,
                             })}
-                            disabled={isViewMode}
+                            disabled={isReadOnly}
                             className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         >
                             <option value="">{t("common.selectTemplate")}</option>
@@ -289,12 +328,12 @@ const TestCaseForm = () => {
                         )}
                         <CustomizableTable
                             ref={customizableTableRef}
-                            operation={isViewMode ? Operation.View : Operation.FillIn}
+                            operation={isReadOnly ? Operation.View : Operation.FillIn}
                             onChange={setRows}
                         />
                     </fieldset>
                 </div>
-                {!loadingTemplates && !isViewMode && (
+                {!loadingTemplates && !isReadOnly && (
                     <button
                         type="submit"
                         className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"

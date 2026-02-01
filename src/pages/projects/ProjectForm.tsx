@@ -114,6 +114,35 @@ const ProjectForm = React.forwardRef<FormDialogBaseExtendsRef, ProjectFormProps>
             })}
           />
         </Field>
+        <div className="space-y-3 rounded-2xl border border-ink/10 bg-paper px-4 py-3">
+          <p className="text-sm font-semibold text-ink">{t("projects.approvalTitle")}</p>
+          <label className="flex items-center gap-2 text-sm text-ink/80">
+            <input
+              type="checkbox"
+              {...register("approvalEnabled")}
+              className="h-4 w-4 rounded border-ink/20 text-ink"
+            />
+            {t("projects.approvalEnabled")}
+          </label>
+          <label className="flex items-center gap-2 text-sm text-ink/80">
+            <input
+              type="checkbox"
+              {...register("approvalScenarioEnabled")}
+              className="h-4 w-4 rounded border-ink/20 text-ink"
+              disabled={!watch("approvalEnabled")}
+            />
+            {t("projects.approvalScenarioEnabled")}
+          </label>
+          <label className="flex items-center gap-2 text-sm text-ink/80">
+            <input
+              type="checkbox"
+              {...register("approvalTestCaseEnabled")}
+              className="h-4 w-4 rounded border-ink/20 text-ink"
+              disabled={!watch("approvalEnabled")}
+            />
+            {t("projects.approvalTestCaseEnabled")}
+          </label>
+        </div>
       </div>
     </FormDialogBase>
   );

@@ -28,7 +28,6 @@ const TagRender: React.FC<TagRenderProps> = ({tagId, tagValueId, onChange, opera
 
     const load = useCallback(async () => {
         if (tagId) {
-            debugger;
             if (lastFetchedIdRef.current === tagId) {
                 return;
             }

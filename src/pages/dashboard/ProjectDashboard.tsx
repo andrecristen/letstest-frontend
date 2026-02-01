@@ -5,6 +5,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 import { Badge, Button, Card, Field, Input, Select } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { getMyProjects, getOverviewProject, getTestProjects } from "../../services/projectService";
+import { InvolvementSituationEnum, InvolvementTypeEnum } from "../../models/InvolvementData";
 import { ProjectData } from "../../models/ProjectData";
 import { ReportType } from "../../models/ReportData";
 import { TestExecutionData } from "../../models/TestExecutionData";
@@ -149,6 +150,33 @@ const ProjectDashboard: React.FC = () => {
       approvalRate,
     };
   }, [filteredExecutions.length, reports, scenarios]);
+
+  const involvementSummary = useMemo(() => {
+    const involvements = projectOverview?.involvements ?? [];
+    const accepted = involvements.filter(
+      (involvement) => involvement.situation === InvolvementSituationEnum.Accepted
+    );
+    const managerIds = new Set<number>();
+    const testerIds = new Set<number>();
+
+    if (projectOverview?.creator?.id) {
+      managerIds.add(projectOverview.creator.id);
+    }
+
+    accepted.forEach((involvement) => {
+      if (involvement.type === InvolvementTypeEnum.Manager) {
+        if (involvement.userId) managerIds.add(involvement.userId);
+      }
+      if (involvement.type === InvolvementTypeEnum.Tester) {
+        if (involvement.userId) testerIds.add(involvement.userId);
+      }
+    });
+
+    return {
+      managers: managerIds.size,
+      testers: testerIds.size,
+    };
+  }, [projectOverview]);
 
   const testerRanking = useMemo(() => {
     if (activeScope === "tester") return [];
@@ -439,6 +467,14 @@ const ProjectDashboard: React.FC = () => {
               <div className="flex items-center justify-between text-sm text-ink/70">
                 <span>{t("dashboard.totalScenarios")}</span>
                 <span className="font-semibold text-ink">{summary.scenarios}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-ink/70">
+                <span>{t("dashboard.totalManagers")}</span>
+                <span className="font-semibold text-ink">{involvementSummary.managers}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-ink/70">
+                <span>{t("dashboard.totalTesters")}</span>
+                <span className="font-semibold text-ink">{involvementSummary.testers}</span>
               </div>
               <div className="flex items-center justify-between text-sm text-ink/70">
                 <span>{t("dashboard.totalCases")}</span>

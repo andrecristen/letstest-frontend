@@ -16,6 +16,7 @@ import ProjectTesterList from "../pages/projects/ProjectTesterList";
 import TestCaseProjectTesterList from "../pages/testCase/TestCaseTesterList";
 import TestExecutionForm from "../pages/testExecution/TestExecutionForm";
 import TestExecutionList from "../pages/testExecution/TestExecutionList";
+import TestExecutionSession from "../pages/testExecution/TestExecutionSession";
 import UserFormProfileEdit from "../pages/user/UserFormProfileEdit";
 import DeviceUserView from "../pages/devices/DeviceUserView";
 import HabilityUserView from "../pages/habilities/HabilityUserView";
@@ -74,6 +75,7 @@ const AppRoutes = () => {
                 {/* Tester */}
                 <Route path="/my-test-projects" element={<ProjectTesterList />}></Route>
                 <Route path="/project/test/:projectId" element={<TestCaseProjectTesterList />}></Route>
+                <Route path="/test-executions/session/:projectId/:testCaseId" element={<TestExecutionSession />}></Route>
                 <Route path="/test-executions/test/:projectId/:testCaseId" element={<TestExecutionForm />}></Route>
                 <Route path="/test-executions/:testCaseId/my" element={<TestExecutionList />}></Route>
                 {/* Shared */}
