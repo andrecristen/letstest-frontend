@@ -93,9 +93,17 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
       },
     });
     socket.on("connect", () => {
+      console.info("[socket] connected", socket.id);
       loadUnreadCount();
     });
+    socket.on("disconnect", (reason) => {
+      console.info("[socket] disconnected", reason);
+    });
+    socket.on("connect_error", (error) => {
+      console.warn("[socket] connect_error", error?.message ?? error);
+    });
     socket.on("notification:new", async () => {
+      console.info("[socket] notification:new received");
       await loadUnreadCount();
     });
     socketRef.current = socket;
