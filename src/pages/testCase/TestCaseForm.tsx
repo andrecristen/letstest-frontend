@@ -72,6 +72,7 @@ const TestCaseForm = () => {
             setValue('projectId', testCase.projectId);
             setValue('environmentId', testCase.environmentId);
             setValue('testScenarioId', testCase.testScenarioId);
+            setValue('dueDate', testCase.dueDate ? testCase.dueDate.split("T")[0] : "");
             loadedTestCaseRefs.current = {
                 environmentId: testCase.environmentId,
                 testScenarioId: testCase.testScenarioId
@@ -203,6 +204,18 @@ const TestCaseForm = () => {
                         className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     />
                     {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+                </div>
+                <div>
+                    <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">{t("common.dueDateLabel")}</label>
+                    <input
+                        type="date"
+                        id="dueDate"
+                        disabled={isViewMode}
+                        {...register('dueDate', {
+                            setValueAs: (value) => (value ? value : null),
+                        })}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                    />
                 </div>
                 <div>
                     <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">{t("common.environmentLabel")} {!isViewMode ? (<button className="text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>

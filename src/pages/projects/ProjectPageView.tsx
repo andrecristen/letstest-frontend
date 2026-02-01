@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { FiDownload, FiEdit, FiFilePlus, FiFileText, FiInbox, FiMonitor, FiMove, FiUser, FiUserPlus } from 'react-icons/fi';
+import { FiBell, FiDownload, FiEdit, FiFilePlus, FiFileText, FiInbox, FiMonitor, FiMove, FiUser, FiUserPlus } from 'react-icons/fi';
 import { useNavigate, useParams } from 'react-router-dom';
 import logo from '../../assets/logo-transparente.png';
 import { getProjectById } from '../../services/projectService';
@@ -119,6 +119,7 @@ const ProjectPageView: React.FC = () => {
                             { label: t('projects.templatesLabel'), route: "templates", icon: <FiFilePlus /> },
                             { label: t('projects.environmentsLabel'), route: "environments", icon: <FiMonitor /> },
                             { label: t('projects.overviewLabel'), route: "overview", icon: <FiDownload /> },
+                            { label: t('projects.notificationsLabel'), route: "notifications", icon: <FiBell /> },
                         ].map((item) => (
                             <button
                                 key={item.route}

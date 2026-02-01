@@ -17,6 +17,13 @@ import logo from "../assets/logo-transparente.png";
 import tokenProvider from "../infra/tokenProvider";
 import notifyProvider from "../infra/notifyProvider";
 import { cn } from "../ui";
+import {
+  getNotifications,
+  getUnreadCount,
+  markAllRead,
+  markNotificationRead,
+  NotificationItem,
+} from "../services/notificationService";
 
 interface Menu {
   name: string;
@@ -40,6 +47,10 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notificationPage] = useState(1);
+  const [notificationLoading, setNotificationLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
   const userButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -51,6 +62,27 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   useEffect(() => {
     setMenuSelected(location.pathname);
   }, [location.pathname]);
+
+  const loadUnreadCount = async () => {
+    const response = await getUnreadCount();
+    const count = response?.data?.count ?? 0;
+    setUnreadCount(count);
+  };
+
+  const loadNotifications = async () => {
+    setNotificationLoading(true);
+    try {
+      const response = await getNotifications(notificationPage, 20);
+      const data = response?.data?.data ?? [];
+      setNotifications(data);
+    } finally {
+      setNotificationLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUnreadCount();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -98,7 +130,11 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   };
 
   const toggleNotificationMenu = () => {
-    setIsNotificationOpen(!isNotificationOpen);
+    const nextState = !isNotificationOpen;
+    setIsNotificationOpen(nextState);
+    if (nextState) {
+      loadNotifications();
+    }
     setIsUserMenuOpen(false);
   };
 
@@ -203,13 +239,83 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
               aria-label="Notificacoes"
             >
               <FiBell />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </button>
             {isNotificationOpen && (
               <div
-                className="absolute right-14 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper p-4 text-sm text-ink/70 shadow-soft"
+                className="absolute right-14 top-12 z-20 w-80 rounded-xl border border-ink/10 bg-paper p-4 text-sm text-ink/70 shadow-soft"
                 ref={notificationMenuRef}
               >
-                {t("nav.notificationsEmpty")}
+                <div className="flex items-center justify-between pb-2">
+                  <span className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                    {t("nav.notifications")}
+                  </span>
+                  {notifications.length > 0 && (
+                    <button
+                      type="button"
+                      className="text-xs font-semibold text-ocean hover:text-ink"
+                      onClick={async () => {
+                        await markAllRead();
+                        setNotifications((prev) =>
+                          prev.map((item) => ({ ...item, readAt: new Date().toISOString() }))
+                        );
+                        setUnreadCount(0);
+                      }}
+                    >
+                      {t("nav.markAllRead")}
+                    </button>
+                  )}
+                </div>
+
+                {notificationLoading ? (
+                  <div className="py-6 text-center text-xs text-ink/50">
+                    {t("common.loading")}
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <div className="py-6 text-center text-xs text-ink/50">
+                    {t("nav.notificationsEmpty")}
+                  </div>
+                ) : (
+                  <div className="max-h-72 space-y-3 overflow-auto pr-1">
+                    {notifications.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={async () => {
+                          if (!item.readAt) {
+                            await markNotificationRead(item.notificationId);
+                            setNotifications((prev) =>
+                              prev.map((notification) =>
+                                notification.id === item.id
+                                  ? { ...notification, readAt: new Date().toISOString() }
+                                  : notification
+                              )
+                            );
+                            setUnreadCount((prev) => Math.max(prev - 1, 0));
+                          }
+                        }}
+                        className={cn(
+                          "w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors",
+                          item.readAt
+                            ? "border-ink/10 bg-paper/60"
+                            : "border-ocean/30 bg-ocean/10"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-ink">{item.notification.title}</span>
+                          <span className="text-[10px] text-ink/50">
+                            {new Date(item.notification.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-ink/60">{item.notification.message}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

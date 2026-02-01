@@ -25,6 +25,11 @@ const ProjectForm = React.forwardRef<FormDialogBaseExtendsRef, ProjectFormProps>
     setData: (data: ProjectData) => {
       reset();
       Object.keys(data).forEach((key) => {
+        if (key === "dueDate") {
+          const value = data.dueDate ? data.dueDate.split("T")[0] : "";
+          setValue("dueDate", value as unknown as ProjectData["dueDate"]);
+          return;
+        }
         setValue(key as keyof ProjectData, data[key as keyof ProjectData]);
       });
     },
@@ -99,6 +104,15 @@ const ProjectForm = React.forwardRef<FormDialogBaseExtendsRef, ProjectFormProps>
               </option>
             ))}
           </Select>
+        </Field>
+        <Field label={t("common.dueDateLabel")}>
+          <Input
+            id="dueDate"
+            type="date"
+            {...register("dueDate", {
+              setValueAs: (value) => (value ? value : null),
+            })}
+          />
         </Field>
       </div>
     </FormDialogBase>

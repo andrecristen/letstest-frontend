@@ -8,6 +8,7 @@ export type ProjectData = {
     description: string;
     visibility: number;
     situation: number;
+    dueDate?: string | null;
     creatorId?: number;
     creator?: UserData;
     testScenarios?: TestScenarioData[];

@@ -30,6 +30,7 @@ import TestScenarioList from "../pages/testScenario/TestScenarioList";
 import TestScenarioForm from "../pages/testScenario/TestScenarioForm";
 import ProjectOverView from "../pages/projects/ProjectOverView";
 import ProjectDashboard from "../pages/dashboard/ProjectDashboard";
+import ProjectNotificationSettings from "../pages/notifications/ProjectNotificationSettings";
 import { useTranslation } from "react-i18next";
 
 const AppRoutes = () => {
@@ -50,6 +51,7 @@ const AppRoutes = () => {
                 <Route path="/project/testers/:projectId" element={<InvolvementOwnerList title={t("projects.testersLabel")} type={InvolvementTypeEnum.Tester} />}></Route>
                 <Route path="/project/managers/:projectId" element={<InvolvementOwnerList title={t("projects.managersLabel")} type={InvolvementTypeEnum.Manager} />}></Route>
                 <Route path="/project/overview/:projectId" element={<ProjectOverView />}></Route>
+                <Route path="/project/notifications/:projectId" element={<ProjectNotificationSettings />}></Route>
                 <Route path="/project/templates/:projectId" element={<TemplateList />}></Route>
                 <Route path="/project/templates/:projectId/add" element={<TemplateForm />}></Route>
                 <Route path="/project/templates/:projectId/copy/:templateIdCopy" element={<TemplateForm />}></Route>

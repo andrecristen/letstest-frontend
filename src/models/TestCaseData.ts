@@ -13,5 +13,6 @@ export type TestCaseData = {
     environment?: EnvironmentData
     testScenarioId?: number;
     testScenario?: TestScenarioData;
+    dueDate?: string | null;
     testExecutions?: TestExecutionData[];
 };
