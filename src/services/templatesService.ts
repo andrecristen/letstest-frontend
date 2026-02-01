@@ -1,12 +1,12 @@
 import { TemplateData } from "../models/TemplateData";
 import apiTokenProvider from "../infra/http-request/apiTokenProvider";
 
-export const getAllByProject = async (projectId: number) => {
-    return await apiTokenProvider.get('/template/' + projectId + '/all');
+export const getAllByProject = async (projectId: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/template/' + projectId + '/all', { params: { page, limit } });
 };
 
-export const getAllByProjectAndType = async (projectId: number, type: number) => {
-    return await apiTokenProvider.get('/template/' + projectId + '/' + type);
+export const getAllByProjectAndType = async (projectId: number, type: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/template/' + projectId + '/' + type, { params: { page, limit } });
 };
 
 export const getById = async (templateId: number) => {

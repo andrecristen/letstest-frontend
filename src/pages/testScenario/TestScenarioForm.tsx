@@ -12,8 +12,10 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import { TestScenarioData } from '../../models/TestScenarioData';
 import { createTestScenario, getTestScenarioById, updateTestScenario } from '../../services/testScenario';
+import { useTranslation } from 'react-i18next';
 
 const TestScenarioForm = () => {
+    const { t } = useTranslation();
     const { projectId, testScenarioId } = useParams();
     const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<TestScenarioData>();
     const customizableTableRef = useRef<CustomizableTableRef>(null);
@@ -48,11 +50,11 @@ const TestScenarioForm = () => {
     const getTemplates = async () => {
         setLoadingTemplates(true);
         try {
-            const response = await getAllByProjectAndType(getProjectId(), TemplateTypeEnum['Definição de cenários de teste']);
-            const newTemplates = response?.data || [];
+            const response = await getAllByProjectAndType(getProjectId(), TemplateTypeEnum.TestScenarioDefinition, 1, 200);
+            const newTemplates = response?.data?.data || [];
             setTemplates(newTemplates);
             if (!newTemplates.length) {
-                notifyProvider.info("Não há nenhum template para Definição de cenários de teste para o seu projeto, certifique-se de criar ao menos.");
+                notifyProvider.info(t("testScenario.noTemplatesInfo"));
             }
         } finally {
             setLoadingTemplates(false);
@@ -75,7 +77,7 @@ const TestScenarioForm = () => {
 
     const onSubmit: SubmitHandler<TestScenarioData> = async (data) => {
         if (!rows.length) {
-            notifyProvider.error('Necessário ao menos uma linha para confirmação.');
+            notifyProvider.error(t("testScenario.minRowRequired"));
             return;
         }
         if (isViewMode) return;
@@ -86,13 +88,15 @@ const TestScenarioForm = () => {
             const response = data.id ? await updateTestScenario(data.id, data) : await createTestScenario(getProjectId(), data);
             const success = response?.status === 200 || response?.status === 201;
             if (success) {
-                notifyProvider.success(`Cenário de teste ${data.id ? 'alterado' : 'criado'} com sucesso`);
+                const actionResult = data.id ? t("common.updatedResult") : t("common.createdResult");
+                notifyProvider.success(t("testScenario.saveSuccess", { action: actionResult }));
                 navigate(-1);
             } else {
-                throw new Error('Erro inesperado');
+                throw new Error(t("testScenario.unexpectedError"));
             }
         } catch (error) {
-            notifyProvider.error(`Erro ao ${data.id ? 'alterar' : 'criar'} Cenário de teste, tente novamente`);
+            const action = data.id ? t("common.updatedAction") : t("common.createdAction");
+            notifyProvider.error(t("testScenario.saveError", { action }));
         }
     };
 
@@ -103,7 +107,7 @@ const TestScenarioForm = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title="Cenário de Teste" />
+            <TitleContainer title={t("testScenario.pageTitle")} />
             <LoadingOverlay show={loadingTemplates || loadingTestScenario} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
@@ -113,34 +117,34 @@ const TestScenarioForm = () => {
                             {...register('id')}
                             disabled
                             className="form-input"
-                            placeholder="Id"
+                            placeholder={t("common.idLabel")}
                         />
                     </div>
                 )}
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">{t("common.nameLabel")}</label>
                     <input
                         type="text"
                         id="name"
                         disabled={isViewMode}
-                        {...register('name', { required: 'Nome é obrigatório' })}
+                        {...register('name', { required: t("common.nameRequired") })}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     />
                     {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
                 {!getTestScenarioId() && (
                     <div className="py-2">
-                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">Template</label>
+                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>
                         <select
                             {...register('templateId', {
-                                required: 'Template é obrigatório',
+                                required: t("testScenario.templateRequired"),
                                 setValueAs: (value) => parseInt(value, 10),
                                 onChange: handleChangeTemplate,
                             })}
                             disabled={isViewMode}
                             className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         >
-                            <option value="">Selecione o template</option>
+                            <option value="">{t("common.selectTemplate")}</option>
                             {templates.map((template) => (
                                 <option key={template.id} value={template.id}>
                                     {template.name}
@@ -152,11 +156,11 @@ const TestScenarioForm = () => {
                 )}
                 <div className="py-2">
                     <fieldset className="border rounded p-4">
-                        <legend className="text-lg font-semibold">Definição do Cenário de Teste:</legend>
+                        <legend className="text-lg font-semibold">{t("testScenario.definitionLegend")}</legend>
                         {!updateTemplate && !getTestScenarioId() && (
                             <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
-                                <strong className="font-bold mr-2">Atenção!</strong>
-                                <span>Selecione o template desejado para preenchimento.</span>
+                                <strong className="font-bold mr-2">{t("common.attention")}</strong>
+                                <span>{t("common.selectTemplateWarning")}</span>
                             </div>
                         )}
                         <CustomizableTable
@@ -172,7 +176,7 @@ const TestScenarioForm = () => {
                         className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
                     >
                         <FiSave className="mr-2" />
-                        Salvar
+                        {t("common.save")}
                     </button>
                 )}
             </form>

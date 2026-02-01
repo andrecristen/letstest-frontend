@@ -1,33 +1,41 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTestProjects } from '../../services/projectService';
-import { getProjectSituationDescription, getProjectVisibilityDescription, getProjectSituationColor } from '../../models/ProjectData';
+import { getProjectSituationDescription, getProjectVisibilityDescription } from '../../models/ProjectData';
 import PainelContainer from '../../components/PainelContainer';
 import TitleContainer from '../../components/TitleContainer';
 import { ProjectData } from '../../models/ProjectData';
+import notifyProvider from '../../infra/notifyProvider';
+import { Badge, Button, Card, Field, Input } from '../../ui';
+import { useTranslation } from 'react-i18next';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
+import LoadingOverlay from '../../components/LoadingOverlay';
+import { FiFilter, FiXCircle } from "react-icons/fi";
 
 const ProjectTesterList: React.FC = () => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
-    const [projects, setProjects] = useState<ProjectData[]>([]);
-    const [loadingProjects, setLoadingProjects] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
-
-    useEffect(() => {
-        loadProjects();
-    }, []);
-
-    const loadProjects = async () => {
-        setLoadingProjects(true);
-        try {
-            const response = await getTestProjects();
-            setProjects(response?.data || []);
-        } catch (error) {
-            console.error('Erro ao carregar projetos:', error);
-        } finally {
-            setLoadingProjects(false);
-        }
-    };
+    const [filterDraft, setFilterDraft] = useState(searchTerm);
+    const {
+        items: projects,
+        loading: loadingProjects,
+        loadingMore,
+        hasNext,
+        sentinelRef,
+    } = useInfiniteList<ProjectData>(
+        async (page, limit) => {
+            try {
+                const response = await getTestProjects(page, limit);
+                return response?.data ?? null;
+            } catch (error) {
+                notifyProvider.error(t('projects.loadListError'));
+                return null;
+            }
+        },
+        []
+    );
 
     const handleClickTestProject = (event: React.MouseEvent, project: ProjectData) => {
         event.preventDefault();
@@ -35,53 +43,112 @@ const ProjectTesterList: React.FC = () => {
         navigate(`/project/test/${project.id}`);
     };
 
-    const filteredProjects = projects.filter(
-        (project) => project.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleKeyCard = (event: React.KeyboardEvent<HTMLDivElement>, project: ProjectData) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleClickTestProject(event as unknown as React.MouseEvent, project);
+        }
+    };
+
+    const getSituationVariant = (situation: number) => {
+        switch (situation) {
+            case 1:
+                return "accent";
+            case 2:
+                return "success";
+            case 3:
+                return "danger";
+            default:
+                return "neutral";
+        }
+    };
+
+    const filteredProjects = useMemo(() => {
+        return projects.filter(
+            (project) => project.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [projects, searchTerm]);
+
+    const applyFilters = () => {
+        setSearchTerm(filterDraft);
+    };
+
+    const clearFilters = () => {
+        setFilterDraft('');
+        setSearchTerm('');
+    };
 
     return (
         <PainelContainer>
-            <TitleContainer title="Testar Projetos" textHelp="Projetos que você é responsável pelos testes" />
+            <LoadingOverlay show={loadingMore} />
+            <div className="space-y-6">
+            <TitleContainer title={t("projects.testerTitle")} textHelp={t("projects.testerHelp")} />
 
-            <div className="flex justify-between mb-4">
-                <input
-                    type="text"
-                    placeholder="Buscar por nome..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="form-input mr-2 py-2 px-8 text-lg h-16"
-                />
-            </div>
-
-            {loadingProjects ? (
-                <div className="text-center text-lg text-purple-600 my-20">Carregando seus projetos...</div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProjects.length > 0 ? (
-                        filteredProjects.map((project) => (
-                            <div
-                                key={project.id}
-                                className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 cursor-pointer"
-                                onClick={(event) => handleClickTestProject(event, project)}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-xl font-semibold text-purple-700">#{project.id} - {project.name}</h3>
-                                </div>
-                                <div className="text-sm text-gray-600"><span
-                                    className={`bg-${getProjectSituationColor(
-                                        project.situation
-                                    )} text-white rounded-lg p-1`}
-                                >
-                                    {getProjectSituationDescription(project.situation)}
-                                </span> {getProjectVisibilityDescription(project.visibility)}</div>
-                                <p title={project.description} className="text-gray-600 my-2 line-clamp-3 overflow-hidden text-ellipsis">{project.description}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-center text-lg text-purple-600 col-span-full">Nenhum projeto encontrado</div>
-                    )}
+                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
+                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                        <Field label={t('projects.searchLabel')}>
+                            <Input
+                                type="text"
+                                placeholder={t('projects.searchPlaceholder')}
+                                value={filterDraft}
+                                onChange={(e) => setFilterDraft(e.target.value)}
+                            />
+                        </Field>
+                    </div>
+                    <div className="flex w-full justify-end gap-2 pt-2">
+                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
+                            {t("common.confirm")}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
+                            {t("common.clearFilters")}
+                        </Button>
+                    </div>
                 </div>
-            )}
+
+                {loadingProjects ? (
+                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                        {t('projects.loadingOwnerList')}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        {filteredProjects.length > 0 ? (
+                            filteredProjects.map((project) => (
+                                <Card
+                                    key={project.id}
+                                    className="cursor-pointer transition-transform hover:-translate-y-1"
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyCard(event, project)}
+                                    onClick={(event: React.MouseEvent<HTMLDivElement>) => handleClickTestProject(event, project)}
+                                >
+                                    <div className="space-y-2">
+                                        <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                            #{project.id}
+                                        </p>
+                                        <h3 className="font-display text-lg text-ink">
+                                            {project.name}
+                                        </h3>
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-ink/60">
+                                        <Badge variant={getSituationVariant(project.situation)}>
+                                            {getProjectSituationDescription(project.situation)}
+                                        </Badge>
+                                        <span>{getProjectVisibilityDescription(project.visibility)}</span>
+                                    </div>
+                                    <p className="mt-4 text-sm text-ink/60">
+                                        {project.description}
+                                    </p>
+                                </Card>
+                            ))
+                        ) : (
+                            <div className="col-span-full rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                                {t('projects.emptyOwnerList')}
+                            </div>
+                        )}
+                    </div>
+                )}
+                {hasNext ? <div ref={sentinelRef} /> : null}
+            </div>
         </PainelContainer>
     );
 }

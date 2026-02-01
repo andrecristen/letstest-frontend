@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { TestScenarioData } from "./TestScenarioData";
 import { UserData } from "./UserData";
 
@@ -13,26 +14,36 @@ export type ProjectData = {
 }
 
 export enum ProjectVisibilityEnum {
-    Público = 1,
-    Privado = 2,
+    Public = 1,
+    Private = 2,
 }
 
+const projectVisibilityOrder: ProjectVisibilityEnum[] = [
+    ProjectVisibilityEnum.Public,
+    ProjectVisibilityEnum.Private,
+];
+
+const projectVisibilityLabels: Record<ProjectVisibilityEnum, string> = {
+    [ProjectVisibilityEnum.Public]: "enums.project.visibility.public",
+    [ProjectVisibilityEnum.Private]: "enums.project.visibility.private",
+};
+
 export const getProjectVisibilityList = () => {
-    return Object.keys(ProjectVisibilityEnum)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: ProjectVisibilityEnum[key as keyof typeof ProjectVisibilityEnum]}));
+    return projectVisibilityOrder.map((visibility) => ({
+        name: i18n.t(projectVisibilityLabels[visibility]),
+        id: visibility,
+    }));
 }
 
 export const getProjectVisibilityDescription = (value: number): string | undefined => {
-    const description = Object.keys(ProjectVisibilityEnum)
-        .find(key => ProjectVisibilityEnum[key as keyof typeof ProjectVisibilityEnum] === value);
-    return description ? description : undefined;
+    const labelKey = projectVisibilityLabels[value as ProjectVisibilityEnum];
+    return labelKey ? i18n.t(labelKey) : undefined;
 }
 
 export enum ProjectSituationEnum {
-    Teste = 1,
-    Finalizado = 2,
-    Cancelado = 3,
+    Testing = 1,
+    Finished = 2,
+    Canceled = 3,
 }
 
 export enum ProjectSituationColorEnum {
@@ -41,16 +52,28 @@ export enum ProjectSituationColorEnum {
     "red-500" = 3,
 }
 
+const projectSituationOrder: ProjectSituationEnum[] = [
+    ProjectSituationEnum.Testing,
+    ProjectSituationEnum.Finished,
+    ProjectSituationEnum.Canceled,
+];
+
+const projectSituationLabels: Record<ProjectSituationEnum, string> = {
+    [ProjectSituationEnum.Testing]: "enums.project.situation.testing",
+    [ProjectSituationEnum.Finished]: "enums.project.situation.finished",
+    [ProjectSituationEnum.Canceled]: "enums.project.situation.canceled",
+};
+
 export const getProjectSituationList = () => {
-    return Object.keys(ProjectSituationEnum)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: ProjectSituationEnum[key as keyof typeof ProjectSituationEnum] ? ProjectSituationEnum[key as keyof typeof ProjectSituationEnum] : null }));
+    return projectSituationOrder.map((situation) => ({
+        name: i18n.t(projectSituationLabels[situation]),
+        id: situation,
+    }));
 }
 
 export const getProjectSituationDescription = (value: number): string | undefined => {
-    const description = Object.keys(ProjectSituationEnum)
-        .find(key => ProjectSituationEnum[key as keyof typeof ProjectSituationEnum] === value);
-    return description ? description : undefined;
+    const labelKey = projectSituationLabels[value as ProjectSituationEnum];
+    return labelKey ? i18n.t(labelKey) : undefined;
 }
 
 export const getProjectSituationColor= (value: number): string | undefined => {
@@ -63,11 +86,26 @@ export enum ProjectTypeEnum {
     Web = 1,
     Desktop = 2,
     App = 3,
-    Híbrido = 4,
+    Hybrid = 4,
 }
 
+const projectTypeOrder: ProjectTypeEnum[] = [
+    ProjectTypeEnum.Web,
+    ProjectTypeEnum.Desktop,
+    ProjectTypeEnum.App,
+    ProjectTypeEnum.Hybrid,
+];
+
+const projectTypeLabels: Record<ProjectTypeEnum, string> = {
+    [ProjectTypeEnum.Web]: "enums.project.type.web",
+    [ProjectTypeEnum.Desktop]: "enums.project.type.desktop",
+    [ProjectTypeEnum.App]: "enums.project.type.app",
+    [ProjectTypeEnum.Hybrid]: "enums.project.type.hybrid",
+};
+
 export const getProjectTypeList = () => {
-    return Object.keys(ProjectTypeEnum)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: ProjectTypeEnum[key as keyof typeof ProjectTypeEnum]}));
+    return projectTypeOrder.map((type) => ({
+        name: i18n.t(projectTypeLabels[type]),
+        id: type,
+    }));
 }

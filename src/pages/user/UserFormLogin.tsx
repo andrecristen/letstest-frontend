@@ -1,70 +1,125 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth } from '../../infra/http-request/authProvider';
-import notifyProvider from '../../infra/notifyProvider';
-import tokenProvider from '../../infra/tokenProvider';
-import { AuthData } from '../../models/AuthData';
-import logo from '../../assets/logo-transparente.png'
-import { FiLoader } from 'react-icons/fi';
-import '../../styles/form.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { FiArrowRight } from "react-icons/fi";
+import { auth } from "../../infra/http-request/authProvider";
+import notifyProvider from "../../infra/notifyProvider";
+import tokenProvider from "../../infra/tokenProvider";
+import { AuthData } from "../../models/AuthData";
+import logo from "../../assets/logo-transparente.png";
+import { Button, Card, Field, Input } from "../../ui";
 
 const UserFormLogin = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
-    const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [validatingLogin, setValidatingLogin] = useState(false);
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [validatingLogin, setValidatingLogin] = useState(false);
-
-    const handleLogin = async (event: any) => {
-        try {
-            event.preventDefault();
-            setValidatingLogin(true);
-            const data: AuthData = { email, password };
-            const response = await auth(data);
-            if (response?.status == 200) {
-                tokenProvider.setSession(response.data.token, response.data.userId);
-                notifyProvider.success("Login realizado com sucesso");
-                navigate("/find-new-projects");
-                return;
-            } else if (response?.data.error) {
-                notifyProvider.error(response?.data.error);
-            } else {
-                notifyProvider.error('Erro ao realizar login');
-            }
-            setEmail("");
-            setPassword("");
-            setValidatingLogin(false);
-        } catch (error) {
-            notifyProvider.error('Erro ao realizar login');
-        }
-    };
-
-    const redirectToHome = () => {
-        navigate('/');
+  const handleLogin = async (event: React.FormEvent) => {
+    try {
+      event.preventDefault();
+      setValidatingLogin(true);
+      const data: AuthData = { email, password };
+      const response = await auth(data);
+      if (response?.status === 200) {
+        tokenProvider.setSession(response.data.token, response.data.userId);
+        notifyProvider.success(t("auth.loginSuccess"));
+        navigate("/find-new-projects");
+        return;
+      }
+      if (response?.data.error) {
+        notifyProvider.error(response.data.error);
+      } else {
+        notifyProvider.error(t("auth.loginError"));
+      }
+      setEmail("");
+      setPassword("");
+      setValidatingLogin(false);
+    } catch (error) {
+      notifyProvider.error(t("auth.loginError"));
     }
+  };
 
-    return (
-        <>
-            <section className="h-screen flex flex-col md:flex-row justify-center space-y-10 md:space-y-0 md:space-x-16 items-center my-2 mx-5 md:mx-0 md:my-0">
-                <div className="md:w-1/3 max-w-sm" onClick={redirectToHome}>
-                    <img src={logo} alt="Logo login" />
-                </div>
-                <form onSubmit={handleLogin} className="md:w-1/3 max-w-sm">
-                    <input className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded" required type="text" placeholder="Login" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    <input className="text-sm w-full px-4 py-2 border border-solid border-gray-300 rounded mt-4" required type="password" placeholder="Senha" value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <div className="text-center md:text-center">
-                        <button disabled={validatingLogin}
-                            className="action-button-purple justify-center mt-3"
-                            type="submit">{validatingLogin ? <FiLoader className="text-white animate-spin" size={30} /> : "Login"}</button>
-                    </div>
-                    <div className="mt-4 font-semibold text-sm text-slate-500 text-center md:text-center">
-                        Ainda não possui uma conta? <a className="text-red-600 hover:underline hover:underline-offset-4" href="/register">Crie agora</a>
-                    </div>
-                </form>
-            </section>
-        </>
-    );
+  return (
+    <section className="min-h-screen px-6 py-10">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div className="flex flex-col gap-6">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="w-fit"
+          >
+            <img src={logo} alt="Logo login" className="h-16" />
+          </button>
+          <div className="space-y-3">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-ocean">
+              Letstest
+            </p>
+            <h1 className="font-display text-3xl text-ink sm:text-4xl">
+              {t("auth.loginTitle")}
+            </h1>
+            <p className="text-base text-ink/70">
+              {t("auth.loginSubtitle")}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-4 text-sm text-ink/60">
+            <span className="rounded-full border border-ink/10 bg-paper px-3 py-1">
+              {t("auth.loginTag1")}
+            </span>
+            <span className="rounded-full border border-ink/10 bg-paper px-3 py-1">
+              {t("auth.loginTag2")}
+            </span>
+            <span className="rounded-full border border-ink/10 bg-paper px-3 py-1">
+              {t("auth.loginTag3")}
+            </span>
+          </div>
+        </div>
+
+        <Card className="flex flex-col gap-6">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <Field label={t("auth.emailPlaceholder")}>
+              <Input
+                required
+                type="email"
+                placeholder={t("auth.emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Field>
+            <Field label={t("auth.passwordPlaceholder")}
+            >
+              <Input
+                required
+                type="password"
+                placeholder={t("auth.passwordPlaceholder")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Field>
+            <Button
+              type="submit"
+              isLoading={validatingLogin}
+              className="w-full"
+              leadingIcon={<FiArrowRight />}
+            >
+              {t("auth.loginButton")}
+            </Button>
+          </form>
+          <div className="text-sm text-ink/60">
+            {t("auth.noAccount")} {" "}
+            <a
+              className="font-semibold text-ocean hover:text-ink"
+              href="/register"
+            >
+              {t("auth.createAccount")}
+            </a>
+          </div>
+        </Card>
+      </div>
+    </section>
+  );
 };
 
 export default UserFormLogin;

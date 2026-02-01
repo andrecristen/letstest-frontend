@@ -1,104 +1,98 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import LoadingOverlay from '../../components/LoadingOverlay';
+import { FiPlus } from 'react-icons/fi';
 import notifyProvider from '../../infra/notifyProvider';
 import { DeviceData, getDeviceTypeList } from '../../models/DeviceData';
 import { create } from '../../services/deviceService';
+import { Button, Field, Input, Select } from '../../ui';
+import FormDialogBase, { FormDialogBaseExtendsRef } from '../../components/FormDialogBase';
+import { useTranslation } from 'react-i18next';
 
 interface DeviceFormProps {
   onDeviceAdded: () => void;
 }
 
 const DeviceForm: React.FC<DeviceFormProps> = ({ onDeviceAdded }) => {
-  
+  const { t } = useTranslation();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<Omit<DeviceData, 'id' | 'userId'>>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const dialogRef = useRef<FormDialogBaseExtendsRef>(null);
   const deviceTypes = getDeviceTypeList();
 
   const onSubmit: SubmitHandler<Omit<DeviceData, 'id' | 'userId'>> = async (data) => {
-    setLoading(true);
     const response = await create(data);
     if (response?.status === 201) {
-      notifyProvider.success("Dispositivo adicionado com sucesso.");
+      notifyProvider.success(t("devices.addSuccess"));
       onDeviceAdded();
       reset();
     } else {
-      notifyProvider.error("Erro ao adicionar dispositivo, tente novamente");
+      notifyProvider.error(t("devices.addError"));
     }
-    setLoading(false);
   };
 
-  const toggleForm = () => {
-    setIsOpen(!isOpen);
+  const openForm = () => dialogRef.current?.openDialog();
+  const closeForm = () => {
+    dialogRef.current?.closeDialog();
+    reset();
   };
 
   return (
-    <div className="my-4">
-      <LoadingOverlay show={loading} />
-      <div className="flex justify-between items-center bg-purple-800 rounded-lg h-16 px-6 m-4 cursor-pointer" onClick={toggleForm}>
-        <h1 className="text-2xl text-white font-bold"> Novo Dispositivo</h1>
-        <button className="focus:outline-none text-white">
-          {isOpen ? <FiChevronUp className="w-6 h-6" /> : <FiChevronDown className="w-6 h-6" />}
-        </button>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("devices.header")}</p>
+          <h2 className="font-display text-xl text-ink">{t("devices.newTitle")}</h2>
+        </div>
+        <Button type="button" onClick={openForm} leadingIcon={<FiPlus />}>
+          {t("common.add")}
+        </Button>
       </div>
-      {isOpen && (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 px-6 pb-6 m-4 bg-white rounded-b-md shadow-md">
-          <div>
-            <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo</label>
-            <select
+      <FormDialogBase
+        ref={dialogRef}
+        title={t("devices.newTitle")}
+        submit={handleSubmit(async (data) => {
+          await onSubmit(data);
+          closeForm();
+        })}
+        cancel={closeForm}
+        confirmLabel={t("common.add")}
+      >
+        <div className="space-y-4">
+          <Field label={t("common.typeLabel")} error={errors.type?.message as string | undefined}>
+            <Select
               id="type"
               {...register('type', {
                 setValueAs: (value) => parseInt(value),
-                required: 'Tipo é obrigatório'
+                required: t("common.typeRequired")
               })}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.type ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
             >
               {deviceTypes.map(type => (
                 <option key={type.id} value={type.id}>{type.name}</option>
               ))}
-            </select>
-            {errors.type && <span className="text-red-500 text-sm">{errors.type.message}</span>}
-          </div>
-          <div>
-            <label htmlFor="brand" className="block text-sm font-medium text-gray-700">Marca</label>
-            <input
+            </Select>
+          </Field>
+          <Field label={t("common.brandLabel")} error={errors.brand?.message as string | undefined}>
+            <Input
               type="text"
               id="brand"
-              {...register('brand', { required: 'Marca é obrigatória' })}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.brand ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+              {...register('brand', { required: t("common.brandRequired") })}
             />
-            {errors.brand && <span className="text-red-500 text-sm">{errors.brand.message}</span>}
-          </div>
-          <div>
-            <label htmlFor="model" className="block text-sm font-medium text-gray-700">Modelo</label>
-            <input
+          </Field>
+          <Field label={t("common.modelLabel")} error={errors.model?.message as string | undefined}>
+            <Input
               type="text"
               id="model"
-              {...register('model', { required: 'Modelo é obrigatório' })}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.model ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+              {...register('model', { required: t("common.modelRequired") })}
             />
-            {errors.model && <span className="text-red-500 text-sm">{errors.model.message}</span>}
-          </div>
-          <div>
-            <label htmlFor="system" className="block text-sm font-medium text-gray-700">Sistema Operacional</label>
-            <input
+          </Field>
+          <Field label={t("common.osLabel")} error={errors.system?.message as string | undefined}>
+            <Input
               type="text"
               id="system"
-              {...register('system', { required: 'Sistema Operacional é obrigatório' })}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.system ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+              {...register('system', { required: t("common.systemRequired") })}
             />
-            {errors.system && <span className="text-red-500 text-sm">{errors.system.message}</span>}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-purple-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 mb-6"
-          >
-            Adicionar Dispositivo
-          </button>
-        </form>
-      )}
+          </Field>
+        </div>
+      </FormDialogBase>
     </div>
   );
 };

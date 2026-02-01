@@ -10,8 +10,11 @@ import CustomizableTable, { CustomizableTableRows } from '../../components/Custo
 import { Operation } from '../../components/CustomizableTable/CustomizableRow';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Badge, Button, Card } from '../../ui';
+import { useTranslation } from 'react-i18next';
 
 const ProjectOverView: React.FC = () => {
+    const { t } = useTranslation();
     const { projectId } = useParams();
     const navigate = useNavigate();
     const [project, setProject] = useState<ProjectData | null>(null);
@@ -28,7 +31,7 @@ const ProjectOverView: React.FC = () => {
             const response = await getOverviewProject(parseInt(projectId || '0'));
             setProject(response?.data);
         } catch (error) {
-            notifyProvider.error('Erro ao carregar o projeto.');
+            notifyProvider.error(t('projectOverview.loadError'));
         }
     };
 
@@ -79,80 +82,137 @@ const ProjectOverView: React.FC = () => {
         }
     };
 
+    const getSituationVariant = (situation: number) => {
+        switch (situation) {
+            case 1:
+                return "accent";
+            case 2:
+                return "success";
+            case 3:
+                return "danger";
+            default:
+                return "neutral";
+        }
+    };
+
     return (
         <PainelContainer>
-            <TitleContainer title="Visão Geral" />
-            <LoadingOverlay show={!project?.id || exporting} />
-            {project && (
-                <div className="p-6 bg-white shadow-md rounded-md" ref={exportRef}>
-                    <h1 className="text-3xl font-semibold mb-6">Detalhes do Projeto</h1>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="mb-4">
-                            <p className="text-lg font-semibold">Nome:</p>
-                            <p className="text-gray-700">{project.name}</p>
+            <div className="space-y-6">
+                <TitleContainer title={t('projectOverview.pageTitle')} />
+                <LoadingOverlay show={!project?.id || exporting} />
+                {project && (
+                    <Card className="space-y-8 bg-paper/95 p-10" ref={exportRef}>
+                        <div className="flex flex-wrap items-start justify-between gap-6 border-b border-ink/10 pb-6">
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                    {t('projectOverview.reportTitle')}
+                                </p>
+                                <h1 className="font-display text-3xl text-ink">{project.name}</h1>
+                                <p className="text-sm text-ink/60">
+                                    {t('projectOverview.issuedOn', { date: new Date().toLocaleDateString('pt-BR') })}
+                                </p>
+                            </div>
+                            <Badge variant={getSituationVariant(project.situation)}>
+                                {getProjectSituationDescription(project.situation)}
+                            </Badge>
                         </div>
-                        <div className="mb-4">
-                            <p className="text-lg font-semibold">Descrição:</p>
-                            <p className="text-gray-700">{project.description}</p>
-                        </div>
-                        <div className="mb-4">
-                            <p className="text-lg font-semibold">Visibilidade:</p>
-                            <p className="text-gray-700">{getProjectVisibilityDescription(project.visibility)}</p>
-                        </div>
-                        <div className="mb-4">
-                            <p className="text-lg font-semibold">Situação:</p>
-                            <p className="text-gray-700">{getProjectSituationDescription(project.situation)}</p>
-                        </div>
-                        <div className="mb-4 col-span-2">
-                            <p className="text-lg font-semibold">Criador:</p>
-                            <p className="text-gray-700">{project.creator?.name} ({project.creator?.email})</p>
-                        </div>
-                    </div>
 
-                    <h1 className="text-2xl font-semibold mt-10 mb-4">Cenários de Teste</h1>
-                    {project.testScenarios?.map((scenario) => (
-                        <div key={scenario.id} className="mb-6">
-                            <h2 className="font-semibold text-xl mb-2">{scenario.name}</h2>
-                            <hr className="mb-4"/>
-                            {scenario.data && (
-                                <CustomizableTable
-                                    projectId={project.id}
-                                    operation={Operation.View}
-                                    defaultRows={convertToCustomizableTableRows(scenario.data)}
-                                    onChange={() => {}}
-                                />
-                            )}
-                            {scenario.testCases && scenario.testCases.map((testCase) => (
-                                <div key={testCase.id} className="mt-4">
-                                    <h3 className="font-semibold text-lg mb-2">{testCase.name}</h3>
-                                    {testCase.data && (
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t('common.summary')}</p>
+                                <p className="text-sm text-ink/70">{project.description}</p>
+                            </div>
+                            <div className="grid gap-4 rounded-2xl border border-ink/10 bg-sand/60 p-4 text-sm text-ink/70">
+                                <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-ink">{t('common.visibility')}</span>
+                                    <span>{getProjectVisibilityDescription(project.visibility)}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-ink">{t('common.status')}</span>
+                                    <span>{getProjectSituationDescription(project.situation)}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-ink">{t('common.creator')}</span>
+                                    <span>{project.creator?.name}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="font-semibold text-ink">{t('common.contact')}</span>
+                                    <span>{project.creator?.email}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between border-b border-ink/10 pb-2">
+                                <h2 className="font-display text-2xl text-ink">{t('projectOverview.testScenariosTitle')}</h2>
+                                <span className="text-sm text-ink/50">
+                                    {t('projectOverview.total', { total: project.testScenarios?.length ?? 0 })}
+                                </span>
+                            </div>
+                            {project.testScenarios?.map((scenario, index) => (
+                                <Card key={scenario.id} className="space-y-4 bg-paper">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div>
+                                            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                                {t('projectOverview.scenarioLabel', { index: index + 1 })}
+                                            </p>
+                                            <h3 className="font-display text-lg text-ink">{scenario.name}</h3>
+                                        </div>
+                                    </div>
+                                    {scenario.data && (
                                         <CustomizableTable
                                             projectId={project.id}
                                             operation={Operation.View}
-                                            defaultRows={convertToCustomizableTableRows(testCase.data)}
+                                            defaultRows={convertToCustomizableTableRows(scenario.data)}
                                             onChange={() => {}}
                                         />
                                     )}
-                                    {testCase.testExecutions && testCase.testExecutions.map((testExecution) => (
-                                        <div key={testExecution.id} className="my-4">
-                                            <h4 className="font-semibold text-md mb-2">Execução</h4>
-                                            {testExecution.data && (
+                                    {scenario.testCases && scenario.testCases.map((testCase, testIndex) => (
+                                        <Card key={testCase.id} className="space-y-3 bg-sand/60">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                                        {t('projectOverview.caseLabel', { index: testIndex + 1 })}
+                                                    </p>
+                                                    <h4 className="font-display text-base text-ink">{testCase.name}</h4>
+                                                </div>
+                                            </div>
+                                            {testCase.data && (
                                                 <CustomizableTable
                                                     projectId={project.id}
                                                     operation={Operation.View}
-                                                    defaultRows={convertToCustomizableTableRows(testExecution.data)}
+                                                    defaultRows={convertToCustomizableTableRows(testCase.data)}
                                                     onChange={() => {}}
                                                 />
                                             )}
-                                        </div>
+                                            {testCase.testExecutions && testCase.testExecutions.map((testExecution, execIndex) => (
+                                                <Card key={testExecution.id} className="space-y-3 bg-paper/80">
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                                        {t('projectOverview.executionLabel', { index: execIndex + 1, id: testExecution.id })}
+                                                    </p>
+                                                    {testExecution.data && (
+                                                        <CustomizableTable
+                                                            projectId={project.id}
+                                                            operation={Operation.View}
+                                                            defaultRows={convertToCustomizableTableRows(testExecution.data)}
+                                                            onChange={() => {}}
+                                                        />
+                                                    )}
+                                                </Card>
+                                            ))}
+                                        </Card>
                                     ))}
-                                </div>
+                                </Card>
                             ))}
                         </div>
-                    ))}
-                    <button ref={buttonRef} onClick={exportToPDF} className="mt-6 px-4 py-2 bg-blue-500 text-white rounded">Exportar como PDF</button>
-                </div>
-            )}
+                        <div className="border-t border-ink/10 pt-4">
+                            <Button ref={buttonRef} onClick={exportToPDF} variant="outline">
+                                {t('projectOverview.exportPdf')}
+                            </Button>
+                        </div>
+                    </Card>
+                )}
+            </div>
         </PainelContainer>
     );
 };

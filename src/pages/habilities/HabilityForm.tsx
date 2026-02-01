@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import LoadingOverlay from '../../components/LoadingOverlay';
+import { FiPlus } from 'react-icons/fi';
 import notifyProvider from '../../infra/notifyProvider';
 import { HabilityData, getHabilityTypeList } from '../../models/HabilityData';
 import { create } from '../../services/habilityService';
+import { Button, Field, Input, Select } from '../../ui';
+import FormDialogBase, { FormDialogBaseExtendsRef } from '../../components/FormDialogBase';
+import { useTranslation } from 'react-i18next';
 
 interface HabilityFormProps {
     onHabilityAdded: () => void;
@@ -12,73 +14,72 @@ interface HabilityFormProps {
 
 const HabilityForm: React.FC<HabilityFormProps> = ({ onHabilityAdded }) => {
 
+    const { t } = useTranslation();
     const { register, handleSubmit, reset, formState: { errors } } = useForm<Omit<HabilityData, 'id' | 'userId'>>();
-    const [loading, setLoading] = useState<boolean>(false);
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const dialogRef = useRef<FormDialogBaseExtendsRef>(null);
     const habilityTypes = getHabilityTypeList();
 
     const onSubmit: SubmitHandler<Omit<HabilityData, 'id' | 'userId'>> = async (data) => {
-        setLoading(true);
         const response = await create(data);
         if (response?.status === 201) {
-            notifyProvider.success("Habilidade adicionada com sucesso.");
+            notifyProvider.success(t("habilities.addSuccess"));
             onHabilityAdded();
             reset();
         } else {
-            notifyProvider.error("Erro ao adicionar habilidade, tente novamente");
+            notifyProvider.error(t("habilities.addError"));
         }
-        setLoading(false);
     };
 
-    const toggleForm = () => {
-        setIsOpen(!isOpen);
+    const openForm = () => dialogRef.current?.openDialog();
+    const closeForm = () => {
+        dialogRef.current?.closeDialog();
+        reset();
     };
 
     return (
-        <div className="my-4">
-            <LoadingOverlay show={loading} />
-            <div className="flex justify-between items-center bg-purple-800 rounded-lg h-16 px-6 m-4 cursor-pointer" onClick={toggleForm}>
-                <h1 className="text-2xl text-white font-bold"> Nova Habilidade</h1>
-                <button className="focus:outline-none text-white">
-                    {isOpen ? <FiChevronUp className="w-6 h-6" /> : <FiChevronDown className="w-6 h-6" />}
-                </button>
+        <div className="space-y-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("habilities.header")}</p>
+                    <h2 className="font-display text-xl text-ink">{t("habilities.newTitle")}</h2>
+                </div>
+                <Button type="button" onClick={openForm} leadingIcon={<FiPlus />}>
+                    {t("common.add")}
+                </Button>
             </div>
-            {isOpen && (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 px-6 pb-6 m-4 bg-white rounded-b-md shadow-md">
-                    <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo</label>
-                        <select
+            <FormDialogBase
+                ref={dialogRef}
+                title={t("habilities.newTitle")}
+                submit={handleSubmit(async (data) => {
+                    await onSubmit(data);
+                    closeForm();
+                })}
+                cancel={closeForm}
+                confirmLabel={t("common.add")}
+            >
+                <div className="space-y-4">
+                    <Field label={t("common.typeLabel")} error={errors.type?.message as string | undefined}>
+                        <Select
                             id="type"
                             {...register('type', {
                                 setValueAs: (value) => parseInt(value),
-                                required: 'Tipo é obrigatório'
+                                required: t("common.typeRequired")
                             })}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.type ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         >
                             {habilityTypes.map(type => (
                                 <option key={type.id} value={type.id}>{type.name}</option>
                             ))}
-                        </select>
-                        {errors.type && <span className="text-red-500 text-sm">{errors.type.message}</span>}
-                    </div>
-                    <div>
-                        <label htmlFor="value" className="block text-sm font-medium text-gray-700">Descrição</label>
-                        <input
+                        </Select>
+                    </Field>
+                    <Field label={t("habilities.descriptionLabel")} error={errors.value?.message as string | undefined}>
+                        <Input
                             type="text"
                             id="value"
-                            {...register('value', { required: 'Descrição é obrigatória' })}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.value ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                            {...register('value', { required: t("habilities.descriptionRequired") })}
                         />
-                        {errors.value && <span className="text-red-500 text-sm">{errors.value.message}</span>}
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-purple-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 mb-6"
-                    >
-                        Adicionar Habilidade
-                    </button>
-                </form>
-            )}
+                    </Field>
+                </div>
+            </FormDialogBase>
         </div>
     );
 };

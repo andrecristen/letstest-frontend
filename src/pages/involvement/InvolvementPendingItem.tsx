@@ -1,11 +1,13 @@
 import React from "react";
-import { FiStar } from "react-icons/fi";
+import { FiUserCheck, FiUserX, FiTrash } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { accept, reject, remove } from '../../services/involvementService';
 import { InvolvementData, InvolvementSituationEnum, getInvolvementTypeDescription } from "../../models/InvolvementData";
-import { getProjectSituationColor, getProjectSituationDescription } from '../../models/ProjectData';
+import { getProjectSituationDescription } from '../../models/ProjectData';
 import logo from '../../assets/logo-transparente.png';
 import notifyProvider from "../../infra/notifyProvider";
+import { Badge, Button, Card } from "../../ui";
+import { useTranslation } from "react-i18next";
 
 interface InvolvementPendingItemProps {
     involvement: InvolvementData;
@@ -15,6 +17,7 @@ interface InvolvementPendingItemProps {
 
 const InvolvementPendingItem: React.FC<InvolvementPendingItemProps> = ({ involvement, typeSituation, callback }) => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const handleClickProfileUser = () => {
@@ -24,7 +27,7 @@ const InvolvementPendingItem: React.FC<InvolvementPendingItemProps> = ({ involve
     const handleClickAccept = async () => {
         const response = await accept(involvement.id);
         if (response?.status !== 200) {
-            notifyProvider.error("Erro ao aceitar envolvimento com o projeto.");
+            notifyProvider.error(t("involvement.acceptError"));
         } else {
             callback();
         }
@@ -33,7 +36,7 @@ const InvolvementPendingItem: React.FC<InvolvementPendingItemProps> = ({ involve
     const handleClickReject = async () => {
         const response = await reject(involvement.id);
         if (response?.status !== 200) {
-            notifyProvider.error("Erro ao rejeitar envolvimento com o projeto.");
+            notifyProvider.error(t("involvement.rejectError"));
         } else {
             callback();
         }
@@ -42,74 +45,89 @@ const InvolvementPendingItem: React.FC<InvolvementPendingItemProps> = ({ involve
     const handleClickRemove = async () => {
         const response = await remove(involvement.id);
         if (response?.status !== 200) {
-            notifyProvider.error("Erro ao remover envolvimento com o projeto.");
+            notifyProvider.error(t("involvement.removeError"));
         } else {
             callback();
         }
     }
 
+    const getSituationVariant = (situation: number) => {
+        switch (situation) {
+            case 1:
+                return "accent";
+            case 2:
+                return "success";
+            case 3:
+                return "danger";
+            default:
+                return "neutral";
+        }
+    };
+
     return (
-        <div className="card-flex">
-            <div className="card-flex-details-container">
-                <div className="ml-3">
-                    <div className="flex items-center text-xs">
-                        <span
-                            className={`bg-${getProjectSituationColor(
-                                involvement.project?.situation || 0
-                            )} text-white relative z-10 rounded-full px-3 py-1.5 font-medium`}
+        <Card className="space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="space-y-2">
+                    <Badge variant={getSituationVariant(involvement.project?.situation || 0)}>
+                        {getProjectSituationDescription(involvement.project?.situation || 0)}
+                    </Badge>
+                    <h3 className="font-display text-lg text-ink">
+                        #{involvement.project?.id} · {involvement.project?.name}
+                    </h3>
+                    <p className="text-sm text-ink/60">
+                        {t("common.typeLabel")}: {getInvolvementTypeDescription(involvement.type)}
+                    </p>
+                    <p className="text-sm text-ink/60">
+                        {involvement.project?.description}
+                    </p>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl border border-ink/10 bg-paper/80 p-3">
+                    <img src={logo} alt={t("common.appName")} className="h-10 w-10 rounded-full bg-gray-50" />
+                    <div className="text-sm">
+                        <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("involvement.creatorLabel")}</p>
+                        <button
+                            type="button"
+                            className="font-semibold text-ocean hover:text-ink"
+                            onClick={handleClickProfileUser}
                         >
-                            {getProjectSituationDescription(involvement.project?.situation || 0)}
-                        </span>
+                            {involvement.project?.creator?.name}
+                        </button>
                     </div>
-                    <div className="group relative">
-                        <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-                            #{involvement.project?.id} - {involvement.project?.name}
-                        </h3>
-                        <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-                            Tipo: {getInvolvementTypeDescription(involvement.type)}
-                        </h3>
-                        <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">{involvement.project?.description}</p>
-                    </div>
-                    <div className="relative mt-8 flex items-center gap-x-4">
-                        <img src={logo} alt="Logo" className="h-10 w-10 rounded-full bg-gray-50" />
-                        <div className="text-sm leading-6">
-                            <p className="font-semibold text-gray-900">
-                                <a href="" className="border-b border-purple-400" onClick={handleClickProfileUser}>Criador: {involvement.project?.creator?.name}</a>
-                            </p>
-                        </div>
-                    </div>
-                    {typeSituation == InvolvementSituationEnum.Recebido ? (
-                        <div className="grid grid-cols-2 my-4">
-                            <button
-                                type="button"
-                                className="w-full py-2 px-8 text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"
-                                onClick={handleClickAccept}
-                            >
-                                Aceitar
-                            </button>
-                            <button
-                                type="button"
-                                className="w-full ml-2 py-2 px-8 text-lg font-medium rounded-md text-white bg-red-500 hover:bg-red-700 transition-colors"
-                                onClick={handleClickReject}
-                            >
-                                Rejeitar
-                            </button>
-                        </div>
-                    ) : null}
-                    {typeSituation == InvolvementSituationEnum.Enviado ? (
-                        <div className="grid grid-cols-1 my-4">
-                            <button
-                                type="button"
-                                className="w-full ml-2 py-2 px-8 text-lg font-medium rounded-md text-white bg-red-500 hover:bg-red-700 transition-colors"
-                                onClick={handleClickRemove}
-                            >
-                                Cancelar Solicitação
-                            </button>
-                        </div>
-                    ) : null}
                 </div>
             </div>
-        </div>
+            {typeSituation == InvolvementSituationEnum.Received ? (
+                <div className="flex flex-wrap gap-2">
+                    <Button
+                        type="button"
+                        variant="accent"
+                        leadingIcon={<FiUserCheck />}
+                        onClick={handleClickAccept}
+                    >
+                        {t("involvement.accept")}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="danger"
+                        leadingIcon={<FiUserX />}
+                        onClick={handleClickReject}
+                    >
+                        {t("involvement.reject")}
+                    </Button>
+                </div>
+            ) : null}
+            {typeSituation == InvolvementSituationEnum.Sent ? (
+                <div className="flex flex-wrap gap-2">
+                    <Button
+                        type="button"
+                        variant="danger"
+                        leadingIcon={<FiTrash />}
+                        onClick={handleClickRemove}
+                    >
+                        {t("involvement.cancelRequest")}
+                    </Button>
+                </div>
+            ) : null}
+        </Card>
     );
 };
 

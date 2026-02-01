@@ -1,8 +1,8 @@
 import apiTokenProvider from "../infra/http-request/apiTokenProvider";
 import { TagData } from "../models/TagData";
 
-export const getTagsByProject = async (projectId: number) => {
-    return await apiTokenProvider.get('/tag/project/' + projectId);
+export const getTagsByProject = async (projectId: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/tag/project/' + projectId, { params: { page, limit } });
 };
 
 export const getTagById = async (tagId: number) => {

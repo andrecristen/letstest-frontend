@@ -3,7 +3,8 @@ import { FiTrash, FiStar, FiSmile, FiGlobe, FiFile, FiBookOpen, FiAward } from '
 import notifyProvider from '../../infra/notifyProvider';
 import { HabilityData, getHabilityTypeDescription } from '../../models/HabilityData';
 import { remove } from '../../services/habilityService';
-import TitleContainer from '../../components/TitleContainer';
+import { Button, Card } from '../../ui';
+import { useTranslation } from 'react-i18next';
 
 interface HabilityListProps {
     habilities: HabilityData[];
@@ -11,17 +12,18 @@ interface HabilityListProps {
 }
 
 const HabilityList: React.FC<HabilityListProps> = ({ habilities, onDelete }) => {
+    const { t } = useTranslation();
 
     const handleDelete = async (hability: HabilityData) => {
         if (hability.id) {
             const response = await remove(hability.id);
             if (response?.status === 200) {
-                notifyProvider.success("Habilidade excluída com sucesso.");
+                notifyProvider.success(t("habilities.deleteSuccess"));
                 if (onDelete) {
                     onDelete();
                 }
             } else {
-                notifyProvider.error("Erro ao excluir habilidade, tente novamente");
+                notifyProvider.error(t("habilities.deleteError"));
             }
         }
     };
@@ -44,36 +46,38 @@ const HabilityList: React.FC<HabilityListProps> = ({ habilities, onDelete }) => 
     };
 
     return (
-        <div>
-            <TitleContainer title="Lista de Habilidades" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+        <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {habilities.length > 0 ? (
                     habilities.map(hability => (
-                        <div
+                        <Card
                             key={hability.id}
-                            className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 flex justify-between items-center"
+                            className="flex items-center justify-between"
                         >
-                            <div className="flex items-center">
-                                {renderHabilityIcon(hability.type)}
-                                <div className="ml-3">
-                                    <p className="text-lg font-bold text-purple-800">{hability.value}</p>
-                                    <p className="text-sm text-purple-500">Tipo: {getHabilityTypeDescription(hability.type)}</p>
+                            <div className="flex items-center gap-3">
+                                <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
+                                    {renderHabilityIcon(hability.type)}
+                                </span>
+                                <div>
+                                    <p className="font-display text-lg text-ink">{hability.value}</p>
+                                    <p className="text-sm text-ink/60">{t("common.typeLabel")}: {getHabilityTypeDescription(hability.type)}</p>
                                 </div>
                             </div>
                             {onDelete ? (
-                                <button
-                                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                                <Button
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => handleDelete(hability)}
-                                    title="Excluir"
+                                    leadingIcon={<FiTrash />}
                                 >
-                                    <FiTrash />
-                                </button>
+                                    {t("common.delete")}
+                                </Button>
                             ) : null}
-                        </div>
+                        </Card>
                     ))
                 ) : (
-                    <div className="text-center text-purple-600 col-span-full">
-                        Nenhuma habilidade encontrada.
+                    <div className="col-span-full rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                        {t("habilities.empty")}
                     </div>
                 )}
             </div>

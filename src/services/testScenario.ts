@@ -1,12 +1,12 @@
 import apiTokenProvider from "../infra/http-request/apiTokenProvider";
 import { TestScenarioData } from "../models/TestScenarioData";
 
-export const getAllTestScenariosByProjects = async (projectId: number) => {
-    return await apiTokenProvider.get('/test-scenario/project/' + projectId);
+export const getAllTestScenariosByProjects = async (projectId: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/test-scenario/project/' + projectId, { params: { page, limit } });
 };
 
-export const getMyTestScenariosByProjects = async (projectId: number) => {
-    return await apiTokenProvider.get('/test-scenario/project/' + projectId);
+export const getMyTestScenariosByProjects = async (projectId: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/test-scenario/project/' + projectId, { params: { page, limit } });
 };
 
 export const getTestScenarioById = async (testScenarioId: number) => {

@@ -4,6 +4,7 @@ import notifyProvider from '../infra/notifyProvider';
 import { upload } from '../services/fileService';
 import { FiXCircle } from 'react-icons/fi';
 import { FileData } from '../models/FileData'; // Importando o tipo FileData
+import { useTranslation } from 'react-i18next';
 
 interface FileUploadProps {
     onChange: (files: FileData[]) => void;
@@ -13,7 +14,8 @@ interface FileUploadProps {
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, required = false, multiple = false }) => {
-    
+    const { t } = useTranslation();
+
     const [uploading, setUploading] = useState<boolean>(false);
     const [progress, setProgress] = useState<number>(0);
     const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
@@ -57,7 +59,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, req
                 }
             }
         } catch (error: any) {
-            notifyProvider.error('Erro ao enviar arquivo:' + error.toString());
+            notifyProvider.error(t('fileUpload.uploadError', { error: error.toString() }));
             clearCurrentSelectedFiles();
             setUploading(false);
             setCurrentFileIndex(0);
@@ -95,13 +97,13 @@ const FileUpload: React.FC<FileUploadProps> = ({ onChange, disabled = false, req
             />
             {uploading && (
                 <div>
-                    <div>Enviando arquivo {currentFileIndex + 1} de {filesToUpload.length}...</div>
+                    <div>{t('fileUpload.uploading', { current: currentFileIndex + 1, total: filesToUpload.length })}</div>
                     <progress value={progress} max="100" className="w-full" />
                 </div>
             )}
             {uploadedFiles.length > 0 && (
                 <div>
-                    <h3>Arquivos enviados com sucesso:</h3>
+                    <h3>{t('fileUpload.uploadedSuccess')}</h3>
                     <ul>
                         {uploadedFiles.map((file) => (
                             <li key={file.id}>

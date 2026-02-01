@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { UserData } from "./UserData";
 
 export type ReportData = {
@@ -11,18 +12,28 @@ export type ReportData = {
 }
 
 export enum ReportType {
-    Aprovado = 1,
-    Rejeitado = 2,
+    Approved = 1,
+    Rejected = 2,
 }
 
+const reportTypeOrder: ReportType[] = [
+    ReportType.Approved,
+    ReportType.Rejected,
+];
+
+const reportTypeLabels: Record<ReportType, string> = {
+    [ReportType.Approved]: "enums.report.type.approved",
+    [ReportType.Rejected]: "enums.report.type.rejected",
+};
+
 export const getReportTypeList = () => {
-    return Object.keys(ReportType)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: ReportType[key as keyof typeof ReportType] }));
+    return reportTypeOrder.map((type) => ({
+        name: i18n.t(reportTypeLabels[type]),
+        id: type,
+    }));
 }
 
 export const getReportTypeDescription = (value: number): string | undefined => {
-    const description = Object.keys(ReportType)
-        .find(key => ReportType[key as keyof typeof ReportType] === value);
-    return description ? description : undefined;
+    const labelKey = reportTypeLabels[value as ReportType];
+    return labelKey ? i18n.t(labelKey) : undefined;
 }

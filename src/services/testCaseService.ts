@@ -1,12 +1,12 @@
 import { TestCaseData } from "../models/TestCaseData";
 import apiTokenProvider from "../infra/http-request/apiTokenProvider";
 
-export const getAllByProjects = async (projectId: number) => {
-    return await apiTokenProvider.get('/test-case/project/' + projectId);
+export const getAllByProjects = async (projectId: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/test-case/project/' + projectId, { params: { page, limit } });
 };
 
-export const getMyByProjects = async (projectId: number) => {
-    return await apiTokenProvider.get('/test-case/project/' + projectId);
+export const getMyByProjects = async (projectId: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/test-case/project/' + projectId, { params: { page, limit } });
 };
 
 export const getById = async (testCaseId: number) => {

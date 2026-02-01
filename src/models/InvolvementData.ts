@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { ProjectData } from "./ProjectData";
 import { UserData } from "./UserData";
 
@@ -12,25 +13,44 @@ export type InvolvementData = {
 }
 
 export enum InvolvementSituationEnum {
-    Aceito = 4,
-    Enviado = 2,
-    Recebido = 1,
-    Rejeitado = 3,
+    Accepted = 4,
+    Sent = 2,
+    Received = 1,
+    Rejected = 3,
 }
 
+const involvementSituationOrder: InvolvementSituationEnum[] = [
+    InvolvementSituationEnum.Received,
+    InvolvementSituationEnum.Sent,
+    InvolvementSituationEnum.Rejected,
+    InvolvementSituationEnum.Accepted,
+];
+
+const involvementSituationLabels: Record<InvolvementSituationEnum, string> = {
+    [InvolvementSituationEnum.Received]: "enums.involvement.situation.received",
+    [InvolvementSituationEnum.Sent]: "enums.involvement.situation.sent",
+    [InvolvementSituationEnum.Rejected]: "enums.involvement.situation.rejected",
+    [InvolvementSituationEnum.Accepted]: "enums.involvement.situation.accepted",
+};
+
 export const getInvolvementSituationList = () => {
-    return Object.keys(InvolvementSituationEnum)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: InvolvementSituationEnum[key as keyof typeof InvolvementSituationEnum] ? InvolvementSituationEnum[key as keyof typeof InvolvementSituationEnum] : null }));
+    return involvementSituationOrder.map((situation) => ({
+        name: i18n.t(involvementSituationLabels[situation]),
+        id: situation,
+    }));
 }
 
 export enum InvolvementTypeEnum {
-    Testador = 1,
-    Gerente = 2,
+    Tester = 1,
+    Manager = 2,
 }
 
+const involvementTypeLabels: Record<InvolvementTypeEnum, string> = {
+    [InvolvementTypeEnum.Tester]: "enums.involvement.type.tester",
+    [InvolvementTypeEnum.Manager]: "enums.involvement.type.manager",
+};
+
 export const getInvolvementTypeDescription = (value: number): string | undefined => {
-    const description = Object.keys(InvolvementTypeEnum)
-        .find(key => InvolvementTypeEnum[key as keyof typeof InvolvementTypeEnum] === value);
-    return description ? description : undefined;
+    const labelKey = involvementTypeLabels[value as InvolvementTypeEnum];
+    return labelKey ? i18n.t(labelKey) : undefined;
 }

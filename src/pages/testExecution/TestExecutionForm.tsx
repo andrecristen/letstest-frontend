@@ -18,9 +18,11 @@ import LoadingOverlay from '../../components/LoadingOverlay';
 import { DeviceData } from '../../models/DeviceData';
 import { getDevicesByUserId } from "../../services/deviceService";
 import tokenProvider from "../../infra/tokenProvider";
+import { useTranslation } from 'react-i18next';
 
 const TestExecutionForm = () => {
 
+    const { t } = useTranslation();
     const { projectId, testCaseId } = useParams();
     const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<TestCaseData>();
     const customizableTableScenarioCaseRef = useRef<CustomizableTableRef>(null);
@@ -60,12 +62,14 @@ const TestExecutionForm = () => {
         setLoadingTemplates(true);
         const response = await getAllByProjectAndType(
             getProjectId(),
-            TemplateTypeEnum["Execução de casos de teste"]
+            TemplateTypeEnum.TestCaseExecution,
+            1,
+            200
         );
-        const newTemplates = response?.data || [];
+        const newTemplates = response?.data?.data || [];
         setTemplates(newTemplates);
         if (!newTemplates.length) {
-            notifyProvider.info("Não há nenhum template para Execução de casos de teste para o seu projeto, certifique-se de criar ao menos.");
+            notifyProvider.info(t("testExecution.noTemplatesInfo"));
         }
         setLoadingTemplates(false);
     }
@@ -86,8 +90,8 @@ const TestExecutionForm = () => {
 
     async function getDevices() {
         setLoadingDevices(true);
-        const response = await getDevicesByUserId(tokenProvider.getSessionUserId());
-        const devices = response?.data || [];
+        const response = await getDevicesByUserId(tokenProvider.getSessionUserId(), 1, 200);
+        const devices = response?.data?.data || [];
         setDevices(devices);
         setLoadingDevices(false);
     }
@@ -100,10 +104,10 @@ const TestExecutionForm = () => {
         };
         const response = await create(getTestCaseId(), dataSend);
         if (response?.status === 200 || response?.status === 201) {
-            notifyProvider.success("Execução reportada com sucesso.");
+            notifyProvider.success(t("testExecution.reportSuccess"));
             navigate(-1);
         } else {
-            notifyProvider.error("Erro ao reportar execução, tente novamente.");
+            notifyProvider.error(t("testExecution.reportError"));
         }
     };
 
@@ -120,23 +124,23 @@ const TestExecutionForm = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title="Testar Caso de Teste" />
+            <TitleContainer title={t("testExecution.pageTitle")} />
             <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingDevices} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Caso de Teste</label>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">{t("common.testCaseLabel")}</label>
                     <input
                         type="text"
                         id="name"
                         disabled
-                        {...register('name', { required: 'Caso de teste é obrigatório' })}
+                        {...register('name', { required: t("testExecution.testCaseRequired") })}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     />
                     {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
                 <div className="py-2">
                     <fieldset className="border rounded p-4">
-                        <legend className="text-lg font-semibold">Definição do Cenário de Teste:</legend>
+                        <legend className="text-lg font-semibold">{t("testScenario.definitionLegend")}</legend>
                         <CustomizableTable
                             ref={customizableTableScenarioCaseRef}
                             operation={Operation.View}
@@ -146,7 +150,7 @@ const TestExecutionForm = () => {
                 </div>
                 <div className="py-2">
                     <fieldset className="border rounded p-4">
-                        <legend className="text-lg font-semibold">Definição do Caso de Teste:</legend>
+                        <legend className="text-lg font-semibold">{t("testCase.definitionLegend")}</legend>
                         <CustomizableTable
                             ref={customizableTableTestCaseRef}
                             operation={Operation.View}
@@ -155,17 +159,17 @@ const TestExecutionForm = () => {
                     </fieldset>
                 </div>
                 <div>
-                    <label htmlFor="deviceId" className="block text-sm font-medium text-gray-700">Dispositivo de execução <button className="text-lg" onClick={handleClickNewDevice} type="button"><FiPlusCircle /></button></label>
+                    <label htmlFor="deviceId" className="block text-sm font-medium text-gray-700">{t("common.executionDeviceLabel")} <button className="text-lg" onClick={handleClickNewDevice} type="button"><FiPlusCircle /></button></label>
                     <select
                         id="deviceId"
                         required
                         {...register('deviceId', {
                             setValueAs: (value) => parseInt(value),
-                            required: 'Dispositivo é obrigatório',
+                            required: t("testExecution.deviceRequired"),
                         })}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.deviceId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     >
-                        <option value="">Selecione o dispositivo</option>
+                        <option value="">{t("common.selectDevice")}</option>
                         {devices.map((device) => (
                             <option key={device.id} value={device.id}>
                                 {device.model}
@@ -178,7 +182,7 @@ const TestExecutionForm = () => {
                     (
                         <>
                             <Timer
-                                title="Executar caso de teste"
+                                title={t("testExecution.executeTitle")}
                                 disabled={!updateDevice}
                                 onChange={(value) => { setTimerTime(value) }}
                                 onStart={() => { setTimerFinished(false) }}
@@ -188,17 +192,17 @@ const TestExecutionForm = () => {
                             {timerFinished ? (
                                 <>
                                     <div>
-                                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">Template</label>
+                                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>
                                         <select
                                             id="templateId"
                                             {...register('templateId', {
                                                 setValueAs: (value) => parseInt(value),
-                                                required: 'Template é obrigatório',
+                                                required: t("testExecution.templateRequired"),
                                                 onChange: handleChangeTemplate,
                                             })}
                                             className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                                         >
-                                            <option value="">Selecione o template</option>
+                                            <option value="">{t("common.selectTemplate")}</option>
                                             {templates.map((template) => (
                                                 <option key={template.id} value={template.id}>
                                                     {template.name}
@@ -209,11 +213,11 @@ const TestExecutionForm = () => {
                                     </div>
                                     <div className="py-2">
                                         <fieldset className="border rounded p-4">
-                                            <legend className="text-lg font-semibold">Reportar execução do Caso de Teste:</legend>
+                                            <legend className="text-lg font-semibold">{t("testExecution.reportLegend")}</legend>
                                             {!updateTemplate && (
                                                 <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
-                                                    <strong className="font-bold mr-2">Atenção!</strong>
-                                                    <span>Selecione o template desejado para preenchimento.</span>
+                                                    <strong className="font-bold mr-2">{t("common.attention")}</strong>
+                                                    <span>{t("common.selectTemplateWarning")}</span>
                                                 </div>
                                             )}
                                             <CustomizableTable
@@ -229,7 +233,7 @@ const TestExecutionForm = () => {
                                             className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
                                         >
                                             <FiSave className="mr-2" />
-                                            Reportar Execução
+                                            {t("testExecution.reportButton")}
                                         </button>
                                     ) : null}</>
                             ) : null}
@@ -238,8 +242,8 @@ const TestExecutionForm = () => {
                     :
                     (
                         <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
-                            <strong className="font-bold mr-2">Atenção!</strong>
-                            <span>Selecione o dispositivo de execução.</span>
+                            <strong className="font-bold mr-2">{t("common.attention")}</strong>
+                            <span>{t("common.selectDeviceWarning")}</span>
                         </div>
                     )
                 }

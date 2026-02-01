@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import logo from '../../assets/logo-transparente.png';
 import { getProjectById } from '../../services/projectService';
 import {
-    getProjectSituationColor,
     getProjectSituationDescription,
 } from '../../models/ProjectData';
 import notifyProvider from '../../infra/notifyProvider';
@@ -15,8 +14,11 @@ import PainelContainer from '../../components/PainelContainer';
 import { ProjectData } from '../../models/ProjectData';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import tokenProvider from '../../infra/tokenProvider';
+import { Badge, Button, Card, cn } from '../../ui';
+import { useTranslation } from 'react-i18next';
 
 const ProjectPageView: React.FC = () => {
+    const { t } = useTranslation();
     const { projectId } = useParams();
     const navigate = useNavigate();
     const [project, setProject] = useState<ProjectData | null>(null);
@@ -31,7 +33,7 @@ const ProjectPageView: React.FC = () => {
             const response = await getProjectById(parseInt(projectId || '0'));
             setProject(response?.data);
         } catch (error) {
-            notifyProvider.error('Erro ao carregar o projeto.');
+            notifyProvider.error(t('projects.loadError'));
         }
     };
 
@@ -49,106 +51,97 @@ const ProjectPageView: React.FC = () => {
         }
     };
 
+    const getSituationVariant = (situation: number) => {
+        switch (situation) {
+            case 1:
+                return "accent";
+            case 2:
+                return "success";
+            case 3:
+                return "danger";
+            default:
+                return "neutral";
+        }
+    };
+
     return (
         <PainelContainer>
-            <TitleContainer title="Detalhes do Projeto" />
-            <LoadingOverlay show={(!project?.id)} />
-            {project ? (
-                <div className="border rounded-lg overflow-hidden shadow-md bg-white">
-                    <img src={logo} className="w-full h-40 object-cover" alt={project.name} />
-                    <div className="p-6">
-                        <h2 className="text-2xl font-semibold text-gray-800">
-                            {project.name}{' '}
-                            <span
-                                className={`bg-${getProjectSituationColor(
-                                    project.situation
-                                )} text-white rounded-lg p-1`}
-                            >
-                                {getProjectSituationDescription(project.situation)}
-                            </span>
-                        </h2>
-                        <p className="text-gray-600 my-4">{project.description}</p>
-                        {project.creatorId == tokenProvider.getSessionUserId() ? (
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={handleEditClick}
-                                    className="px-4 py-2 text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors"
-                                >
-                                    <FiEdit className="inline-block w-5 h-5 mr-2" />
-                                    Editar
-                                </button>
+            <div className="space-y-6">
+                <TitleContainer title={t('projects.detailTitle')} />
+                <LoadingOverlay show={(!project?.id)} />
+                {project ? (
+                    <Card className="overflow-hidden p-0">
+                        <div className="h-40 w-full bg-gradient-to-r from-ocean/30 via-sand to-ember/30">
+                            <img src={logo} className="h-full w-full object-contain p-6" alt={project.name} />
+                        </div>
+                        <div className="space-y-4 p-6">
+                            <div className="flex flex-wrap items-center justify-between gap-4">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                        Projeto
+                                    </p>
+                                    <h2 className="font-display text-2xl text-ink">
+                                        {project.name}
+                                    </h2>
+                                </div>
+                                <Badge variant={getSituationVariant(project.situation)}>
+                                    {getProjectSituationDescription(project.situation)}
+                                </Badge>
                             </div>
-                        ) : null}
+                            <p className="text-sm text-ink/60">{project.description}</p>
+                            {project.creatorId == tokenProvider.getSessionUserId() ? (
+                                <div className="flex justify-end">
+                                    <Button onClick={handleEditClick} leadingIcon={<FiEdit />}>
+                                        {t('common.edit')}
+                                    </Button>
+                                </div>
+                            ) : null}
+                        </div>
+                    </Card>
+                ) : (
+                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                        {t('common.loading')}
                     </div>
-                </div>
-            ) : (
-                <div className="flex justify-center items-center h-60">
-                    <span className="text-purple-600 text-xl">Carregando...</span>
-                </div>
-            )}
+                )}
 
-            <div className="container mx-auto my-10">
-                <h2 className="text-4xl text-center font-bold mb-8 text-purple-600">Operações</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    <div
-                        onClick={() => navigateTo('managers')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiUserPlus className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Gerentes</h3>
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="font-display text-2xl text-ink">{t('projects.operationsTitle')}</h2>
+                        <p className="text-sm text-ink/60">{t('projects.operationsSubtitle')}</p>
                     </div>
-                    <div
-                        onClick={() => navigateTo('testers')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiUser className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Testadores</h3>
-                    </div>
-                    <div
-                        onClick={() => navigateTo('test-scenarios')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiMove className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Cenários de Teste</h3>
-                    </div>
-                    <div
-                        onClick={() => navigateTo('test-cases')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiFileText className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Casos de Teste</h3>
-                    </div>
-                    <div
-                        onClick={() => navigateTo('tags')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiInbox className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Campos Personalizados</h3>
-                    </div>
-                    <div
-                        onClick={() => navigateTo('templates')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiFilePlus className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Templates</h3>
-                    </div>
-                    <div
-                        onClick={() => navigateTo('environments')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiMonitor className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Ambientes</h3>
-                    </div>
-                    <div
-                        onClick={() => navigateTo('overview')}
-                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                    >
-                        <FiDownload className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                        <h3 className="text-center text-lg font-semibold text-purple-600">Visão Geral</h3>
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+                        {[
+                            { label: t('projects.managersLabel'), route: "managers", icon: <FiUserPlus /> },
+                            { label: t('projects.testersLabel'), route: "testers", icon: <FiUser /> },
+                            { label: t('projects.testScenariosLabel'), route: "test-scenarios", icon: <FiMove /> },
+                            { label: t('projects.testCasesLabel'), route: "test-cases", icon: <FiFileText /> },
+                            { label: t('projects.customFieldsLabel'), route: "tags", icon: <FiInbox /> },
+                            { label: t('projects.templatesLabel'), route: "templates", icon: <FiFilePlus /> },
+                            { label: t('projects.environmentsLabel'), route: "environments", icon: <FiMonitor /> },
+                            { label: t('projects.overviewLabel'), route: "overview", icon: <FiDownload /> },
+                        ].map((item) => (
+                            <button
+                                key={item.route}
+                                type="button"
+                                onClick={() => navigateTo(item.route)}
+                                className={cn(
+                                    "group rounded-2xl border border-ink/10 bg-paper/80 p-4 text-left transition-all hover:-translate-y-1 hover:border-ink/30"
+                                )}
+                                aria-label={t('common.openLabel', { label: item.label })}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xl text-ink/70 group-hover:text-ink">
+                                        {item.icon}
+                                    </span>
+                                </div>
+                                <h3 className="mt-4 text-sm font-semibold text-ink">{item.label}</h3>
+                                <p className="mt-1 text-xs text-ink/50">{t('common.manage')}</p>
+                            </button>
+                        ))}
                     </div>
                 </div>
+                <ProjectForm ref={formDialogRef} callbackSubmit={loadProject} />
             </div>
-            <ProjectForm ref={formDialogRef} callbackSubmit={loadProject} />
         </PainelContainer>
     );
 };

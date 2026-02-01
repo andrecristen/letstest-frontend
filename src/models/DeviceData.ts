@@ -1,3 +1,5 @@
+import i18n from "../i18n";
+
 export type DeviceData = {
     id?: number;
     type: number;
@@ -15,15 +17,27 @@ export enum DeviceType {
     Smartwatch = 4,
 }
 
+const deviceTypeOptions: Array<{ id: DeviceType; labelKey: string }> = [
+    { id: DeviceType.Smartphone, labelKey: "enums.device.smartphone" },
+    { id: DeviceType.Notebook, labelKey: "enums.device.notebook" },
+    { id: DeviceType.Desktop, labelKey: "enums.device.desktop" },
+    { id: DeviceType.Tablet, labelKey: "enums.device.tablet" },
+    { id: DeviceType.Smartwatch, labelKey: "enums.device.smartwatch" },
+];
+
 export const getDeviceTypeList = () => {
-    return Object.keys(DeviceType)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: DeviceType[key as keyof typeof DeviceType] }));
+    return deviceTypeOptions.map((option) => ({
+        name: i18n.t(option.labelKey),
+        id: option.id,
+    }));
 }
 
 export const getDeviceTypeDescription = (value: number): string | undefined => {
-    const description = Object.keys(DeviceType)
-        .find(key => DeviceType[key as keyof typeof DeviceType] === value);
-    return description ? description : undefined;
+    for (let index = deviceTypeOptions.length - 1; index >= 0; index -= 1) {
+        const option = deviceTypeOptions[index];
+        if (option.id === value) {
+            return i18n.t(option.labelKey);
+        }
+    }
+    return undefined;
 }
-

@@ -5,6 +5,6 @@ export const createReport = async (testExecutionId: number, body: ReportData) =>
     return await apiTokenProvider.post('/report/' + testExecutionId, body);
 };
 
-export const getReportsByTestExecution = async (testExecutionId: number) => {
-    return await apiTokenProvider.get('/report/test-execution/' + testExecutionId);
+export const getReportsByTestExecution = async (testExecutionId: number, page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/report/test-execution/' + testExecutionId, { params: { page, limit } });
 };

@@ -23,9 +23,14 @@ const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigat
 }
 
 const apiTokenProvider = {
-    get: async (path: string) => {
+    get: async (path: string, extraConfigs?: any) => {
         try {
-            return await api.get(path, getExtraConfigs());
+            const defaultExtraConfigs = getExtraConfigs();
+            if (extraConfigs && extraConfigs.headers) {
+                defaultExtraConfigs.headers = {...defaultExtraConfigs.headers, ...extraConfigs.headers};
+            }
+            const finalConfigs = {...extraConfigs, ...defaultExtraConfigs};
+            return await api.get(path, finalConfigs);
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);

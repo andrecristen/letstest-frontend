@@ -1,35 +1,66 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { getInvolvementInvitations, getInvolvementApplied } from '../../services/involvementService';
 import { InvolvementData, InvolvementSituationEnum } from '../../models/InvolvementData';
 import PainelContainer from '../../components/PainelContainer';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import InvolvementPendingList from './InvolvementPendingList';
+import TitleContainer from '../../components/TitleContainer';
+import notifyProvider from '../../infra/notifyProvider';
+import { useTranslation } from 'react-i18next';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
 
 const InvolvementPendingView: React.FC = () => {
-    const navigate = useNavigate();
-    const [invitations, setInvitations] = useState<InvolvementData[]>([]);
-    const [applies, setApplies] = useState<InvolvementData[]>([]);
-    const [loadingInvolvements, setLoadingInvolvements] = useState<boolean>(true);
+    const { t } = useTranslation();
+    const {
+        items: invitations,
+        loading: loadingInvitations,
+        loadingMore: loadingMoreInvitations,
+        hasNext: hasNextInvitations,
+        sentinelRef: invitationsRef,
+        reload: reloadInvitations,
+    } = useInfiniteList<InvolvementData>(
+        async (page, limit) => {
+            try {
+                const response = await getInvolvementInvitations(page, limit);
+                return response?.data ?? null;
+            } catch (error) {
+                notifyProvider.error(t("involvement.loadError"));
+                return null;
+            }
+        },
+        []
+    );
 
-    useEffect(() => {
-        loadInvolvements();
-    }, []);
-
-    const loadInvolvements = async () => {
-        setLoadingInvolvements(true);
-        const responseInvitations = await getInvolvementInvitations();
-        setInvitations(responseInvitations?.data);
-        const responseApplies = await getInvolvementApplied();
-        setApplies(responseApplies?.data);
-        setLoadingInvolvements(false);
-    };
+    const {
+        items: applies,
+        loading: loadingApplies,
+        loadingMore: loadingMoreApplies,
+        hasNext: hasNextApplies,
+        sentinelRef: appliesRef,
+        reload: reloadApplies,
+    } = useInfiniteList<InvolvementData>(
+        async (page, limit) => {
+            try {
+                const response = await getInvolvementApplied(page, limit);
+                return response?.data ?? null;
+            } catch (error) {
+                notifyProvider.error(t("involvement.loadError"));
+                return null;
+            }
+        },
+        []
+    );
 
     return (
         <PainelContainer>
-            <LoadingOverlay show={loadingInvolvements} />
-            <InvolvementPendingList callback={loadInvolvements} typeSituation={InvolvementSituationEnum.Recebido} key={1} title="Convites Recebidos" textHelp="Convites enviados à você pelos gerentes de projetos"involvements={invitations} />
-            <InvolvementPendingList callback={loadInvolvements} typeSituation={InvolvementSituationEnum.Enviado} key={2} title="Solicitações Enviadas" textHelp="Solicitações de participação enviados por você aos gerentes dos projetos" involvements={applies} />
+            <LoadingOverlay show={loadingInvitations || loadingApplies || loadingMoreInvitations || loadingMoreApplies} />
+            <div className="space-y-6">
+                <TitleContainer title={t("involvement.pendingTitle")} />
+                <InvolvementPendingList callback={reloadInvitations} typeSituation={InvolvementSituationEnum.Received} involvements={invitations} />
+                {hasNextInvitations ? <div ref={invitationsRef} /> : null}
+                <InvolvementPendingList callback={reloadApplies} typeSituation={InvolvementSituationEnum.Sent} involvements={applies} />
+                {hasNextApplies ? <div ref={appliesRef} /> : null}
+            </div>
         </PainelContainer>
     );
 };

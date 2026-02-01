@@ -3,7 +3,8 @@ import { FiSmartphone, FiMonitor, FiTablet, FiWatch, FiTrash, FiImage, FiLayers 
 import notifyProvider from '../../infra/notifyProvider';
 import { DeviceData, getDeviceTypeDescription } from '../../models/DeviceData';
 import { remove } from '../../services/deviceService';
-import TitleContainer from '../../components/TitleContainer';
+import { Button, Card } from '../../ui';
+import { useTranslation } from 'react-i18next';
 
 interface DeviceListProps {
     devices: DeviceData[];
@@ -11,17 +12,18 @@ interface DeviceListProps {
 }
 
 const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
+    const { t } = useTranslation();
 
     const handleDelete = async (device: DeviceData) => {
         if (device.id) {
             const response = await remove(device.id);
             if (response?.status === 200) {
-                notifyProvider.success("Dispositivo excluído com sucesso.");
+                notifyProvider.success(t("devices.deleteSuccess"));
                 if (onDelete) {
                     onDelete();
                 }
             } else {
-                notifyProvider.error("Erro ao excluir dispositivo, tente novamente");
+                notifyProvider.error(t("devices.deleteError"));
             }
         }
     };
@@ -44,38 +46,40 @@ const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
     };
 
     return (
-        <div>
-            <TitleContainer title="Lista de Dispositivos" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+        <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {devices.length > 0 ? (
                     devices.map(device => (
-                        <div
+                        <Card
                             key={device.id}
-                            className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 flex justify-between items-center"
+                            className="flex items-center justify-between"
                         >
-                            <div className="flex items-center">
-                                {renderDeviceIcon(device.type)}
-                                <div className="ml-3">
-                                    <p className="text-lg font-bold text-purple-800">{device.model}</p>
-                                    <p className="text-sm text-purple-500">Tipo: {getDeviceTypeDescription(device.type)}</p>
-                                    <p className="text-sm text-purple-500">Marca: {device.brand}</p>
-                                    <p className="text-sm text-purple-500">Sistema: {device.system}</p>
+                            <div className="flex items-center gap-3">
+                                <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
+                                    {renderDeviceIcon(device.type)}
+                                </span>
+                                <div>
+                                    <p className="font-display text-lg text-ink">{device.model}</p>
+                                    <p className="text-sm text-ink/60">{t("common.typeLabel")}: {getDeviceTypeDescription(device.type)}</p>
+                                    <p className="text-sm text-ink/60">{t("common.brandLabel")}: {device.brand}</p>
+                                    <p className="text-sm text-ink/60">{t("common.systemLabel")}: {device.system}</p>
                                 </div>
                             </div>
                             {onDelete ? (
-                                <button
-                                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                                <Button
+                                    variant="danger"
+                                    size="sm"
                                     onClick={() => handleDelete(device)}
-                                    title="Excluir"
+                                    leadingIcon={<FiTrash />}
                                 >
-                                    <FiTrash />
-                                </button>
+                                    {t("common.delete")}
+                                </Button>
                             ) : null}
-                        </div>
+                        </Card>
                     ))
                 ) : (
-                    <div className="text-center text-purple-600 col-span-full">
-                        Nenhum dispositivo encontrado.
+                    <div className="col-span-full rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                        {t("devices.empty")}
                     </div>
                 )}
             </div>

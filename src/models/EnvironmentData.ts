@@ -1,3 +1,5 @@
+import i18n from "../i18n";
+
 export type EnvironmentData = {
     id: number;
     name: string;
@@ -6,19 +8,28 @@ export type EnvironmentData = {
 }
 
 export enum EnvironmentSituation {
-    Operante = 1,
-    Inoperante = 2,
+    Operational = 1,
+    Inoperative = 2,
 }
 
+const environmentSituationOrder: EnvironmentSituation[] = [
+    EnvironmentSituation.Operational,
+    EnvironmentSituation.Inoperative,
+];
+
+const environmentSituationLabels: Record<EnvironmentSituation, string> = {
+    [EnvironmentSituation.Operational]: "enums.environment.situation.operational",
+    [EnvironmentSituation.Inoperative]: "enums.environment.situation.inoperative",
+};
 
 export const getEnvironmentSituationList = () => {
-    return Object.keys(EnvironmentSituation)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: EnvironmentSituation[key as keyof typeof EnvironmentSituation] }));
+    return environmentSituationOrder.map((situation) => ({
+        name: i18n.t(environmentSituationLabels[situation]),
+        id: situation,
+    }));
 }
 
 export const getEnvironmentSituationDescription = (value: number): string | undefined => {
-    const description = Object.keys(EnvironmentSituation)
-        .find(key => EnvironmentSituation[key as keyof typeof EnvironmentSituation] === value);
-    return description ? description : undefined;
+    const labelKey = environmentSituationLabels[value as EnvironmentSituation];
+    return labelKey ? i18n.t(labelKey) : undefined;
 }

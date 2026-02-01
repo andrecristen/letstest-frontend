@@ -6,6 +6,8 @@ import { TestExecutionData } from "../../models/TestExecutionData";
 import { useNavigate } from "react-router-dom";
 import { FormDialogBaseExtendsRef } from "../../components/FormDialogBase";
 import ReportForm from "../reports/ReportForm";
+import { Button, Card } from "../../ui";
+import { useTranslation } from "react-i18next";
 
 interface TestExecutionItemProps {
     testExecution: TestExecutionData;
@@ -14,6 +16,7 @@ interface TestExecutionItemProps {
 
 const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution, isUserView }) => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const customizableTableTestExecutionRef = useRef<CustomizableTableRef>(null);
     const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
@@ -45,14 +48,32 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution, is
     };
 
     return (
-        <div className="card-flex">
-            <div className="card-flex-details-container">
-                <FiFileText className="text-lg text-purple-700" />
-                <div className="ml-3">
-                    <p className="text-sm font-medium text-purple-900"># {testExecution.id}</p>
-                    <p className="text-sm text-gray-500">Testado por: <a href="" className="border-b border-purple-400" onClick={() => { handleClickProfileUser(testExecution) }}>{testExecution.user?.name}</a></p>
-                    <p className="text-sm text-gray-500">Tempo de execução: {formatTime(testExecution.testTime)}</p>
-                    <p className="text-sm text-gray-500">Dispositivo de execução: {testExecution.device?.model} ({testExecution.device?.brand} - {testExecution.device?.system})</p>
+        <Card className="space-y-4">
+            <div className="flex flex-wrap items-center gap-4">
+                <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
+                    <FiFileText className="h-5 w-5" />
+                </span>
+                <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                        #{testExecution.id}
+                    </p>
+                    <p className="text-sm text-ink/60">
+                        {t("testExecution.testedByLabel")}:{" "}
+                        <button
+                            type="button"
+                            className="font-semibold text-ocean hover:text-ink"
+                            onClick={() => handleClickProfileUser(testExecution)}
+                        >
+                            {testExecution.user?.name}
+                        </button>
+                    </p>
+                    <p className="text-sm text-ink/60">
+                        {t("testExecution.executionTimeLabel")}: {formatTime(testExecution.testTime)}
+                    </p>
+                    <p className="text-sm text-ink/60">
+                        {t("testExecution.deviceLabel")}: {testExecution.device?.model} ({testExecution.device?.brand} -{" "}
+                        {testExecution.device?.system})
+                    </p>
                 </div>
             </div>
             <div className="w-full">
@@ -62,22 +83,26 @@ const TestExecutionItem: React.FC<TestExecutionItemProps> = ({ testExecution, is
                     onChange={() => { }}
                 />
             </div>
-            {!isUserView ? (
-                <div className="w-full mt-2">
-                    <button onClick={(event) => { handleClickAddReport(event) }} className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-teal-700 text-white rounded hover:bg-teal-800">
-                        <FiStar className="mr-2" />
-                        Avaliar
-                    </button>
-                </div>
-            ) : null}
-            <div className="w-full mt-2">
-                <button onClick={(event) => { handleClickListReports(event, testExecution) }} className="w-full text-lg font-bold flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-800">
-                    <FiList className="mr-2" />
-                    Avaliações
-                </button>
+            <div className="flex flex-wrap gap-2">
+                {!isUserView ? (
+                    <Button
+                        onClick={(event) => { handleClickAddReport(event) }}
+                        variant="accent"
+                        leadingIcon={<FiStar />}
+                    >
+                        {t("testExecution.evaluateButton")}
+                    </Button>
+                ) : null}
+                <Button
+                    onClick={(event) => { handleClickListReports(event, testExecution) }}
+                    variant="outline"
+                    leadingIcon={<FiList />}
+                >
+                    {t("testExecution.ratingsButton")}
+                </Button>
             </div>
             <ReportForm ref={formDialogRef} testExecution={testExecution} />
-        </div>
+        </Card>
     );
 };
 

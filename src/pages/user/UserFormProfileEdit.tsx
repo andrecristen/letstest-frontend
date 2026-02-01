@@ -9,9 +9,12 @@ import tokenProvider from '../../infra/tokenProvider';
 import notifyProvider from '../../infra/notifyProvider';
 import { useNavigate } from 'react-router-dom';
 import TitleContainer from '../../components/TitleContainer';
+import { Button, Card, Field, Input, Textarea } from '../../ui';
+import { useTranslation } from 'react-i18next';
 
 const UserFormProfileEdit = () => {
 
+    const { t } = useTranslation();
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<UserData>();
     const [loading, setLoading] = useState<boolean>(true);
     const navigate = useNavigate();
@@ -23,9 +26,9 @@ const UserFormProfileEdit = () => {
     const onSubmit: SubmitHandler<UserData> = async (data) => {
         const response = await update(tokenProvider.getSessionUserId(), data);
         if (response?.status === 200 || response?.status === 201) {
-            notifyProvider.success("Perfil alterado com sucesso.");
+            notifyProvider.success(t("profile.updateSuccess"));
         } else {
-            notifyProvider.error("Erro ao alterar perfil, tente novamente.");
+            notifyProvider.error(t("profile.updateError"));
         }
     };
 
@@ -41,72 +44,70 @@ const UserFormProfileEdit = () => {
     return (
         <PainelContainer>
             <LoadingOverlay show={loading} />
-            <TitleContainer title="Editar Perfil" />
-            <div className="mx-auto bg-white p-8 rounded-lg shadow-md">
-                <div className="flex flex-col items-center mb-6">
-                    <img
-                        className="w-36 h-36 rounded-full shadow-lg"
-                        src="https://via.placeholder.com/150"
-                        alt="User avatar"
-                    />
-                </div>
-                <div className="container mx-auto my-10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div
-                            onClick={() => navigate('/habilities')}
-                            className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
-                        >
-                            <FiSmile className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                            <h3 className="text-center text-lg font-semibold text-purple-600">Minhas Habilidades</h3>
+            <div className="space-y-6">
+                <TitleContainer title={t("profile.editTitle")} />
+                <Card className="space-y-6 p-8">
+                    <div className="flex flex-col items-center gap-4 text-center">
+                        <img
+                            className="h-32 w-32 rounded-full border border-ink/10 object-cover"
+                            src="https://via.placeholder.com/150"
+                            alt={t("common.userAvatar")}
+                        />
+                        <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("profile.title")}</p>
+                            <h2 className="font-display text-2xl text-ink">{t("profile.yourData")}</h2>
                         </div>
+                    </div>
 
-                        <div
-                            onClick={() => navigate('/devices')}
-                            className="bg-white p-4 rounded-lg shadow-md hover:shadow-xl cursor-pointer transition-shadow"
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/habilities')}
+                            className="group rounded-2xl border border-ink/10 bg-paper/80 p-4 text-left transition-all hover:-translate-y-1 hover:border-ink/30"
                         >
-                            <FiSmartphone className="w-12 h-12 mx-auto mb-2 text-purple-600" />
-                            <h3 className="text-center text-lg font-semibold text-purple-600">Meus Dispostivos</h3>
-                        </div>
+                            <FiSmile className="text-xl text-ink/60 group-hover:text-ink" />
+                            <h3 className="mt-3 font-semibold text-ink">{t("profile.mySkills")}</h3>
+                            <p className="text-sm text-ink/50">{t("profile.updateSkills")}</p>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/devices')}
+                            className="group rounded-2xl border border-ink/10 bg-paper/80 p-4 text-left transition-all hover:-translate-y-1 hover:border-ink/30"
+                        >
+                            <FiSmartphone className="text-xl text-ink/60 group-hover:text-ink" />
+                            <h3 className="mt-3 font-semibold text-ink">{t("profile.myDevices")}</h3>
+                            <p className="text-sm text-ink/50">{t("profile.manageExecutionEnvironments")}</p>
+                        </button>
                     </div>
-                </div>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="mb-4">
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
-                        <input
-                            type="text"
-                            id="name"
-                            {...register('name', { required: 'Nome é obrigatório' })}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                        />
-                        {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            disabled
-                            {...register('email', { required: 'Email é obrigatório' })}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                        />
-                        {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
-                    </div>
-                    <div className="mb-4">
-                        <label htmlFor="bio" className="block text-sm font-medium text-gray-700">Bio</label>
-                        <textarea
-                            id="bio"
-                            {...register('bio')}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.bio ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                        />
-                        {errors.bio && <span className="text-red-500 text-sm">{errors.bio.message}</span>}
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-purple-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                    >
-                        Salvar
-                    </button>
-                </form>
+
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        <Field label={t("common.nameLabel")} error={errors.name?.message as string | undefined}>
+                            <Input
+                                type="text"
+                                id="name"
+                                {...register('name', { required: t("common.nameRequired") })}
+                            />
+                        </Field>
+                        <Field label={t("common.emailLabel")} error={errors.email?.message as string | undefined}>
+                            <Input
+                                type="email"
+                                id="email"
+                                disabled
+                                {...register('email', { required: t("common.emailRequired") })}
+                            />
+                        </Field>
+                        <Field label={t("common.bioLabel")} error={errors.bio?.message as string | undefined}>
+                            <Textarea
+                                id="bio"
+                                {...register('bio')}
+                            />
+                        </Field>
+                        <Button type="submit" variant="accent" size="lg" className="w-full">
+                            {t("common.save")}
+                        </Button>
+                    </form>
+                </Card>
             </div>
         </PainelContainer>
     );

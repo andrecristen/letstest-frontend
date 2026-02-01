@@ -16,8 +16,10 @@ import { EnvironmentData } from "../../models/EnvironmentData";
 import { getAllByProjects } from '../../services/environmentService';
 import { getAllTestScenariosByProjects } from '../../services/testScenario';
 import { TestScenarioData } from '../../models/TestScenarioData';
+import { useTranslation } from 'react-i18next';
 
 const TestCaseForm = () => {
+    const { t } = useTranslation();
     const { projectId, testCaseId } = useParams();
     const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<TestCaseData>();
     const customizableTableRef = useRef<CustomizableTableRef>(null);
@@ -58,11 +60,11 @@ const TestCaseForm = () => {
     const getTemplates = async () => {
         setLoadingTemplates(true);
         try {
-            const response = await getAllByProjectAndType(getProjectId(), TemplateTypeEnum['Definição de casos de teste']);
-            const newTemplates = response?.data || [];
+            const response = await getAllByProjectAndType(getProjectId(), TemplateTypeEnum.TestCaseDefinition, 1, 200);
+            const newTemplates = response?.data?.data || [];
             setTemplates(newTemplates);
             if (!newTemplates.length) {
-                notifyProvider.info("Não há nenhum template para Definição de casos de teste para o seu projeto, certifique-se de criar ao menos.");
+                notifyProvider.info(t("testCase.noTemplatesInfo"));
             }
         } finally {
             setLoadingTemplates(false);
@@ -88,8 +90,8 @@ const TestCaseForm = () => {
     const getEnvironments = async () => {
         setLoadingEnvironments(true);
         try {
-            const response = await getAllByProjects(getProjectId());
-            setEnvironments(response?.data || []);
+            const response = await getAllByProjects(getProjectId(), 1, 200);
+            setEnvironments(response?.data?.data || []);
         } finally {
             setLoadingEnvironments(false);
         }
@@ -98,8 +100,8 @@ const TestCaseForm = () => {
     const getTestScenarios = async () => {
         setLoadingTestScenarios(true);
         try {
-            const response = await getAllTestScenariosByProjects(getProjectId());
-            setTestScenarios(response?.data || []);
+            const response = await getAllTestScenariosByProjects(getProjectId(), 1, 200);
+            setTestScenarios(response?.data?.data || []);
         } finally {
             setLoadingTestScenarios(false);
         }
@@ -107,7 +109,7 @@ const TestCaseForm = () => {
 
     const onSubmit: SubmitHandler<TestCaseData> = async (data) => {
         if (!rows.length) {
-            notifyProvider.error('Necessário ao menos uma linha para confirmação.');
+            notifyProvider.error(t("testCase.minRowRequired"));
             return;
         }
         if (isViewMode) return;
@@ -119,13 +121,15 @@ const TestCaseForm = () => {
             const response = data.id ? await update(data.id, data) : await create(getProjectId(), data);
             const success = response?.status === 200 || response?.status === 201;
             if (success) {
-                notifyProvider.success(`Caso de teste ${data.id ? 'alterado' : 'criado'} com sucesso`);
+                const actionResult = data.id ? t("common.updatedResult") : t("common.createdResult");
+                notifyProvider.success(t("testCase.saveSuccess", { action: actionResult }));
                 navigate(-1);
             } else {
-                throw new Error('Erro inesperado');
+                throw new Error(t("testCase.unexpectedError"));
             }
         } catch (error) {
-            notifyProvider.error(`Erro ao ${data.id ? 'alterar' : 'criar'} Caso de teste, tente novamente`);
+            const action = data.id ? t("common.updatedAction") : t("common.createdAction");
+            notifyProvider.error(t("testCase.saveError", { action }));
         }
     };
 
@@ -144,7 +148,7 @@ const TestCaseForm = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title="Caso de Teste" />
+            <TitleContainer title={t("testCase.pageTitle")} />
             <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingEnvironments || loadingTestScenarios} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
@@ -154,32 +158,32 @@ const TestCaseForm = () => {
                             {...register('id')}
                             disabled
                             className="form-input"
-                            placeholder="Id"
+                            placeholder={t("common.idLabel")}
                         />
                     </div>
                 )}
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">{t("common.nameLabel")}</label>
                     <input
                         type="text"
                         id="name"
                         disabled={isViewMode}
-                        {...register('name', { required: 'Nome é obrigatório' })}
+                        {...register('name', { required: t("common.nameRequired") })}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     />
                     {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
                 </div>
                 <div>
-                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">Ambiente de teste {!isViewMode ? (<button className="text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
+                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">{t("common.environmentLabel")} {!isViewMode ? (<button className="text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
                     <select
                         {...register('environmentId', {
-                            required: 'Ambiente de teste é obrigatório',
+                            required: t("testCase.environmentRequired"),
                             setValueAs: (value) => parseInt(value, 10),
                         })}
                         disabled={isViewMode}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.environmentId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     >
-                        <option value="">Selecione o ambiente</option>
+                        <option value="">{t("common.selectEnvironment")}</option>
                         {environments.map((environment) => (
                             <option key={environment.id} value={environment.id}>
                                 {environment.name}
@@ -189,17 +193,17 @@ const TestCaseForm = () => {
                     {errors.environmentId && <span className="text-red-500 text-sm">{errors.environmentId.message}</span>}
                 </div>
                 <div>
-                    <label htmlFor="testScenarioId" className="block text-sm font-medium text-gray-700">Cenário de teste {!isViewMode ? (<button className="text-lg" onClick={handleClickNewTestScenario} type="button"><FiPlusCircle /></button>) : null}</label>
+                    <label htmlFor="testScenarioId" className="block text-sm font-medium text-gray-700">{t("common.testScenarioLabel")} {!isViewMode ? (<button className="text-lg" onClick={handleClickNewTestScenario} type="button"><FiPlusCircle /></button>) : null}</label>
                     <select
                         id='testScenarioId'
                         {...register('testScenarioId', {
-                            required: 'Cenário de teste é obrigatório',
+                            required: t("testCase.testScenarioRequired"),
                             setValueAs: (value) => parseInt(value, 10),
                         })}
                         disabled={isViewMode}
                         className={`mt-1 block w-full px-3 py-2 border ${errors.testScenarioId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                     >
-                        <option value="">Selecione o cenário de testes</option>
+                        <option value="">{t("common.selectScenario")}</option>
                         {testScenarios.map((testScenario) => (
                             <option key={testScenario.id} value={testScenario.id}>
                                 {testScenario.name}
@@ -210,17 +214,17 @@ const TestCaseForm = () => {
                 </div>
                 {!getTestCaseId() && (
                     <div className="py-2">
-                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">Template</label>
+                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>
                         <select
                             {...register('templateId', {
-                                required: 'Template é obrigatório',
+                                required: t("testCase.templateRequired"),
                                 setValueAs: (value) => parseInt(value, 10),
                                 onChange: handleChangeTemplate,
                             })}
                             disabled={isViewMode}
                             className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                         >
-                            <option value="">Selecione o template</option>
+                            <option value="">{t("common.selectTemplate")}</option>
                             {templates.map((template) => (
                                 <option key={template.id} value={template.id}>
                                     {template.name}
@@ -232,11 +236,11 @@ const TestCaseForm = () => {
                 )}
                 <div className="py-2">
                     <fieldset className="border rounded p-4">
-                        <legend className="text-lg font-semibold">Definição do Caso de Teste:</legend>
+                        <legend className="text-lg font-semibold">{t("testCase.definitionLegend")}</legend>
                         {!updateTemplate && !getTestCaseId() && (
                             <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
-                                <strong className="font-bold mr-2">Atenção!</strong>
-                                <span>Selecione o template desejado para preenchimento.</span>
+                                <strong className="font-bold mr-2">{t("common.attention")}</strong>
+                                <span>{t("common.selectTemplateWarning")}</span>
                             </div>
                         )}
                         <CustomizableTable
@@ -252,7 +256,7 @@ const TestCaseForm = () => {
                         className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
                     >
                         <FiSave className="mr-2" />
-                        Salvar
+                        {t("common.save")}
                     </button>
                 )}
             </form>

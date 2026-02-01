@@ -9,8 +9,11 @@ import { TagData, TagSituation, getTagSituationList } from '../../models/TagData
 import { createTag, getTagById, updateTag } from '../../services/tagService';
 import { FiPlus, FiSave, FiTrash } from 'react-icons/fi';
 import { TagValueData } from '../../models/TagValueData';
+import { Button, Field, Input, Select, Textarea } from '../../ui';
+import { useTranslation } from 'react-i18next';
 
 const TagForm = () => {
+    const { t } = useTranslation();
     const { projectId, tagId } = useParams();
     const { register, handleSubmit, setValue, getValues, watch, formState: { errors } } = useForm<TagData>();
     const [loadingTag, setLoadingTag] = useState(false);
@@ -51,20 +54,22 @@ const TagForm = () => {
         try {
             setLoadingTag(true);
             if (!tagValues.length) {
-                notifyProvider.error("Necessário ao menos um valor criado.");
+                notifyProvider.error(t("tags.minValueRequired"));
                 return;
             }
             data.tagValues = tagValues;
             const response = data.id ? await updateTag(data.id, data) : await createTag(getProjectId(), data);
             const success = response?.status === 200 || response?.status === 201;
             if (success) {
-                notifyProvider.success(`Campo personalizado ${data.id ? 'alterado' : 'criado'} com sucesso`);
+                const actionResult = data.id ? t("common.updatedResult") : t("common.createdResult");
+                notifyProvider.success(t("tags.saveSuccess", { action: actionResult }));
                 navigate(-1);
             } else {
-                throw new Error('Erro inesperado');
+                throw new Error(t("tags.unexpectedError"));
             }
         } catch (error) {
-            notifyProvider.error(`Erro ao ${data.id ? 'alterar' : 'criar'} Campo Personalizado, tente novamente`);
+            const action = data.id ? t("common.updatedAction") : t("common.createdAction");
+            notifyProvider.error(t("tags.saveError", { action }));
         } finally {
             setLoadingTag(false);
         }
@@ -98,140 +103,142 @@ const TagForm = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title="Campo Personalizado" />
+            <TitleContainer title={t("tags.formTitle")} />
             <LoadingOverlay show={loadingTag} />
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
                     <div className="py-2">
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">#</label>
-                        <input
-                            {...register('id')}
-                            disabled
-                            className="form-input"
-                            placeholder="Id"
-                        />
+                        <Field label="#">
+                            <Input
+                                {...register('id')}
+                                disabled
+                                placeholder={t("common.idLabel")}
+                            />
+                        </Field>
                     </div>
                 )}
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
-                    <input
-                        type="text"
-                        id="name"
-                        disabled={isViewMode}
-                        {...register('name', { required: 'Nome é obrigatório' })}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                    />
-                    {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+                    <Field label={t("common.nameLabel")} error={errors.name?.message as string | undefined}>
+                        <Input
+                            type="text"
+                            id="name"
+                            disabled={isViewMode}
+                            {...register('name', { required: t("common.nameRequired") })}
+                        />
+                    </Field>
                 </div>
                 <div>
-                    <label htmlFor="commentary" className="block text-sm font-medium text-gray-700">Comentário</label>
-                    <textarea
-                        id="commentary"
-                        disabled={isViewMode}
-                        {...register('commentary')}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.commentary ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                    />
-                    {errors.commentary && <span className="text-red-500 text-sm">{errors.commentary.message}</span>}
+                    <Field label={t("tags.commentLabel")} error={errors.commentary?.message as string | undefined}>
+                        <Textarea
+                            id="commentary"
+                            disabled={isViewMode}
+                            {...register('commentary')}
+                        />
+                    </Field>
                 </div>
                 <div>
-                    <label htmlFor="situation" className="block text-sm font-medium text-gray-700">Visibilidade</label>
-                    <select
-                        id="situation"
-                        disabled={isViewMode}
-                        {...register("situation", {
-                            setValueAs: (value) => parseInt(value),
-                            required: "Situação é obrigatória"
-                        })}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.situation ? "border-red-500" : "border-gray-300"} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                    >
-                        <option value="">
-                            Selecione a situação do campo personalizado
-                        </option>
-                        {getTagSituationList().map((situation) => (
-                            <option key={situation.id} value={situation.id}>
-                                {situation.name}
+                    <Field label={t("tags.visibilityLabel")} error={errors.situation?.message as string | undefined}>
+                        <Select
+                            id="situation"
+                            disabled={isViewMode}
+                            {...register("situation", {
+                                setValueAs: (value) => parseInt(value),
+                                required: t("tags.visibilityRequired")
+                            })}
+                        >
+                            <option value="">
+                                {t("tags.selectSituation")}
                             </option>
-                        ))}
-                    </select>
-                    {errors.situation && <span className="text-red-500 text-sm">{errors.situation.message}</span>}
+                            {getTagSituationList().map((situation) => (
+                                <option key={situation.id} value={situation.id}>
+                                    {situation.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
                 </div>
-                <fieldset className="border rounded p-4">
-                    <legend>Valores</legend>
+                <fieldset className="rounded-2xl border border-ink/10 bg-paper/70 p-4">
+                    <legend className="px-2 text-sm font-semibold text-ink">{t("common.values")}</legend>
                     <div className="flex flex-col gap-2">
                         {tagValues.map((tagValue, index) => (
                             <>
                                 <div key={index} className="flex items-center gap-2">
-                                    <div className="grid grid-cols-1">
-                                        <label className="block text-sm font-medium text-gray-700">Nome</label>
-                                        <input
-                                            type="text"
-                                            value={tagValue.name}
-                                            disabled={isViewMode}
-                                            required={true}
-                                            onChange={(e) => updateTagName(index, e.target.value)}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                                        />
-                                        <label className="block text-sm font-medium text-gray-700">Comentário de Ajuda</label>
-                                        <textarea
-                                            value={tagValue.commentary || ""}
-                                            disabled={isViewMode}
-                                            onChange={(e) => updateTagCommentary(index, e.target.value)}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                                        />
-                                        <label className="block text-sm font-medium text-gray-700">Situação</label>
-                                        <select
-                                            id="situation"
-                                            disabled={isViewMode}
-                                            required={true}
-                                            value={tagValue.situation}
-                                            onChange={(e) => updateTagSituation(index, parseInt(e.target.value))}
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                                        >
-                                            <option value="">
-                                                Selecione a situação do campo personalizado
-                                            </option>
-                                            {getTagSituationList().map((situation) => (
-                                                <option key={situation.id} value={situation.id}>
-                                                    {situation.name}
+                                    <div className="grid w-full grid-cols-1 gap-3">
+                                        <Field label={t("common.nameLabel")}>
+                                            <Input
+                                                type="text"
+                                                value={tagValue.name}
+                                                disabled={isViewMode}
+                                                required={true}
+                                                onChange={(e) => updateTagName(index, e.target.value)}
+                                            />
+                                        </Field>
+                                        <Field label={t("tags.helpCommentaryLabel")}>
+                                            <Textarea
+                                                value={tagValue.commentary || ""}
+                                                disabled={isViewMode}
+                                                onChange={(e) => updateTagCommentary(index, e.target.value)}
+                                            />
+                                        </Field>
+                                        <Field label={t("common.status")}>
+                                            <Select
+                                                id="situation"
+                                                disabled={isViewMode}
+                                                required={true}
+                                                value={tagValue.situation}
+                                                onChange={(e) => updateTagSituation(index, parseInt(e.target.value))}
+                                            >
+                                                <option value="">
+                                                    {t("tags.selectSituation")}
                                                 </option>
-                                            ))}
-                                        </select>
+                                                {getTagSituationList().map((situation) => (
+                                                    <option key={situation.id} value={situation.id}>
+                                                        {situation.name}
+                                                    </option>
+                                                ))}
+                                            </Select>
+                                        </Field>
                                     </div>
 
                                     {isAddMode ? (
-                                        <button
+                                        <Button
                                             type="button"
                                             onClick={() => removeTagValue(index)}
-                                            className="text-red-500"
+                                            variant="danger"
+                                            size="sm"
+                                            leadingIcon={<FiTrash />}
                                         >
-                                            <FiTrash />
-                                        </button>
+                                            {t("common.remove")}
+                                        </Button>
                                     ) : null}
 
                                 </div>
-                                <hr className="border border-gray-400" />
+                                <hr className="border border-ink/10" />
                             </>
                         ))}
                     </div>
                     {!isViewMode && (
-                        <button
+                        <Button
                             type="button"
                             onClick={addTagValue}
-                            className="mt-2 text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md flex items-center"
+                            variant="outline"
+                            size="sm"
+                            leadingIcon={<FiPlus />}
                         >
-                            <FiPlus className="mr-1" />
-                            Adicionar Valor
-                        </button>
+                            {t("tags.addValue")}
+                        </Button>
                     )}
                 </fieldset>
                 {!loadingTag && !isViewMode && (
-                    <button
+                    <Button
                         type="submit"
-                        className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
+                        variant="accent"
+                        size="lg"
+                        leadingIcon={<FiSave />}
+                        className="mt-6"
                     >
-                        <FiSave className="mr-2" />
-                        Salvar
-                    </button>
+                        {t("common.save")}
+                    </Button>
                 )}
             </form>
         </PainelContainer>

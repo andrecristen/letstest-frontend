@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getByProjectAndSituation, accept, reject, remove, invite } from '../../services/involvementService';
+import { getByProjectAndSituation, accept, reject, remove } from '../../services/involvementService';
 import { InvolvementData, InvolvementSituationEnum, InvolvementTypeEnum, getInvolvementSituationList, } from '../../models/InvolvementData';
 import PainelContainer from '../../components/PainelContainer';
 import TitleContainer from '../../components/TitleContainer';
-import { FiCheckCircle, FiMail, FiUserX, FiTrash, FiUser, FiEye } from 'react-icons/fi';
+import { FiCheckCircle, FiFilter, FiMail, FiSearch, FiUserX, FiTrash, FiUser, FiEye, FiXCircle } from 'react-icons/fi';
 import notifyProvider from '../../infra/notifyProvider';
+import { Button, Card, Field, Input, cn } from '../../ui';
+import { useTranslation } from 'react-i18next';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
+import LoadingOverlay from '../../components/LoadingOverlay';
+import InviteUserModal from './InviteUserModal';
+import InviteEmailModal from './InviteEmailModal';
 
 interface InvolvementManagementListProps {
     type: InvolvementTypeEnum;
@@ -14,79 +20,82 @@ interface InvolvementManagementListProps {
 
 const InvolvementOwnerList: React.FC<InvolvementManagementListProps> = ({ type, title }) => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const [selectedSituation, setSelectedSituation] = useState<InvolvementSituationEnum>(InvolvementSituationEnum.Aceito);
-    const [involvements, setInvolvements] = useState<InvolvementData[]>([]);
-    const [loadingInvolvements, setLoadingInvolvements] = useState<boolean>(true);
-    const [inviting, setInviting] = useState<boolean>(false);
-    const [email, setEmail] = useState<string>('');
+    const [selectedSituation, setSelectedSituation] = useState<InvolvementSituationEnum>(InvolvementSituationEnum.Accepted);
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [filterDraft, setFilterDraft] = useState<{ search: string; situation: InvolvementSituationEnum }>({
+        search: '',
+        situation: InvolvementSituationEnum.Accepted,
+    });
+    const [inviteSearchOpen, setInviteSearchOpen] = useState(false);
+    const [inviteEmailOpen, setInviteEmailOpen] = useState(false);
 
     let situations = getInvolvementSituationList();
-    if (type === InvolvementTypeEnum.Gerente) {
-        situations = situations.filter((situation) => situation.id !== InvolvementSituationEnum.Recebido);
+    if (type === InvolvementTypeEnum.Manager) {
+        situations = situations.filter((situation) => situation.id !== InvolvementSituationEnum.Received);
     }
 
-    useEffect(() => {
-        loadInvolvements();
-    }, [selectedSituation]);
-
-    const loadInvolvements = async () => {
-        setLoadingInvolvements(true);
-        try {
-            const response = await getByProjectAndSituation(parseInt(projectId || '0', 10), selectedSituation);
-            const filteredInvolvements = response?.data.filter((involvement: InvolvementData) => involvement.type === type) || [];
-            setInvolvements(filteredInvolvements);
-        } catch (error) {
-            console.error('Erro ao carregar envolvimentos:', error);
-        } finally {
-            setLoadingInvolvements(false);
-        }
-    };
+    const {
+        items: involvements,
+        loading: loadingInvolvements,
+        loadingMore,
+        hasNext,
+        sentinelRef,
+        reload,
+    } = useInfiniteList<InvolvementData>(
+        async (page, limit) => {
+            try {
+                const response = await getByProjectAndSituation(
+                    parseInt(projectId || '0', 10),
+                    selectedSituation,
+                    page,
+                    limit,
+                    searchTerm
+                );
+                const data = response?.data?.data ?? [];
+                return response?.data ? { ...response.data, data: data.filter((involvement: InvolvementData) => involvement.type === type) } : null;
+            } catch (error) {
+                notifyProvider.error(t('involvement.ownerLoadError'));
+                return null;
+            }
+        },
+        [selectedSituation, searchTerm, type, projectId],
+        { enabled: Boolean(projectId) }
+    );
 
     const handleSituationChange = (situationId: InvolvementSituationEnum | null) => {
         if (situationId) {
+            setFilterDraft((prev) => ({ ...prev, situation: situationId }));
             setSelectedSituation(situationId);
         }
     };
 
-    const handleInvite = async () => {
-        setInviting(true);
-        if (email.trim() === '') {
-            notifyProvider.info('Preencha o e-mail para enviar o convite.');
-            setInviting(false);
-            return;
-        }
+    const applyFilters = () => {
+        setSelectedSituation(filterDraft.situation);
+        setSearchTerm(filterDraft.search);
+    };
 
-        try {
-            const response = await invite(parseInt(projectId || '0', 10), email, type);
-            if (response?.status === 201) {
-                notifyProvider.success('Convite enviado.');
-                loadInvolvements();
-            } else {
-                notifyProvider.error('Erro ao enviar convite.');
-            }
-        } catch (error) {
-            notifyProvider.error('Erro ao enviar convite.');
-        }
-
-        setEmail('');
-        setInviting(false);
+    const clearFilters = () => {
+        setFilterDraft({ search: '', situation: InvolvementSituationEnum.Accepted });
+        setSelectedSituation(InvolvementSituationEnum.Accepted);
+        setSearchTerm('');
     };
 
     const handleRemove = async (involvement: InvolvementData) => {
         await remove(involvement.id);
-        loadInvolvements();
+        reload();
     }
 
     const handleAccept = async (involvement: InvolvementData) => {
         await accept(involvement.id);
-        setSelectedSituation(InvolvementSituationEnum.Aceito);
+        setSelectedSituation(InvolvementSituationEnum.Accepted);
     }
 
     const handleReject = async (involvement: InvolvementData) => {
         await reject(involvement.id);
-        setSelectedSituation(InvolvementSituationEnum.Rejeitado);
+        setSelectedSituation(InvolvementSituationEnum.Rejected);
     }
 
     const handleView = async (involvement: InvolvementData) => {
@@ -94,106 +103,150 @@ const InvolvementOwnerList: React.FC<InvolvementManagementListProps> = ({ type, 
     }
 
     const renderInvolvementCard = (involvement: InvolvementData) => (
-        <div
-            key={involvement.id}
-            className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 flex justify-between items-center"
-        >
-            <div className="flex items-center">
-                <FiUser className="text-purple-700 w-6 h-6" />
-                <div className="ml-3">
-                    <p className="text-2xl text-purple-800">{involvement.user?.name}</p>
-                    <p className="text-sm text-purple-500">{involvement.user?.email}</p>
+        <Card key={involvement.id} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+                <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
+                    <FiUser className="h-5 w-5" />
+                </span>
+                <div>
+                    <p className="font-display text-lg text-ink">{involvement.user?.name}</p>
+                    <p className="text-sm text-ink/60">{involvement.user?.email}</p>
                 </div>
             </div>
-            <div className="flex">
-                <button
-                    className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded mr-2"
+            <div className="flex flex-wrap items-center gap-2">
+                <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleView(involvement)}
-                    title="Visualizar"
+                    leadingIcon={<FiEye />}
                 >
-                    <FiEye />
-                </button>
-                {selectedSituation === InvolvementSituationEnum.Recebido && (
+                    {t('involvement.viewProfile')}
+                </Button>
+                {selectedSituation === InvolvementSituationEnum.Received && (
                     <>
-                        <button
-                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2"
+                        <Button
+                            variant="danger"
+                            size="sm"
                             onClick={() => handleReject(involvement)}
-                            title="Rejeitar"
+                            leadingIcon={<FiUserX />}
                         >
-                            <FiUserX />
-                        </button>
-                        <button
-                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                            {t('involvement.reject')}
+                        </Button>
+                        <Button
+                            variant="accent"
+                            size="sm"
                             onClick={() => handleAccept(involvement)}
-                            title="Aceitar"
+                            leadingIcon={<FiCheckCircle />}
                         >
-                            <FiCheckCircle />
-                        </button>
+                            {t('involvement.accept')}
+                        </Button>
                     </>
                 )}
-                {selectedSituation !== InvolvementSituationEnum.Recebido && (
-                    <button
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                {selectedSituation !== InvolvementSituationEnum.Received && (
+                    <Button
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleRemove(involvement)}
-                        title="Excluir"
+                        leadingIcon={<FiTrash />}
                     >
-                        <FiTrash />
-                    </button>
+                        {t('common.remove')}
+                    </Button>
                 )}
             </div>
-        </div>
+        </Card>
     );
 
     return (
         <PainelContainer>
-            <TitleContainer title={title} />
-            <div className="w-full flex items-center mt-4">
-                <input
-                    type="email"
-                    disabled={inviting}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="E-mail do usuário para convite"
-                    className="h-12 w-10/12 border border-purple-400 rounded-l py-2 px-3 focus:outline-none"
-                />
-                <button
-                    disabled={inviting}
-                    className="h-12 w-2/12 bg-purple-600 text-white flex items-center justify-center rounded-r hover:bg-purple-700 transition-colors"
-                    onClick={handleInvite}
-                >
-                    <FiMail className="w-6 h-6" />
-                </button>
-            </div>
-            <div className="flex flex-wrap border-b mb-4">
-                {situations.map((situation) => (
-                    <div
-                        key={situation.id}
-                        className={`cursor-pointer py-2 px-4 text-center ${selectedSituation === situation.id
-                            ? 'text-purple-700 font-semibold border-b-4 border-purple-400'
-                            : 'text-gray-600 hover:text-purple-600'
-                            }`}
-                        onClick={() => handleSituationChange(situation.id)}
-                    >
-                        {situation.name}
-                    </div>
-                ))}
-            </div>
+            <LoadingOverlay show={loadingMore} />
+            <div className="space-y-6">
+                <TitleContainer title={title} />
 
-            {loadingInvolvements ? (
-                <div className="text-center text-purple-600">Carregando envolvimentos...</div>
-            ) : (
-                <div className="grid grid-cols-1 gap-6 mt-4">
-                    {involvements.length > 0 ? (
-                        involvements.map((involvement) => renderInvolvementCard(involvement))
-                    ) : (
-                        <div className="text-center text-purple-600 col-span-full">
-                            {selectedSituation === InvolvementSituationEnum.Recebido
-                                ? 'Nenhuma candidatura recebida'
-                                : 'Nenhum envolvimento com o projeto para a situação selecionada'}
-                        </div>
-                    )}
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                    <Button type="button" variant="outline" leadingIcon={<FiMail />} onClick={() => setInviteEmailOpen(true)}>
+                        {t('involvement.inviteByEmail')}
+                    </Button>
+                    <Button type="button" variant="primary" leadingIcon={<FiSearch />} onClick={() => setInviteSearchOpen(true)}>
+                        {t('involvement.inviteSearch')}
+                    </Button>
                 </div>
-            )}
+
+                <div className="flex flex-col gap-4 rounded-2xl border border-ink/10 bg-paper/70 p-4">
+                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                        <Field label={t("involvement.searchLabel")}>
+                            <Input
+                                type="text"
+                                placeholder={t("involvement.searchPlaceholder")}
+                                value={filterDraft.search}
+                                onChange={(event) => setFilterDraft((prev) => ({ ...prev, search: event.target.value }))}
+                            />
+                        </Field>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {situations.map((situation) => (
+                            <button
+                                key={situation.id}
+                                type="button"
+                                aria-pressed={filterDraft.situation === situation.id}
+                                className={cn(
+                                    "rounded-full border px-4 py-2 text-sm font-semibold transition-all",
+                                    filterDraft.situation === situation.id
+                                        ? "border-ink bg-ink text-sand"
+                                        : "border-ink/10 bg-paper text-ink/60 hover:border-ink/30 hover:text-ink"
+                                )}
+                                onClick={() => handleSituationChange(situation.id)}
+                            >
+                                {situation.name}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex w-full justify-end gap-2 pt-2">
+                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
+                            {t("common.confirm")}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
+                            {t("common.clearFilters")}
+                        </Button>
+                    </div>
+                </div>
+
+                {loadingInvolvements ? (
+                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                        {t('involvement.loadingList')}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-6">
+                        {involvements.length > 0 ? (
+                            involvements.map((involvement) => renderInvolvementCard(involvement))
+                        ) : (
+                            <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                                {selectedSituation === InvolvementSituationEnum.Received
+                                    ? t('involvement.emptyReceived')
+                                    : t('involvement.emptyForSituation')}
+                            </div>
+                        )}
+                    </div>
+                )}
+                {hasNext ? <div ref={sentinelRef} /> : null}
+            </div>
+            {projectId ? (
+                <>
+                    <InviteEmailModal
+                        open={inviteEmailOpen}
+                        onClose={() => setInviteEmailOpen(false)}
+                        projectId={parseInt(projectId, 10)}
+                        type={type}
+                        onInvited={reload}
+                    />
+                    <InviteUserModal
+                        open={inviteSearchOpen}
+                        onClose={() => setInviteSearchOpen(false)}
+                        projectId={parseInt(projectId, 10)}
+                        type={type}
+                        onInvited={reload}
+                    />
+                </>
+            ) : null}
         </PainelContainer>
     );
 };

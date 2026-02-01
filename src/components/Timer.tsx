@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiCheckSquare, FiPlay, FiSkipBack, FiVideo } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface TimerProps {
     title: string;
@@ -11,6 +12,7 @@ interface TimerProps {
 }
 
 const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onStop, onReset }) => {
+    const { t } = useTranslation();
 
     const [isRunning, setIsRunning] = useState(false);
     const [timeElapsed, setTimeElapsed] = useState(0);
@@ -99,7 +101,7 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
             recorder.start();
             setIsRecording(true);
         } catch (error) {
-            console.error('Erro ao iniciar a gravação:', error);
+            console.error(t('timer.recordError'), error);
         }
     };
 
@@ -112,22 +114,22 @@ const Timer: React.FC<TimerProps> = ({ title, disabled, onChange, onStart, onSto
     return (
         <div className="bg-gray-100 p-4 rounded-lg shadow-md">
             <h1 className="text-2xl font-bold mb-4">{title}</h1>
-            <p className="text-xl mb-4">Tempo decorrido: {formatTime(timeElapsed)}</p>
+            <p className="text-xl mb-4">{t('timer.elapsed', { time: formatTime(timeElapsed) })}</p>
             {isInitial ? (
                 <button disabled={disabled} type="button" onClick={handleStart} className="action-button-blue m-2">
-                    <FiPlay className="m-2 text-2xl" /> {timeElapsed ? "Continuar" : "Inicializar"}
+                    <FiPlay className="m-2 text-2xl" /> {timeElapsed ? t('timer.continue') : t('timer.start')}
                 </button>
             ) : (
                 <>
                     <button type="button" onClick={handleStop} className="action-button-red m-2">
-                        <FiCheckSquare className="m-2 text-2xl" /> Finalizar
+                        <FiCheckSquare className="m-2 text-2xl" /> {t('timer.finish')}
                     </button>
                     <button type="button" onClick={handleReset} className="action-button-teal m-2">
-                        <FiSkipBack className="m-2 text-2xl" /> Reiniciar
+                        <FiSkipBack className="m-2 text-2xl" /> {t('timer.reset')}
                     </button>
                     {!isRecording && (
                         <button type="button" onClick={handleRecord} className="action-button-purple m-2">
-                            <FiVideo className="m-2 text-2xl" /> Gravar Tela
+                            <FiVideo className="m-2 text-2xl" /> {t('timer.recordScreen')}
                         </button>
                     )}
                 </>

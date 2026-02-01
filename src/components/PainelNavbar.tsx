@@ -1,9 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { FiMenu, FiBell, FiUser, FiGitPullRequest, FiPlay, FiSearch, FiPieChart, FiLogOut, FiMail } from 'react-icons/fi';
-import { useNavigate, useLocation } from 'react-router-dom';
-import logo from '../assets/logo-transparente.png';
-import tokenProvider from '../infra/tokenProvider';
-import notifyProvider from '../infra/notifyProvider';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  FiMenu,
+  FiBell,
+  FiUser,
+  FiGitPullRequest,
+  FiPlay,
+  FiSearch,
+  FiLogOut,
+  FiMail,
+  FiGlobe,
+} from "react-icons/fi";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import logo from "../assets/logo-transparente.png";
+import tokenProvider from "../infra/tokenProvider";
+import notifyProvider from "../infra/notifyProvider";
+import { cn } from "../ui";
 
 interface Menu {
   name: string;
@@ -16,19 +28,28 @@ interface PainelNavbarProps {
 }
 
 const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
-
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
 
-  const [isMenuOpen, setIsMenuOpen] = useState(localStorage.getItem('isMenuOpen') === 'true');
+  const [isMenuOpen, setIsMenuOpen] = useState(
+    localStorage.getItem("isMenuOpen") === "true"
+  );
   const [menuSelected, setMenuSelected] = useState(location.pathname);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
 
   const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
   const userButtonRef = useRef<HTMLButtonElement | null>(null);
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const languageMenuRef = useRef<HTMLDivElement | null>(null);
+  const languageButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    setMenuSelected(location.pathname);
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -51,19 +72,28 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
       ) {
         setIsUserMenuOpen(false);
       }
+
+      if (
+        languageMenuRef.current &&
+        languageButtonRef.current &&
+        !languageMenuRef.current.contains(target) &&
+        !languageButtonRef.current.contains(target)
+      ) {
+        setIsLanguageOpen(false);
+      }
     };
 
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
 
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
   const toggleMenu = () => {
     const newIsMenuOpen = !isMenuOpen;
     setIsMenuOpen(newIsMenuOpen);
-    localStorage.setItem('isMenuOpen', `${newIsMenuOpen}`);
+    localStorage.setItem("isMenuOpen", `${newIsMenuOpen}`);
   };
 
   const toggleNotificationMenu = () => {
@@ -74,14 +104,33 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
     setIsNotificationOpen(false);
+    setIsLanguageOpen(false);
   };
 
+  const toggleLanguageMenu = () => {
+    setIsLanguageOpen(!isLanguageOpen);
+    setIsNotificationOpen(false);
+    setIsUserMenuOpen(false);
+  };
+
+  const handleChangeLanguage = (language: "pt" | "en") => {
+    i18n.changeLanguage(language);
+    localStorage.setItem("language", language);
+    setIsLanguageOpen(false);
+  };
+
+  const languageOptions = [
+    { id: "pt", label: "Português" },
+    { id: "en", label: "English" },
+  ] as const;
+
   const menus: Menu[] = [
-    { name: 'Encontrar Projetos', route: '/find-new-projects', icon: <FiSearch /> },
-    { name: 'Gerenciar Projetos', route: '/my-owner-projects', icon: <FiGitPullRequest /> },
-    { name: 'Testar Projetos', route: '/my-test-projects', icon: <FiPlay /> },
-    { name: 'Solicitações e Convites', route: '/involvements', icon: <FiMail /> },
-    { name: 'Meu Perfil', route: '/profile', icon: <FiUser /> },
+    { name: t("nav.findProjects"), route: "/find-new-projects", icon: <FiSearch /> },
+    { name: t("nav.manageProjects"), route: "/my-owner-projects", icon: <FiGitPullRequest /> },
+    { name: t("nav.testProjects"), route: "/my-test-projects", icon: <FiPlay /> },
+    { name: t("nav.invitations"), route: "/involvements/invitations", icon: <FiMail /> },
+    { name: t("nav.requests"), route: "/involvements/requests", icon: <FiMail /> },
+    { name: t("nav.myProfile"), route: "/profile", icon: <FiUser /> },
   ];
 
   const handleClickMenu = (event: React.MouseEvent, route: string) => {
@@ -91,96 +140,151 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <nav className={`bg-purple-800 text-gray-200 transition-width duration-300 ${isMenuOpen ? 'w-64' : 'w-16'}`}>
-        <div className="flex flex-col h-full space-y-6 p-4">
-          {menus.map((menu) => (
-            <a
-              key={menu.name}
-              onClick={(event) => handleClickMenu(event, menu.route)}
-              href="#"
-              className={`flex items-center p-2 rounded hover:bg-purple-600 hover:text-white ${menu.route === menuSelected ? 'bg-purple-600 text-white' : ''
-                }`}
-              title={isMenuOpen ? '' : menu.name}
-            >
-              <span className="text-xl">{menu.icon}</span>
-              {isMenuOpen && <span className="ml-4">{menu.name}</span>}
-            </a>
-          ))}
+    <div className="flex h-screen overflow-hidden bg-sand">
+      <nav
+        className={cn(
+          "sticky top-0 flex h-screen flex-col gap-6 border-r border-ink/10 bg-shale px-3 py-6 text-sand transition-all duration-300",
+          isMenuOpen ? "w-64" : "w-20"
+        )}
+      >
+        <div className="flex items-center justify-between px-2">
+          {isMenuOpen && (
+            <span className="font-display text-lg tracking-wide"></span>
+          )}
+          <button
+            className="rounded-lg p-2 text-sand/80 hover:bg-sand/10"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            <FiMenu className="text-xl" />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {menus.map((menu) => {
+            const isActive = menu.route === menuSelected;
+            return (
+              <a
+                key={menu.name}
+                onClick={(event) => handleClickMenu(event, menu.route)}
+                href="#"
+                className={cn(
+                  "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all",
+                  isActive
+                    ? "bg-sand/10 text-sand"
+                    : "text-sand/70 hover:bg-sand/10 hover:text-sand"
+                )}
+                title={isMenuOpen ? "" : menu.name}
+              >
+                <span className="text-lg">{menu.icon}</span>
+                {isMenuOpen && <span className="font-medium">{menu.name}</span>}
+              </a>
+            );
+          })}
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white flex items-center justify-between px-6 py-3 border-b relative">
-          <button
-            className="text-gray-600 focus:outline-none"
-            onClick={toggleMenu}
-          >
-            <FiMenu className="text-2xl" />
-          </button>
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-paper/80 px-6 py-4 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Logo" className="h-8" />
+            <div className="hidden sm:block">
+              <p className="font-display text-lg text-ink">{t("common.panel")}</p>
+            </div>
+          </div>
 
-          <img src={logo} alt="Logo" className="h-8" />
-
-          <div className="space-x-4 flex items-center relative">
-            {/* Icone de Notificações */}
+          <div className="relative flex items-center gap-4">
             <button
               onClick={toggleNotificationMenu}
-              className="focus:outline-none relative"
+              className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
               ref={notificationButtonRef}
+              aria-label="Notificacoes"
             >
-              <FiBell className="text-gray-500" />
-              {/* Menu de Notificações */}
-              {isNotificationOpen && (
+              <FiBell />
+            </button>
+            {isNotificationOpen && (
+              <div
+                className="absolute right-14 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper p-4 text-sm text-ink/70 shadow-soft"
+                ref={notificationMenuRef}
+              >
+                {t("nav.notificationsEmpty")}
+              </div>
+            )}
+
+            <div className="relative">
+              <button
+                onClick={toggleLanguageMenu}
+                className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 hover:text-ink"
+                ref={languageButtonRef}
+                aria-label="Idioma"
+              >
+                <FiGlobe />
+                <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+                  {i18n.language === "en" ? "EN" : "PT"}
+                </span>
+              </button>
+              {isLanguageOpen && (
                 <div
-                  className="absolute right-2 bg-white border shadow-lg p-4 w-48"
-                  ref={notificationMenuRef}
+                  className="absolute right-0 top-12 z-20 w-40 rounded-xl border border-ink/10 bg-paper p-2 text-sm text-ink/70 shadow-soft"
+                  ref={languageMenuRef}
                 >
-                  <p className="text-sm">Você não tem notificações</p>
+                  {languageOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => handleChangeLanguage(option.id)}
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-lg px-3 py-2 hover:bg-ink/5",
+                        i18n.language === option.id ? "text-ink" : "text-ink/70"
+                      )}
+                    >
+                      <span>{option.label}</span>
+                      {i18n.language === option.id ? (
+                        <span className="text-xs uppercase tracking-[0.2em]">•</span>
+                      ) : null}
+                    </button>
+                  ))}
                 </div>
               )}
-            </button>
+            </div>
 
-            {/* Icone de Usuário */}
             <button
               onClick={toggleUserMenu}
-              className="focus:outline-none relative"
+              className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
               ref={userButtonRef}
+              aria-label="Menu do usuario"
             >
-              <FiUser className="text-gray-500" />
-              {/* Menu de Usuário */}
-              {isUserMenuOpen && (
-                <div
-                  className="absolute right-2 bg-white border shadow-lg p-4 w-48 flex flex-col"
-                  ref={userMenuRef}
-                >
-                  <button
-                    onClick={() => {
-                      tokenProvider.removeSession();
-                      notifyProvider.info("Usuário deslogado");
-                      navigate("/login");
-                    }}
-                    className="text-sm hover:bg-gray-100 p-2 inline-flex items-center w-full"
-                  >
-                    <FiLogOut className="w-5 h-5 mr-2" />Logout
-                  </button>
-                  <button
-                    onClick={() => navigate('/profile')}
-                    className="text-sm hover:bg-gray-100 p-2 inline-flex items-center w-full"
-                  >
-                    <FiUser className="w-5 h-5 mr-2" />Meu Perfil
-                  </button>
-                </div>
-              )}
+              <FiUser />
             </button>
+            {isUserMenuOpen && (
+              <div
+                className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper p-2 text-sm text-ink/70 shadow-soft"
+                ref={userMenuRef}
+              >
+                <button
+                  onClick={() => {
+                    tokenProvider.removeSession();
+                    notifyProvider.info(t("nav.logoutSuccess"));
+                    navigate("/login");
+                  }}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-ink/5"
+                >
+                  <FiLogOut className="text-base" /> {t("nav.logout")}
+                </button>
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-ink/5"
+                >
+                  <FiUser className="text-base" /> {t("nav.myProfile")}
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-2 bg-gray-50 pb-20">
-          {children}
+        <div className="flex-1 overflow-y-auto px-6 pb-20 pt-6">
+          <div className="min-h-[calc(100vh-140px)] rounded-3xl border border-ink/10 bg-paper/70 p-6 shadow-soft">
+            {children}
+          </div>
         </div>
       </main>
     </div>

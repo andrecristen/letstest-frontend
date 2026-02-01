@@ -3,6 +3,7 @@ import FormDialogBase, { FormDialogBaseRef } from './FormDialogBase';
 import { FileData } from '../models/FileData';
 import { FiFile } from 'react-icons/fi';
 import DocViewer, { DocViewerRenderers, IDocument } from "@cyntler/react-doc-viewer";
+import { useTranslation } from 'react-i18next';
 
 interface FileViewerProps {
     files: FileData[];
@@ -10,6 +11,7 @@ interface FileViewerProps {
 
 const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
 
+    const { t } = useTranslation();
     const [selectedFile, setSelectedFile] = useState<IDocument[] | null>(null);
     const formDialogRef = React.useRef<FormDialogBaseRef>(null);
     const url = process.env.REACT_APP_FILES_ENDPOINT_URL;
@@ -25,9 +27,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
         }
     };
 
-    const closeFileViewer = (event: React.FormEvent) => {
-        event.preventDefault();
-        event.stopPropagation();
+    const closeFileViewer = () => {
         setSelectedFile(null);
         if (formDialogRef.current) {
             formDialogRef.current.closeDialog();
@@ -43,7 +43,12 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
                     </li>
                 ))}
             </ul>
-            <FormDialogBase ref={formDialogRef} title="Visualizar Arquivo" initialOpen={false} submit={(event: React.FormEvent) => closeFileViewer(event)}>
+            <FormDialogBase
+                ref={formDialogRef}
+                title={t("common.viewFile")}
+                initialOpen={false}
+                submit={() => closeFileViewer()}
+            >
                 {selectedFile && (
                     <div className="h-70vh">
                         <DocViewer documents={selectedFile} pluginRenderers={DocViewerRenderers} />

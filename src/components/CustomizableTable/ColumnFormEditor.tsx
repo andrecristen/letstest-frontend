@@ -6,6 +6,8 @@ import { FileData } from "../../models/FileData";
 import { TagData } from "../../models/TagData";
 import { getTagsByProject } from "../../services/tagService";
 import LoadingOverlay from "../LoadingOverlay";
+import { useTranslation } from "react-i18next";
+import { Field, Input, Select, Textarea } from "../../ui";
 
 interface EditFormProps {
     projectId?: number;
@@ -50,19 +52,42 @@ const TYPES_CONTENT_EDIT_REQUIRED = [
     ColumnType.Label
 ]
 
-export const getColumnTypeList = () => {
-    return Object.keys(ColumnType)
-        .filter(key => isNaN(Number(key)))
-        .map(key => ({ name: key, id: ColumnType[key as keyof typeof ColumnType] }));
-}
+const COLUMN_TYPE_ORDER: ColumnType[] = [
+    ColumnType.Text,
+    ColumnType.LongText,
+    ColumnType.Label,
+    ColumnType.Tag,
+    ColumnType.File,
+    ColumnType.MultipleFiles,
+    ColumnType.List,
+    ColumnType.Table,
+    ColumnType.Empty,
+];
+
+const COLUMN_TYPE_LABEL_KEYS: Record<ColumnType, string> = {
+    [ColumnType.Label]: "customTable.columnTypes.label",
+    [ColumnType.Text]: "customTable.columnTypes.text",
+    [ColumnType.LongText]: "customTable.columnTypes.longText",
+    [ColumnType.Tag]: "customTable.columnTypes.tag",
+    [ColumnType.List]: "customTable.columnTypes.list",
+    [ColumnType.Table]: "customTable.columnTypes.table",
+    [ColumnType.Empty]: "customTable.columnTypes.empty",
+    [ColumnType.File]: "customTable.columnTypes.file",
+    [ColumnType.MultipleFiles]: "customTable.columnTypes.multipleFiles",
+};
 
 const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
+    const { t } = useTranslation();
 
     const { register, handleSubmit, setValue, watch } = useForm<Column>();
     const [tags, setTags] = useState<TagData[]>([]);
     const [loadingTags, setLoadingTags] = useState<boolean>(false);
 
     const updateType = watch("type");
+    const columnTypeOptions = COLUMN_TYPE_ORDER.map((type) => ({
+        id: type,
+        label: t(COLUMN_TYPE_LABEL_KEYS[type]),
+    }));
 
     useEffect(() => {
         Object.keys(column).forEach((key) => {
@@ -75,10 +100,10 @@ const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
         if (projectId) {
             setLoadingTags(true);
             try {
-                const response = await getTagsByProject(projectId);
-                setTags(response?.data || []);
+                const response = await getTagsByProject(projectId, 1, 200);
+                setTags(response?.data?.data || []);
             } catch (error) {
-                console.error("Erro ao carregar tags:", error);
+            console.error(t("customTable.loadTagsError"), error);
             } finally {
                 setLoadingTags(false);
             }
@@ -100,58 +125,71 @@ const EditForm: React.FC<EditFormProps> = ({ projectId, column, onFinish }) => {
             initialOpen={true}
             submit={handleSubmit(callOnSubmit)}
             cancel={onFinish}
-            title="Editar Coluna"
+            title={t("customTable.editColumnTitle")}
+            modalClassName="max-w-2xl"
         >
             <LoadingOverlay show={loadingTags} />
-            <div className="py-2">
-                <select
-                    {...register("type")}
-                    required
-                    className="form-input"
-                >
-                    <option disabled value="null">Tipo da coluna</option>
-                    {getColumnTypeList().map((type) => {
-                        return (
-                            <option key={'columnType' + type.id} value={type.id}>{type.id}</option>
-                        );
-                    })}
-                </select>
+            <div className="grid gap-4 md:grid-cols-2">
+                <Field label={t("customTable.typeLabel")}>
+                    <Select {...register("type")} required>
+                        <option value="" disabled>
+                            {t("common.columnType")}
+                        </option>
+                        {columnTypeOptions.map((type) => (
+                            <option key={`columnType${type.id}`} value={type.id}>
+                                {type.label}
+                            </option>
+                        ))}
+                    </Select>
+                </Field>
+                <div className="rounded-2xl border border-ink/10 bg-ink/5 p-4 text-sm text-ink/70">
+                    <p className="font-semibold text-ink">{t("customTable.typeHelpTitle")}</p>
+                    <p className="mt-1 text-xs text-ink/60">{t("customTable.typeHelpDescription")}</p>
+                </div>
             </div>
-            {TYPES_CONTENT_EDIT.some((columnType) => columnType == updateType) ? (
-                <div className="py-2">
-                    <input
-                        {...register("content")}
-                        required={TYPES_CONTENT_EDIT_REQUIRED.some((columnType) => columnType == updateType)}
-                        className="form-input"
-                        placeholder="Conteúdo"
-                    />
-                </div>
-            ) : null}
-            {TYPES_CONTENT_PLACEHOLDER.some((columnType) => columnType == updateType) ? (
-                <div className="py-2">
-                    <input
-                        {...register("placeholder")}
-                        className="form-input"
-                        placeholder="Texto de Ajuda"
-                    />
-                </div>
-            ) : null}
-            {updateType == ColumnType.Tag ? (
-                <div className="py-2">
-                    <select
-                        {...register("tagId", { setValueAs: (value) => parseInt(value) })}
-                        required
-                        className="form-input"
-                    >
-                        <option value="">Selecione o campo personalizado</option>
-                        {tags.map((tag) => {
-                            return (
-                                <option key={'tag' + tag.id} value={tag.id}>{tag.name}</option>
-                            );
-                        })}
-                    </select>
-                </div>
-            ) : null}
+            <div className="grid gap-4 md:grid-cols-2">
+                {TYPES_CONTENT_EDIT.some((columnType) => columnType == updateType) ? (
+                    <Field label={t("customTable.contentLabel")}>
+                        <Input
+                            {...register("content")}
+                            required={TYPES_CONTENT_EDIT_REQUIRED.some((columnType) => columnType == updateType)}
+                            placeholder={t("customTable.contentPlaceholder")}
+                        />
+                    </Field>
+                ) : null}
+                {TYPES_CONTENT_PLACEHOLDER.some((columnType) => columnType == updateType) ? (
+                    <Field label={t("customTable.placeholderLabel")}>
+                        <Input
+                            {...register("placeholder")}
+                            placeholder={t("customTable.helpTextPlaceholder")}
+                        />
+                    </Field>
+                ) : null}
+                {updateType == ColumnType.Tag ? (
+                    <Field label={t("customTable.tagLabel")}>
+                        <Select
+                            {...register("tagId", { setValueAs: (value) => parseInt(value, 10) })}
+                            required
+                        >
+                            <option value="">{t("common.selectCustomField")}</option>
+                            {tags.map((tag) => (
+                                <option key={`tag${tag.id}`} value={tag.id}>
+                                    {tag.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                ) : null}
+                {updateType == ColumnType.LongText ? (
+                    <Field label={t("customTable.previewLabel")} hint={t("customTable.previewHint")}>
+                        <Textarea
+                            value={String(watch("content") ?? "")}
+                            placeholder={t("customTable.fillPlaceholder")}
+                            disabled
+                        />
+                    </Field>
+                ) : null}
+            </div>
 
         </FormDialogBase>
     );

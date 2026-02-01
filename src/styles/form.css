@@ -1,25 +1,25 @@
 .form-input {
-    @apply rounded w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm;
+    @apply rounded-xl w-full px-3 py-2 border border-ink/10 bg-paper text-ink placeholder-ink/40 focus:outline-none focus:ring-ocean/30 focus:border-ocean focus:z-10 sm:text-sm;
 }
 
 .action-button-blue {
-    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 transition-colors mb-2;
+    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-ocean text-sand font-semibold rounded-xl hover:bg-ocean/90 transition-colors mb-2;
 }
 
 .action-button-green {
-    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-green-600 text-white font-bold rounded-md hover:bg-green-700 transition-colors mb-2;
+    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-pine text-sand font-semibold rounded-xl hover:bg-pine/90 transition-colors mb-2;
 }
 
 .action-button-teal {
-    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-teal-600 text-white font-bold rounded-md hover:bg-teal-700 transition-colors mb-2;
+    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-ocean text-sand font-semibold rounded-xl hover:bg-ocean/90 transition-colors mb-2;
 }
 
 .action-button-purple {
-    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-purple-600 text-white font-bold rounded-md hover:bg-purple-700 transition-colors mb-2;
+    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-ink text-sand font-semibold rounded-xl hover:bg-ink/90 transition-colors mb-2;
 }
 
 .action-button-red {
-    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-red-600 text-white font-bold rounded-md hover:bg-red-700 transition-colors mb-2;
+    @apply inline-flex items-center w-full md:w-40 px-4 py-2 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors mb-2;
 }
 
 .cards-list-inline {
@@ -27,7 +27,7 @@
 }
 
 .card-flex {
-    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 flex flex-wrap justify-between;
+    @apply bg-paper/90 rounded-2xl shadow-soft hover:shadow-lift transition-shadow p-6 flex flex-wrap justify-between border border-ink/10;
 }
 
 .card-flex-details-container {

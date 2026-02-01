@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import EnvironmentItem from "./EnvironmentItem";
 import PainelContainer from "../../components/PainelContainer";
@@ -7,39 +7,52 @@ import { EnvironmentData } from "../../models/EnvironmentData";
 import { getAllByProjects } from "../../services/environmentService";
 import EnvironmentForm from "./EnvironmentForm";
 import { FormDialogBaseExtendsRef } from "../../components/FormDialogBase";
+import notifyProvider from "../../infra/notifyProvider";
+import { Button, Field, Input } from "../../ui";
+import { useTranslation } from "react-i18next";
+import { useInfiniteList } from "../../hooks/useInfiniteList";
+import LoadingOverlay from "../../components/LoadingOverlay";
+import { FiFilter, FiPlus, FiXCircle } from "react-icons/fi";
 
 const EnvironmentList: React.FC = () => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { projectId } = useParams();
-    const [environments, setEnvironments] = useState<EnvironmentData[]>([]);
-    const [loadingEnvironments, setLoadingEnvironments] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const [filterDraft, setFilterDraft] = useState(searchTerm);
     const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
-
-    useEffect(() => {
-        loadEnvironments();
-    }, []);
 
     const getProjectId = () => {
         return parseInt(projectId || "0", 10);
     }
 
-    const loadEnvironments = async () => {
-        setLoadingEnvironments(true);
-        try {
-            const response = await getAllByProjects(getProjectId());
-            setEnvironments(response?.data || []);
-        } catch (error) {
-            console.error("Erro ao carregar ambiente de teste:", error);
-        } finally {
-            setLoadingEnvironments(false);
-        }
-    };
-
-    const filteredEnvironments = environments.filter((environment) =>
-        environment.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const {
+        items: environments,
+        loading: loadingEnvironments,
+        loadingMore,
+        hasNext,
+        sentinelRef,
+        reload,
+    } = useInfiniteList<EnvironmentData>(
+        async (page, limit) => {
+            try {
+                const response = await getAllByProjects(getProjectId(), page, limit);
+                return response?.data ?? null;
+            } catch (error) {
+                notifyProvider.error(t("environment.loadError"));
+                return null;
+            }
+        },
+        [projectId],
+        { enabled: Boolean(projectId) }
     );
+
+    const filteredEnvironments = useMemo(() => {
+        return environments.filter((environment) =>
+            environment.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [environments, searchTerm]);
 
     const handleClickNewEnvironment = () => {
         formDialogRef.current?.setData({});
@@ -51,41 +64,68 @@ const EnvironmentList: React.FC = () => {
         formDialogRef.current?.openDialog();
     };
 
+    const applyFilters = () => {
+        setSearchTerm(filterDraft);
+    };
+
+    const clearFilters = () => {
+        setFilterDraft("");
+        setSearchTerm("");
+    };
+
     return (
         <PainelContainer>
-            <TitleContainer title="Ambientes de Teste" />
-            <div className="flex justify-between mb-4">
-                <input
-                    type="text"
-                    placeholder="Buscar por nome..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="form-input mr-2"
-                />
-                <button
-                    type="button"
-                    className="py-2 px-8 text-lg font-medium rounded-md text-white bg-purple-500 hover:bg-purple-700 transition-colors"
-                    onClick={handleClickNewEnvironment}
-                >
-                    Criar Novo
-                </button>
-            </div>
-            {loadingEnvironments ? (
-                <div className="text-center text-purple-600 text-lg m-20">Carregando ambientes de teste do projeto...</div>
-            ) : filteredEnvironments.length === 0 ? (
-                <div className="text-center text-purple-600 text-lg m-20">Nenhum ambiente de teste encontrado</div>
-            ) : (
-                <div className="cards-list-inline">
-                    {filteredEnvironments.map((environment) => (
-                        <EnvironmentItem
-                            key={environment.id}
-                            environment={environment}
-                            onEdit={() => handleClickEnvironment(environment)}
-                        />
-                    ))}
+            <LoadingOverlay show={loadingMore} />
+            <div className="space-y-6">
+                <TitleContainer title={t("environment.listTitle")} />
+                <div className="flex flex-wrap items-end justify-end gap-4">
+                    <Button type="button" onClick={handleClickNewEnvironment} leadingIcon={<FiPlus />}>
+                        {t("environment.createNew")}
+                    </Button>
                 </div>
-            )}
-            <EnvironmentForm projectId={getProjectId()} ref={formDialogRef} callbackSubmit={loadEnvironments} />
+
+                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
+                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                        <Field label={t("environment.searchLabel")}>
+                            <Input
+                                type="text"
+                                placeholder={t("environment.searchPlaceholder")}
+                                value={filterDraft}
+                                onChange={(e) => setFilterDraft(e.target.value)}
+                            />
+                        </Field>
+                    </div>
+                    <div className="flex w-full justify-end gap-2 pt-2">
+                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
+                            {t("common.confirm")}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
+                            {t("common.clearFilters")}
+                        </Button>
+                    </div>
+                </div>
+                {loadingEnvironments ? (
+                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                        {t("environment.loadingList")}
+                    </div>
+                ) : filteredEnvironments.length === 0 ? (
+                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                        {t("environment.emptyList")}
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {filteredEnvironments.map((environment) => (
+                            <EnvironmentItem
+                                key={environment.id}
+                                environment={environment}
+                                onEdit={() => handleClickEnvironment(environment)}
+                            />
+                        ))}
+                    </div>
+                )}
+                {hasNext ? <div ref={sentinelRef} /> : null}
+                <EnvironmentForm projectId={getProjectId()} ref={formDialogRef} callbackSubmit={reload} />
+            </div>
         </PainelContainer>
     );
 };

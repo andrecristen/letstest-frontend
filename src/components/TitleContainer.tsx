@@ -16,15 +16,15 @@ const TitleContainer: React.FC<TitleContainerProps> = ({ title, textHelp }) => {
   };
 
   return (
-    <div className="flex justify-between items-center bg-purple-800 rounded-lg h-16 px-6 m-4">
-      <h1 className="text-2xl text-white font-bold inline-flex items-center">
+    <div className="flex items-center justify-between rounded-2xl border border-ink/10 bg-paper/80 px-6 py-4 shadow-soft">
+      <h1 className="inline-flex items-center gap-3 font-display text-2xl text-ink">
         {title} {textHelp && <Tooltip text={textHelp} />}
       </h1>
       <button
         onClick={handleBack}
-        className="border border-white bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+        className="rounded-xl border border-ink/10 bg-ink px-3 py-2 text-sand transition-colors hover:bg-ink/90"
       >
-        <FiSkipBack className="w-5 h-5" />
+        <FiSkipBack className="h-5 w-5" />
       </button>
     </div>
   );

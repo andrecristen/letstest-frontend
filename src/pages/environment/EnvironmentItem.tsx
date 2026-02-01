@@ -1,6 +1,8 @@
 import React from "react";
 import { FiEdit, FiFileText } from "react-icons/fi";
 import { EnvironmentData, getEnvironmentSituationDescription } from "../../models/EnvironmentData";
+import { Badge, Button, Card } from "../../ui";
+import { useTranslation } from "react-i18next";
 
 interface EnvironmentItemProps {
     environment: EnvironmentData;
@@ -8,30 +10,33 @@ interface EnvironmentItemProps {
 }
 
 const EnvironmentItem: React.FC<EnvironmentItemProps> = ({ environment, onEdit }) => {
+    const { t } = useTranslation();
     return (
-        <div className="card-flex">
-            <div className="card-flex-details-container">
-                <FiFileText className="text-lg text-purple-700" />
-                <div className="ml-3">
-                    <p className="text-sm font-medium text-purple-900"># {environment.id}</p>
-                    <p className="font-bold text-lg text-purple-700">{environment.name}</p>
-                    <p className="text-sm text-purple-700">Situação: {getEnvironmentSituationDescription(environment.situation)}</p>
-                    <p className="text-sm text-purple-700">Descrição/Acesso: {environment.description}</p>
+        <Card className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-3">
+                <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
+                    <FiFileText className="h-5 w-5" />
+                </span>
+                <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                        #{environment.id}
+                    </p>
+                    <p className="font-display text-lg text-ink">{environment.name}</p>
+                    <Badge variant={environment.situation === 1 ? "success" : "danger"}>
+                        {getEnvironmentSituationDescription(environment.situation)}
+                    </Badge>
+                    <p className="text-sm text-ink/60">{environment.description}</p>
                 </div>
             </div>
 
-            <div className="card-flex-actions-container">
+            <div className="flex flex-wrap items-center gap-2">
                 {onEdit ? (
-                    <button
-                        onClick={onEdit}
-                        className="action-button-blue"
-                    >
-                        <FiEdit className="w-5 h-5 mr-2" /> Editar
-                    </button>
+                    <Button onClick={onEdit} variant="outline" size="sm" leadingIcon={<FiEdit />}>
+                        {t("common.edit")}
+                    </Button>
                 ) : null}
-
             </div>
-        </div>
+        </Card>
     );
 };
 

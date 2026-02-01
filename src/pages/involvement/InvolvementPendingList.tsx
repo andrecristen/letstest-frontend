@@ -1,32 +1,28 @@
 import React from 'react';
-import TitleContainer from '../../components/TitleContainer';
 import { InvolvementData, InvolvementSituationEnum } from '../../models/InvolvementData';
 import InvolvementPendingItem from './InvolvementPendingItem';
+import { useTranslation } from 'react-i18next';
 
 interface InvolvementPendingProps {
     involvements: InvolvementData[];
     typeSituation: InvolvementSituationEnum;
     callback: () => void;
-    title: string;
-    textHelp?: string;
 }
 
-const InvolvementPendingList: React.FC<InvolvementPendingProps> = ({ involvements, typeSituation, callback, title, textHelp }) => {
+const InvolvementPendingList: React.FC<InvolvementPendingProps> = ({ involvements, typeSituation, callback }) => {
 
+    const { t } = useTranslation();
     return (
-        <div>
-            <TitleContainer title={title} textHelp={textHelp} />
-            <div className="grid grid-cols-1 gap-6 mt-4 p-6">
-                {involvements.length > 0 ? (
-                    involvements.map(involvement => (
-                        <InvolvementPendingItem key={involvement.id} callback={callback} typeSituation={typeSituation} involvement={involvement} />
-                    ))
-                ) : (
-                    <div className="text-center text-purple-600 col-span-full">
-                        Nenhum envolvimento encontrado.
-                    </div>
-                )}
-            </div>
+        <div className="space-y-4">
+            {involvements.length > 0 ? (
+                involvements.map(involvement => (
+                    <InvolvementPendingItem key={involvement.id} callback={callback} typeSituation={typeSituation} involvement={involvement} />
+                ))
+            ) : (
+                <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                    {t("involvement.emptyList")}
+                </div>
+            )}
         </div>
     );
 };

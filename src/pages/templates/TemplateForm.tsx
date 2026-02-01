@@ -10,8 +10,11 @@ import notifyProvider from '../../infra/notifyProvider';
 import CustomizableTable, { CustomizableTableRef, CustomizableTableRows } from '../../components/CustomizableTable/CustomizableTable';
 import { Operation } from '../../components/CustomizableTable/CustomizableRow';
 import LoadingOverlay from "../../components/LoadingOverlay";
+import { Button, Field, Input, Select, Textarea } from "../../ui";
+import { useTranslation } from 'react-i18next';
 
 const TemplateForm = () => {
+    const { t } = useTranslation();
 
     const customizableTableRef = useRef<CustomizableTableRef>(null);
     const [rows, setRows] = useState<CustomizableTableRows[]>([]);
@@ -57,7 +60,7 @@ const TemplateForm = () => {
         event?.stopPropagation();
         if (event?.target?.attributes?.name?.nodeValue == "template") {
             if (!rows.length) {
-                notifyProvider.error("Necessário ao menos uma linha para confirmação.");
+                notifyProvider.error(t("templates.minRowRequired"));
                 return;
             }
             data.data = Object.fromEntries(
@@ -66,10 +69,10 @@ const TemplateForm = () => {
             setLoadingTemplate(true);
             const response = await create(getProjectId(), data);
             if (response?.status == 201) {
-                notifyProvider.success("Template criado com sucesso");
+                notifyProvider.success(t("templates.createSuccess"));
                 navigate(-1);
             } else {
-                notifyProvider.error("Erro ao criar template, tente novamente");
+                notifyProvider.error(t("templates.createError"));
             }
             setLoadingTemplate(false);
         }
@@ -77,52 +80,48 @@ const TemplateForm = () => {
 
     return (
         <PainelContainer>
-            <TitleContainer title={isViewMode ? "Visualizar Template" : "Personalizar Template"} />
+            <TitleContainer title={isViewMode ? t("templates.viewTitle") : t("templates.editTitle")} />
             <LoadingOverlay show={loadingTemplate} />
             <form name={'template'} onSubmit={handleSubmit(onSubmit)}>
                 <div className="py-2">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
-                    <input
-                        {...register('name', { required: 'Nome é obrigatório' })}
-                        disabled={isViewMode}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                        placeholder="Nome"
-                    />
-                    {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+                    <Field label={t("common.nameLabel")} error={errors.name?.message as string | undefined}>
+                        <Input
+                            {...register('name', { required: t("common.nameRequired") })}
+                            disabled={isViewMode}
+                            placeholder={t("common.nameLabel")}
+                        />
+                    </Field>
                 </div>
                 <div className="py-2">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Descrição</label>
-                    <textarea
-                        {...register("description", { required: 'Descrição é obrigatória' })}
-                        rows={5}
-                        disabled={isViewMode}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.description ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                        placeholder="Descrição"
-                    />
-                    {errors.description && <span className="text-red-500 text-sm">{errors.description.message}</span>}
+                    <Field label={t("common.descriptionLabel")} error={errors.description?.message as string | undefined}>
+                        <Textarea
+                            {...register("description", { required: t("common.descriptionRequired") })}
+                            rows={5}
+                            disabled={isViewMode}
+                            placeholder={t("common.descriptionLabel")}
+                        />
+                    </Field>
                 </div>
                 <div className="py-2">
-                    <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo</label>
-                    <select
-                        {...register('type', {
-                            required: 'Tipo é obrigatório',
-                            setValueAs: (value) => parseInt(value),
-                        })}
-                        disabled={isViewMode}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.type ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                    >
-                        <option value="">Selecione o tipo do template</option>
-                        {getTemplateTypeList().map((type) => (
-                            <option key={type.id} value={type.id}>
-                                {type.name}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.type && <span className="text-red-500 text-sm">{errors.type.message}</span>}
+                    <Field label={t("common.typeLabel")} error={errors.type?.message as string | undefined}>
+                        <Select
+                            {...register('type', {
+                                required: t("common.typeRequired"),
+                                setValueAs: (value) => parseInt(value),
+                            })}
+                            disabled={isViewMode}
+                        >
+                            <option value="">{t("templates.selectType")}</option>
+                            {getTemplateTypeList().map((type) => (
+                                <option key={type.id} value={type.id}>
+                                    {type.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
                 </div>
-                <fieldset className="border rounded p-4">
-                    <legend className="text-lg font-semibold">Definição do Template:</legend>
-                    <hr />
+                <fieldset className="rounded-2xl border border-ink/10 bg-paper/70 p-4">
+                    <legend className="px-2 text-sm font-semibold text-ink">{t("templates.definitionLegend")}</legend>
                     <CustomizableTable
                         projectId={getProjectId()}
                         ref={customizableTableRef}
@@ -131,9 +130,9 @@ const TemplateForm = () => {
                     />
                 </fieldset>
                 {!isViewMode && (
-                    <button type="submit" className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 w-full flex justify-center items-center rounded-md">
-                        <FiSave className="mr-2" /> Salvar
-                    </button>
+                    <Button type="submit" variant="accent" size="lg" leadingIcon={<FiSave />} className="mt-6 w-full">
+                        {t("common.save")}
+                    </Button>
                 )}
 
             </form>

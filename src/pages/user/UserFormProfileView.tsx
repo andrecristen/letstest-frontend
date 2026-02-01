@@ -8,18 +8,50 @@ import { useParams } from 'react-router-dom';
 import TitleContainer from '../../components/TitleContainer';
 import HabilityList from '../habilities/HabilityList';
 import { HabilityData } from '../../models/HabilityData';
-import { getHabilitiesByUserId, getMy } from '../../services/habilityService';
+import { getHabilitiesByUserId } from '../../services/habilityService';
 import { getDevicesByUserId } from '../../services/deviceService';
 import DeviceList from '../devices/DeviceList';
 import { DeviceData } from '../../models/DeviceData';
+import { Card, Field, Input, Textarea } from '../../ui';
+import { useTranslation } from 'react-i18next';
+import { useInfiniteList } from '../../hooks/useInfiniteList';
 
 const UserFormProfileView = () => {
 
+    const { t } = useTranslation();
     const { register, setValue, formState: { errors } } = useForm<UserData>();
-    const [habilities, setHabilities] = useState<HabilityData[]>([]);
-    const [devices, setDevices] = useState<DeviceData[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const { userId } = useParams();
+
+    const {
+        items: habilities,
+        loading: loadingHabilities,
+        loadingMore: loadingMoreHabilities,
+        hasNext: hasNextHabilities,
+        sentinelRef: habilitiesRef,
+    } = useInfiniteList<HabilityData>(
+        async (page, limit) => {
+            const response = await getHabilitiesByUserId(parseInt(userId || "0", 10), page, limit);
+            return response?.data ?? null;
+        },
+        [userId],
+        { enabled: Boolean(userId) }
+    );
+
+    const {
+        items: devices,
+        loading: loadingDevices,
+        loadingMore: loadingMoreDevices,
+        hasNext: hasNextDevices,
+        sentinelRef: devicesRef,
+    } = useInfiniteList<DeviceData>(
+        async (page, limit) => {
+            const response = await getDevicesByUserId(parseInt(userId || "0", 10), page, limit);
+            return response?.data ?? null;
+        },
+        [userId],
+        { enabled: Boolean(userId) }
+    );
 
     useEffect(() => {
         load();
@@ -31,62 +63,57 @@ const UserFormProfileView = () => {
         setValue('name', responseUser?.data.name);
         setValue('email', responseUser?.data.email);
         setValue('bio', responseUser?.data.bio);
-        const responseHabilities = await getHabilitiesByUserId(parseInt(userId || "0", 10));
-        setHabilities(responseHabilities?.data);
-        const responseDevices = await getDevicesByUserId(parseInt(userId || "0", 10));
-        setDevices(responseDevices?.data);
         setLoading(false);
     };
 
     return (
         <PainelContainer>
-            <LoadingOverlay show={loading} />
-            <TitleContainer title="Visualizar Perfil" />
-            <div className="mx-auto bg-white p-8 rounded-lg shadow-md">
-                <div className="flex flex-col items-center mb-6">
-                    <img
-                        className="w-36 h-36 rounded-full shadow-lg"
-                        src="https://via.placeholder.com/150"
-                        alt="User avatar"
-                    />
-                </div>
-                <div>
-                    <div className="mb-4">
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
-                        <input
-                            type="text"
-                            id="name"
-                            disabled
-                            {...register('name', { required: 'Nome é obrigatório' })}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+            <LoadingOverlay show={loading || loadingHabilities || loadingDevices || loadingMoreHabilities || loadingMoreDevices} />
+            <div className="space-y-6">
+                <TitleContainer title={t("profile.viewTitle")} />
+                <Card className="space-y-6 p-8">
+                    <div className="flex flex-col items-center gap-4 text-center">
+                        <img
+                            className="h-32 w-32 rounded-full border border-ink/10 object-cover"
+                            src="https://via.placeholder.com/150"
+                            alt={t("common.userAvatar")}
                         />
-                        {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+                        <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("profile.title")}</p>
+                            <h2 className="font-display text-2xl text-ink">{t("profile.userInfo")}</h2>
+                        </div>
                     </div>
-                    <div className="mb-4">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            disabled
-                            {...register('email', { required: 'Email é obrigatório' })}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                        />
-                        {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
+                    <div className="space-y-4">
+                        <Field label={t("common.nameLabel")} error={errors.name?.message as string | undefined}>
+                            <Input
+                                type="text"
+                                id="name"
+                                disabled
+                                {...register('name', { required: t("common.nameRequired") })}
+                            />
+                        </Field>
+                        <Field label={t("common.emailLabel")} error={errors.email?.message as string | undefined}>
+                            <Input
+                                type="email"
+                                id="email"
+                                disabled
+                                {...register('email', { required: t("common.emailRequired") })}
+                            />
+                        </Field>
+                        <Field label={t("common.bioLabel")} error={errors.bio?.message as string | undefined}>
+                            <Textarea
+                                id="bio"
+                                disabled
+                                {...register('bio')}
+                            />
+                        </Field>
                     </div>
-                    <div className="mb-4">
-                        <label htmlFor="bio" className="block text-sm font-medium text-gray-700">Bio</label>
-                        <textarea
-                            id="bio"
-                            disabled
-                            {...register('bio')}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.bio ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
-                        />
-                        {errors.bio && <span className="text-red-500 text-sm">{errors.bio.message}</span>}
-                    </div>
-                </div>
+                </Card>
+                <HabilityList habilities={habilities} />
+                {hasNextHabilities ? <div ref={habilitiesRef} /> : null}
+                <DeviceList devices={devices} />
+                {hasNextDevices ? <div ref={devicesRef} /> : null}
             </div>
-            <HabilityList habilities={habilities} />
-            <DeviceList devices={devices} />
         </PainelContainer>
     );
 };

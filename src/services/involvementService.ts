@@ -2,8 +2,8 @@ import { InvolvementTypeEnum } from "../models/InvolvementData";
 import apiTokenProvider from "../infra/http-request/apiTokenProvider";
 
 
-export const getByProjectAndSituation = async (projectId: number, situation: number) => {
-    return await apiTokenProvider.get('/involvement/' + projectId + '/' + situation);
+export const getByProjectAndSituation = async (projectId: number, situation: number, page = 1, limit = 20, search?: string) => {
+    return await apiTokenProvider.get('/involvement/' + projectId + '/' + situation, { params: { page, limit, search } });
 };
 
 export const accept = async (involvementId: number) => {
@@ -32,10 +32,10 @@ export const apply = async (projectId: number) => {
     });
 }
 
-export const getInvolvementInvitations = async () => {
-    return await apiTokenProvider.get('/involvement/invitations');
+export const getInvolvementInvitations = async (page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/involvement/invitations', { params: { page, limit } });
 };
 
-export const getInvolvementApplied = async () => {
-    return await apiTokenProvider.get('/involvement/applied');
+export const getInvolvementApplied = async (page = 1, limit = 20) => {
+    return await apiTokenProvider.get('/involvement/applied', { params: { page, limit } });
 };
