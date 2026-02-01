@@ -4,15 +4,17 @@ import { cn } from "./utils";
 interface ModalProps {
   open: boolean;
   onClose?: () => void;
+  containerStyle?: React.CSSProperties;
   className?: string;
+  style?: React.CSSProperties;
   children: React.ReactNode;
 }
 
-const Modal = ({ open, onClose, className, children }: ModalProps) => {
+const Modal = ({ open, onClose, containerStyle, className, style, children }: ModalProps) => {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
+    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-12" style={containerStyle}>
       <div
         className="absolute inset-0 bg-ink/50"
         onClick={onClose}
@@ -23,6 +25,7 @@ const Modal = ({ open, onClose, className, children }: ModalProps) => {
           "relative w-full max-w-lg rounded-3xl border border-ink/10 bg-paper p-6 shadow-soft",
           className
         )}
+        style={style}
       >
         {children}
       </div>

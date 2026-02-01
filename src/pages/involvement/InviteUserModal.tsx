@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiFilter, FiUserPlus, FiXCircle } from "react-icons/fi";
+import { FiFilter, FiUser, FiUserPlus, FiXCircle } from "react-icons/fi";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import { InvolvementTypeEnum } from "../../models/InvolvementData";
 import { getDeviceTypeDescription, getDeviceTypeList } from "../../models/DeviceData";
@@ -27,6 +28,7 @@ type InviteUserModalProps = {
 
 const InviteUserModal: React.FC<InviteUserModalProps> = ({ open, onClose, projectId, type, onInvited }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [invitingUserId, setInvitingUserId] = useState<number | null>(null);
 
   const [filters, setFilters] = useState({
@@ -130,8 +132,14 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ open, onClose, projec
   return (
     <>
       <LoadingOverlay show={invitingUserId !== null} />
-      <Modal open={open} onClose={onClose} className="my-6 max-w-screen-2xl w-full">
-        <div className="flex max-h-screen flex-col space-y-6">
+      <Modal
+        open={open}
+        onClose={onClose}
+        className="w-full max-w-screen-2xl overflow-hidden"
+        containerStyle={{ paddingTop: 24, paddingBottom: 24 }}
+        style={{ maxHeight: "calc(100vh - 128px)" }}
+      >
+        <div className="flex h-full flex-col space-y-6 pb-4">
           <div className="space-y-2">
             <h3 className="font-display text-xl text-ink">{t("involvement.inviteModalTitle")}</h3>
             <p className="text-sm text-ink/60">{t("involvement.inviteModalHelp")}</p>
@@ -231,46 +239,62 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ open, onClose, projec
               <span>{t("involvement.searchResults")}</span>
               {loading ? <span>{t("common.loading")}</span> : null}
             </div>
-            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
+            <div className="min-h-0 flex-1 max-h-[36vh] overflow-y-auto pr-2">
               {users.length === 0 && !loading ? (
                 <div className="rounded-2xl border border-ink/10 bg-paper/70 p-6 text-center text-sm text-ink/60">
                   {t("involvement.emptySearch")}
                 </div>
               ) : (
-                users.map((user) => (
-                  <div
-                    key={user.id}
-                    className="flex flex-col gap-3 rounded-2xl border border-ink/10 bg-paper px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="space-y-2">
-                      <div>
-                        <p className="font-display text-lg text-ink">{user.name}</p>
-                        <p className="text-sm text-ink/60">{user.email}</p>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {users.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex flex-col justify-between rounded-2xl border border-ink/10 bg-paper px-4 py-3"
+                    >
+                      <div className="space-y-2">
+                        <div>
+                          <p className="font-display text-base text-ink">{user.name}</p>
+                          <p className="text-xs text-ink/60">{user.email}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 text-[11px] text-ink/60">
+                          {user.habilities?.slice(0, 2).map((hability) => (
+                            <span key={`hab-${hability.id}`} className="rounded-full border border-ink/10 px-2 py-0.5">
+                              {getHabilityTypeDescription(hability.type)}
+                            </span>
+                          ))}
+                          {user.devices?.slice(0, 1).map((device) => (
+                            <span key={`dev-${device.id}`} className="rounded-full border border-ink/10 px-2 py-0.5">
+                              {getDeviceTypeDescription(device.type)}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2 text-xs text-ink/60">
-                        {user.habilities?.slice(0, 3).map((hability) => (
-                          <span key={`hab-${hability.id}`} className="rounded-full border border-ink/10 px-2 py-1">
-                            {getHabilityTypeDescription(hability.type)} · {hability.value}
-                          </span>
-                        ))}
-                        {user.devices?.slice(0, 2).map((device) => (
-                          <span key={`dev-${device.id}`} className="rounded-full border border-ink/10 px-2 py-1">
-                            {getDeviceTypeDescription(device.type)} · {device.brand} {device.model}
-                          </span>
-                        ))}
+                      <div className="flex gap-2 pt-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          leadingIcon={<FiUser />}
+                          onClick={() => navigate(`/profile/${user.id}`)}
+                          className="w-full"
+                        >
+                          {t("involvement.viewProfile")}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="accent"
+                          size="sm"
+                          leadingIcon={<FiUserPlus />}
+                          onClick={() => handleInvite(user.email, user.id)}
+                          disabled={invitingUserId === user.id}
+                          className="w-full"
+                        >
+                          {t("involvement.inviteButton")}
+                        </Button>
                       </div>
                     </div>
-                    <Button
-                      type="button"
-                      variant="accent"
-                      leadingIcon={<FiUserPlus />}
-                      onClick={() => handleInvite(user.email, user.id)}
-                      disabled={invitingUserId === user.id}
-                    >
-                      {t("involvement.inviteButton")}
-                    </Button>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
               {loadingMore ? (
                 <div className="text-center text-xs text-ink/50">{t("common.loading")}</div>
@@ -279,7 +303,7 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ open, onClose, projec
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-3">
             <Button type="button" variant="outline" onClick={onClose}>
               {t("common.close")}
             </Button>

@@ -281,8 +281,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-20 pt-6">
-          <div className="min-h-[calc(100vh-140px)] rounded-3xl border border-ink/10 bg-paper/70 p-6 shadow-soft">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="rounded-3xl border border-ink/10 bg-paper/70 p-6 shadow-soft">
             {children}
           </div>
         </div>
