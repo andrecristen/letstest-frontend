@@ -130,8 +130,8 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ open, onClose, projec
   return (
     <>
       <LoadingOverlay show={invitingUserId !== null} />
-      <Modal open={open} onClose={onClose} className="max-w-4xl">
-        <div className="space-y-6">
+      <Modal open={open} onClose={onClose} className="max-w-[96vw]">
+        <div className="flex max-h-[92vh] flex-col space-y-6">
           <div className="space-y-2">
             <h3 className="font-display text-xl text-ink">{t("involvement.inviteModalTitle")}</h3>
             <p className="text-sm text-ink/60">{t("involvement.inviteModalHelp")}</p>
@@ -226,12 +226,12 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({ open, onClose, projec
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="flex min-h-0 flex-1 flex-col space-y-4">
             <div className="flex items-center justify-between text-sm text-ink/60">
               <span>{t("involvement.searchResults")}</span>
               {loading ? <span>{t("common.loading")}</span> : null}
             </div>
-            <div className="max-h-[45vh] space-y-3 overflow-y-auto pr-2">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
               {users.length === 0 && !loading ? (
                 <div className="rounded-2xl border border-ink/10 bg-paper/70 p-6 text-center text-sm text-ink/60">
                   {t("involvement.emptySearch")}
