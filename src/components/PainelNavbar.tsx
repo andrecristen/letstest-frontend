@@ -24,6 +24,7 @@ import {
   markNotificationRead,
   NotificationItem,
 } from "../services/notificationService";
+import { io, Socket } from "socket.io-client";
 
 interface Menu {
   name: string;
@@ -51,6 +52,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const [notificationPage] = useState(1);
   const [notificationLoading, setNotificationLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const socketRef = useRef<Socket | null>(null);
 
   const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
   const userButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -74,7 +76,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     try {
       const response = await getNotifications(notificationPage, 20);
       const data = response?.data?.data ?? [];
-      setNotifications(data);
+      const unreadOnly = data.filter((item: NotificationItem) => !item.readAt);
+      setNotifications(unreadOnly);
     } finally {
       setNotificationLoading(false);
     }
@@ -82,6 +85,21 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
   useEffect(() => {
     loadUnreadCount();
+    const baseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+    const socket = io(baseUrl, {
+      transports: ["websocket"],
+      auth: {
+        token: tokenProvider.getSessionToken(),
+      },
+    });
+    socket.on("notification:new", async () => {
+      await loadUnreadCount();
+    });
+    socketRef.current = socket;
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -260,10 +278,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
                       className="text-xs font-semibold text-ocean hover:text-ink"
                       onClick={async () => {
                         await markAllRead();
-                        setNotifications((prev) =>
-                          prev.map((item) => ({ ...item, readAt: new Date().toISOString() }))
-                        );
-                        setUnreadCount(0);
+                        setNotifications([]);
+                        await loadUnreadCount();
                       }}
                     >
                       {t("nav.markAllRead")}
@@ -288,14 +304,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
                         onClick={async () => {
                           if (!item.readAt) {
                             await markNotificationRead(item.notificationId);
-                            setNotifications((prev) =>
-                              prev.map((notification) =>
-                                notification.id === item.id
-                                  ? { ...notification, readAt: new Date().toISOString() }
-                                  : notification
-                              )
-                            );
-                            setUnreadCount((prev) => Math.max(prev - 1, 0));
+                            setNotifications((prev) => prev.filter((notification) => notification.id !== item.id));
+                            await loadUnreadCount();
                           }
                         }}
                         className={cn(
@@ -316,6 +326,18 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
                     ))}
                   </div>
                 )}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    className="w-full rounded-lg border border-ink/10 py-2 text-xs font-semibold text-ink/70 hover:border-ink/30"
+                    onClick={() => {
+                      setIsNotificationOpen(false);
+                      navigate("/notifications");
+                    }}
+                  >
+                    {t("nav.viewAllNotifications")}
+                  </button>
+                </div>
               </div>
             )}
 

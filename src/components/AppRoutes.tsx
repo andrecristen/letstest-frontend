@@ -31,6 +31,7 @@ import TestScenarioForm from "../pages/testScenario/TestScenarioForm";
 import ProjectOverView from "../pages/projects/ProjectOverView";
 import ProjectDashboard from "../pages/dashboard/ProjectDashboard";
 import ProjectNotificationSettings from "../pages/notifications/ProjectNotificationSettings";
+import NotificationList from "../pages/notifications/NotificationList";
 import { useTranslation } from "react-i18next";
 
 const AppRoutes = () => {
@@ -81,6 +82,7 @@ const AppRoutes = () => {
                 <Route path="/profile/:userId" element={<UserFormProfileView />}></Route>
                 <Route path="/devices" element={<DeviceUserView />}></Route>
                 <Route path="/habilities" element={<HabilityUserView />}></Route>
+                <Route path="/notifications" element={<NotificationList />}></Route>
                 <Route path="/reports/test-execution/:testExecutionId" element={<ReportList />}></Route>
                 <Route path="/involvements" element={<InvolvementInvitationsView />}></Route>
                 <Route path="/involvements/invitations" element={<InvolvementInvitationsView />}></Route>
