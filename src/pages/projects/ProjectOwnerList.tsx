@@ -13,12 +13,14 @@ import { Badge, Button, Card, Field, Input, Select } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { useInfiniteList } from "../../hooks/useInfiniteList";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import tokenProvider from "../../infra/tokenProvider";
 
 const ProjectOwnerList: React.FC = () => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
   const formDialogRef = useRef<FormDialogBaseExtendsRef>(null);
+  const currentUserId = tokenProvider.getSessionUserId();
 
   const [filters, setFilters] = useState<{ search: string; situation: number | null; visibility: number | null }>({
     search: "",
@@ -79,7 +81,7 @@ const ProjectOwnerList: React.FC = () => {
   const getSituationVariant = (situation: number) => {
     switch (situation) {
       case 1:
-        return "accent";
+        return "info";
       case 2:
         return "success";
       case 3:
@@ -188,7 +190,7 @@ const ProjectOwnerList: React.FC = () => {
               filteredProjects.map((project) => (
                 <Card
                   key={project.id}
-                  className="cursor-pointer transition-transform hover:-translate-y-1"
+                  className="relative cursor-pointer transition-transform hover:-translate-y-1"
                   role="button"
                   tabIndex={0}
                   onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyCard(event, project)}
@@ -196,6 +198,21 @@ const ProjectOwnerList: React.FC = () => {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-2">
+                      {project.creatorId === currentUserId ? (
+                        <Badge
+                          variant="neutral"
+                          className="border-violet-300/70 bg-violet-100/70 text-violet-700"
+                        >
+                          {t("projects.roleOwner")}
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant="neutral"
+                          className="border-slate-200 bg-slate-100 text-slate-700"
+                        >
+                          {t("projects.roleManager")}
+                        </Badge>
+                      )}
                       <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
                         #{project.id}
                       </p>
@@ -203,14 +220,16 @@ const ProjectOwnerList: React.FC = () => {
                         {project.name}
                       </h3>
                     </div>
-                    <button
-                      type="button"
-                      aria-label={t("projects.editAria")}
-                      className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 transition-colors hover:text-ink"
-                      onClick={(event) => handleClickEditProject(event, project)}
-                    >
-                      <FiEdit className="h-5 w-5" />
-                    </button>
+                    {project.creatorId === currentUserId ? (
+                      <button
+                        type="button"
+                        aria-label={t("projects.editAria")}
+                        className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 transition-colors hover:text-ink"
+                        onClick={(event) => handleClickEditProject(event, project)}
+                      >
+                        <FiEdit className="h-5 w-5" />
+                      </button>
+                    ) : null}
                   </div>
                   <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-ink/60">
                     <Badge variant={getSituationVariant(project.situation)}>

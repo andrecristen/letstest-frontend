@@ -14,7 +14,7 @@ interface TestCaseItemProps {
     onAssign?: () => void;
     onViewAssignment?: () => void;
     customActions?: React.ReactNode;
-    statusBadge?: { label: string; variant?: "neutral" | "accent" | "success" | "danger" };
+    statusBadge?: { label: string; variant?: "neutral" | "accent" | "success" | "danger" | "info" };
     actionsPosition?: "inline" | "footer";
     layout?: "inline" | "stacked";
     compactActions?: boolean;

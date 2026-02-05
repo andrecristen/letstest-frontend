@@ -212,7 +212,17 @@ const TestExecutionSession: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 rounded-full border border-ink/10 bg-white/70 px-3 py-2 shadow-sm">
-                                <Badge variant={status === "running" ? "success" : status === "paused" ? "accent" : "neutral"}>
+                                <Badge
+                                    variant={
+                                        status === "running"
+                                            ? "info"
+                                            : status === "paused"
+                                            ? "accent"
+                                            : status === "finished"
+                                            ? "success"
+                                            : "neutral"
+                                    }
+                                >
                                     {statusLabel}
                                 </Badge>
                                 <div className="text-sm font-semibold text-ink">

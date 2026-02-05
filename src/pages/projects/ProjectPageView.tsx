@@ -54,7 +54,7 @@ const ProjectPageView: React.FC = () => {
     const getSituationVariant = (situation: number) => {
         switch (situation) {
             case 1:
-                return "accent";
+                return "info";
             case 2:
                 return "success";
             case 3:

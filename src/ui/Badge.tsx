@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "./utils";
 
-type BadgeVariant = "neutral" | "accent" | "success" | "danger";
+type BadgeVariant = "neutral" | "accent" | "success" | "danger" | "info";
 
 interface BadgeProps {
   variant?: BadgeVariant;
@@ -14,6 +14,7 @@ const variantStyles: Record<BadgeVariant, string> = {
   accent: "border-ember/30 bg-ember/10 text-ember",
   success: "border-pine/30 bg-pine/10 text-pine",
   danger: "border-red-500/30 bg-red-500/10 text-red-600",
+  info: "border-sky-300/70 bg-sky-100/60 text-sky-700",
 };
 
 const Badge = ({ variant = "neutral", className, children }: BadgeProps) => {

@@ -10,6 +10,9 @@ import {
   FiMail,
   FiGlobe,
   FiBarChart2,
+  FiTool,
+  FiVideo,
+  FiCheckSquare,
 } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -17,6 +20,7 @@ import logo from "../assets/logo-transparente.png";
 import tokenProvider from "../infra/tokenProvider";
 import notifyProvider from "../infra/notifyProvider";
 import { cn } from "../ui";
+import Modal from "../ui/Modal";
 import {
   getNotifications,
   getUnreadCount,
@@ -48,10 +52,16 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isToolsOpen, setIsToolsOpen] = useState(false);
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationPage] = useState(1);
   const [notificationLoading, setNotificationLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [checklistItems, setChecklistItems] = useState<
+    { id: string; text: string; done: boolean }[]
+  >([]);
+  const [newChecklistItem, setNewChecklistItem] = useState("");
   const socketRef = useRef<Socket | null>(null);
 
   const notificationButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -60,6 +70,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
   const languageButtonRef = useRef<HTMLButtonElement | null>(null);
+  const toolsMenuRef = useRef<HTMLDivElement | null>(null);
+  const toolsButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setMenuSelected(location.pathname);
@@ -102,6 +114,29 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const stored = localStorage.getItem("testerChecklist");
+    if (stored) {
+      try {
+        setChecklistItems(JSON.parse(stored));
+        return;
+      } catch {
+        // ignore malformed storage
+      }
+    }
+    setChecklistItems([
+      { id: "env", text: t("nav.toolsChecklistDefaultEnvironment"), done: false },
+      { id: "scenario", text: t("nav.toolsChecklistDefaultScenario"), done: false },
+      { id: "data", text: t("nav.toolsChecklistDefaultData"), done: false },
+      { id: "evidence", text: t("nav.toolsChecklistDefaultEvidence"), done: false },
+      { id: "notes", text: t("nav.toolsChecklistDefaultNotes"), done: false },
+    ]);
+  }, [t]);
+
+  useEffect(() => {
+    localStorage.setItem("testerChecklist", JSON.stringify(checklistItems));
+  }, [checklistItems]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
 
@@ -131,6 +166,15 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
       ) {
         setIsLanguageOpen(false);
       }
+
+      if (
+        toolsMenuRef.current &&
+        toolsButtonRef.current &&
+        !toolsMenuRef.current.contains(target) &&
+        !toolsButtonRef.current.contains(target)
+      ) {
+        setIsToolsOpen(false);
+      }
     };
 
     document.addEventListener("click", handleClickOutside);
@@ -159,18 +203,87 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     setIsUserMenuOpen(!isUserMenuOpen);
     setIsNotificationOpen(false);
     setIsLanguageOpen(false);
+    setIsToolsOpen(false);
   };
 
   const toggleLanguageMenu = () => {
     setIsLanguageOpen(!isLanguageOpen);
     setIsNotificationOpen(false);
     setIsUserMenuOpen(false);
+    setIsToolsOpen(false);
+  };
+
+  const toggleToolsMenu = () => {
+    setIsToolsOpen(!isToolsOpen);
+    setIsNotificationOpen(false);
+    setIsUserMenuOpen(false);
+    setIsLanguageOpen(false);
   };
 
   const handleChangeLanguage = (language: "pt" | "en") => {
     i18n.changeLanguage(language);
     localStorage.setItem("language", language);
     setIsLanguageOpen(false);
+  };
+
+  const handleRecordScreen = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (event) => {
+        chunks.push(event.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        document.body.appendChild(a);
+        a.href = url;
+        a.download = `gravacao-tela-${Date.now()}.webm`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      };
+
+      recorder.start();
+      notifyProvider.success(t("nav.toolsRecordingStarted"));
+      setIsToolsOpen(false);
+    } catch (error) {
+      notifyProvider.error(t("nav.toolsRecordingError"));
+    }
+  };
+
+  const handleComingSoon = (message: string) => {
+    notifyProvider.info(message);
+    setIsToolsOpen(false);
+  };
+
+  const openChecklist = () => {
+    setIsChecklistOpen(true);
+    setIsToolsOpen(false);
+  };
+
+  const toggleChecklistItem = (id: string) => {
+    setChecklistItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
+    );
+  };
+
+  const removeChecklistItem = (id: string) => {
+    setChecklistItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const addChecklistItem = () => {
+    const text = newChecklistItem.trim();
+    if (!text) return;
+    setChecklistItems((prev) => [
+      ...prev,
+      { id: `${Date.now()}`, text, done: false },
+    ]);
+    setNewChecklistItem("");
   };
 
   const languageOptions = [
@@ -249,6 +362,37 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
           </div>
 
           <div className="relative flex items-center gap-4">
+            <div className="relative">
+              <button
+                onClick={toggleToolsMenu}
+                className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
+                ref={toolsButtonRef}
+                aria-label={t("nav.tools")}
+              >
+                <FiTool />
+              </button>
+              {isToolsOpen && (
+                <div
+                  className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper p-2 text-sm text-ink/70 shadow-soft"
+                  ref={toolsMenuRef}
+                >
+                  <button
+                    type="button"
+                    onClick={handleRecordScreen}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-ink/5"
+                  >
+                    <FiVideo className="text-base" /> {t("nav.toolsRecordScreen")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openChecklist}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-ink/5"
+                  >
+                    <FiCheckSquare className="text-base" /> {t("nav.toolsChecklist")}
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               onClick={toggleNotificationMenu}
               className="relative rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
@@ -416,6 +560,78 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
           </div>
         </div>
       </main>
+
+      <Modal open={isChecklistOpen} onClose={() => setIsChecklistOpen(false)}>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                {t("nav.toolsChecklist")}
+              </p>
+              <h2 className="font-display text-xl text-ink">
+                {t("nav.toolsChecklistTitle")}
+              </h2>
+            </div>
+            <button
+              type="button"
+              className="text-xs font-semibold text-ink/60 hover:text-ink"
+              onClick={() => setIsChecklistOpen(false)}
+            >
+              {t("common.close")}
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {checklistItems.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-ink/10 p-4 text-center text-sm text-ink/50">
+                {t("nav.toolsChecklistEmpty")}
+              </div>
+            ) : (
+              checklistItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded-xl border border-ink/10 bg-paper px-3 py-2"
+                >
+                  <label className="flex items-center gap-2 text-sm text-ink">
+                    <input
+                      type="checkbox"
+                      checked={item.done}
+                      onChange={() => toggleChecklistItem(item.id)}
+                      className="h-4 w-4 rounded border-ink/30 text-ink"
+                    />
+                    <span className={item.done ? "line-through text-ink/50" : ""}>
+                      {item.text}
+                    </span>
+                  </label>
+                  <button
+                    type="button"
+                    className="text-xs font-semibold text-ink/50 hover:text-ink"
+                    onClick={() => removeChecklistItem(item.id)}
+                  >
+                    {t("common.remove")}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              value={newChecklistItem}
+              onChange={(event) => setNewChecklistItem(event.target.value)}
+              placeholder={t("nav.toolsChecklistPlaceholder")}
+              className="flex-1 rounded-xl border border-ink/10 px-3 py-2 text-sm text-ink"
+            />
+            <button
+              type="button"
+              onClick={addChecklistItem}
+              className="rounded-xl border border-ink/10 bg-ink px-4 py-2 text-sm font-semibold text-sand hover:bg-ink/90"
+            >
+              {t("nav.toolsChecklistAdd")}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

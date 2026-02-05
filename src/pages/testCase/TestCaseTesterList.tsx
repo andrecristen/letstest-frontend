@@ -95,9 +95,9 @@ const TestCaseProjectTesterList: React.FC = () => {
     }, []);
 
     const getStatusBadge = useCallback((status: string) => {
-        if (status === "running") return { label: t("testCase.statusRunning"), variant: "success" as const };
+        if (status === "running") return { label: t("testCase.statusRunning"), variant: "info" as const };
         if (status === "paused") return { label: t("testCase.statusPaused"), variant: "accent" as const };
-        if (status === "finished") return { label: t("testCase.statusFinished"), variant: "neutral" as const };
+        if (status === "finished") return { label: t("testCase.statusFinished"), variant: "success" as const };
         return { label: t("testCase.statusIdle"), variant: "neutral" as const };
     }, [t]);
 
