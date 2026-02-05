@@ -21,7 +21,6 @@ const HabilityUserView: React.FC = () => {
     const [filterDraft, setFilterDraft] = useState(filters);
     const {
         items: habilities,
-        loading,
         loadingInitial,
         loadingMore,
         hasNext,

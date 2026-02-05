@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiPlus, FiTrash2, FiCopy, FiKey } from "react-icons/fi";
@@ -34,7 +34,7 @@ const ApiKeyManagement: React.FC = () => {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const loadApiKeys = async () => {
+  const loadApiKeys = useCallback(async () => {
     setLoading(true);
     try {
       const response = await apiKeyService.getApiKeys();
@@ -48,13 +48,13 @@ const ApiKeyManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     if (currentOrganization && isOwner) {
       loadApiKeys();
     }
-  }, [currentOrganization, isOwner]);
+  }, [currentOrganization, isOwner, loadApiKeys]);
 
   useEffect(() => {
     if (currentOrganization && !isOwner) {

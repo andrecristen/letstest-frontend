@@ -26,7 +26,6 @@ const InvolvementOwnerList: React.FC<InvolvementManagementListProps> = ({ type, 
 
   const {
     items: involvements,
-    loading: loadingInvolvements,
     loadingInitial,
     loadingMore,
     hasNext,

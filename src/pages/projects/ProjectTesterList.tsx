@@ -18,7 +18,6 @@ const ProjectTesterList: React.FC = () => {
     const [filterDraft, setFilterDraft] = useState(searchTerm);
     const {
         items: projects,
-        loading: loadingProjects,
         loadingInitial,
         loadingMore,
         hasNext,

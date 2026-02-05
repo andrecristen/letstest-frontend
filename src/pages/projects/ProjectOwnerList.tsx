@@ -30,7 +30,6 @@ const ProjectOwnerList: React.FC = () => {
 
   const {
     items: projects,
-    loading: loadingProjects,
     loadingInitial,
     loadingMore,
     hasNext,

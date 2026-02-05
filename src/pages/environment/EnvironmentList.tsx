@@ -27,7 +27,6 @@ const EnvironmentList: React.FC = () => {
 
     const {
         items: environments,
-        loading: loadingEnvironments,
         loadingInitial,
         loadingMore,
         hasNext,

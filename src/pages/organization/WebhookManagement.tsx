@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiPlus, FiTrash2, FiCopy, FiRefreshCw, FiChevronDown, FiChevronUp } from "react-icons/fi";
@@ -39,7 +39,7 @@ const WebhookManagement: React.FC = () => {
   const [deliveries, setDeliveries] = useState<WebhookDelivery[]>([]);
   const [loadingDeliveries, setLoadingDeliveries] = useState(false);
 
-  const loadWebhooks = async () => {
+  const loadWebhooks = useCallback(async () => {
     setLoading(true);
     try {
       const response = await webhookService.getWebhooks();
@@ -54,7 +54,7 @@ const WebhookManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   const loadDeliveries = async (webhookId: number) => {
     setLoadingDeliveries(true);
@@ -74,7 +74,7 @@ const WebhookManagement: React.FC = () => {
     if (currentOrganization && isOwner) {
       loadWebhooks();
     }
-  }, [currentOrganization, isOwner]);
+  }, [currentOrganization, isOwner, loadWebhooks]);
 
   useEffect(() => {
     if (currentOrganization && !isOwner) {
