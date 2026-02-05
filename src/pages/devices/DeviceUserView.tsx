@@ -21,7 +21,6 @@ const DeviceUserView: React.FC = () => {
     const [filterDraft, setFilterDraft] = useState(filters);
     const {
         items: devices,
-        loading,
         loadingInitial,
         loadingMore,
         hasNext,
