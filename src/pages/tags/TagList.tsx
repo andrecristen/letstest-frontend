@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import PainelContainer from "../../components/PainelContainer";
-import TitleContainer from "../../components/TitleContainer";
+import ListLayout from "../../components/ListLayout";
 import TagItem from "./TagItem";
 import { TagData } from "../../models/TagData";
 import { getTagsByProject } from "../../services/tagService";
@@ -9,8 +8,8 @@ import notifyProvider from "../../infra/notifyProvider";
 import { Button, Field, Input } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { useInfiniteList } from "../../hooks/useInfiniteList";
-import LoadingOverlay from "../../components/LoadingOverlay";
-import { FiFilter, FiPlus, FiXCircle } from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
+import { usePageLoading } from "../../hooks/usePageLoading";
 
 const TagList: React.FC = () => {
 
@@ -22,6 +21,7 @@ const TagList: React.FC = () => {
     const {
         items: tags,
         loading: loadingTags,
+        loadingInitial,
         loadingMore,
         hasNext,
         sentinelRef,
@@ -58,62 +58,48 @@ const TagList: React.FC = () => {
         setSearchTerm("");
     };
 
+    usePageLoading(loadingInitial);
+
     return (
-        <PainelContainer>
-            <LoadingOverlay show={loadingMore} />
-            <div className="space-y-6">
-                <TitleContainer title={t("tags.listTitle")} />
-
-                <div className="flex flex-wrap items-end justify-end gap-4">
-                    <Button type="button" onClick={handleNewTag} leadingIcon={<FiPlus />}>
-                        {t("tags.createNew")}
-                    </Button>
+        <ListLayout
+            title={t("tags.listTitle")}
+            actions={(
+                <Button type="button" onClick={handleNewTag} leadingIcon={<FiPlus />}>
+                    {t("tags.createNew")}
+                </Button>
+            )}
+            filters={(
+                <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                    <Field label={t("tags.searchLabel")}>
+                        <Input
+                            type="text"
+                            placeholder={t("tags.searchPlaceholder")}
+                            value={filterDraft}
+                            onChange={(e) => setFilterDraft(e.target.value)}
+                        />
+                    </Field>
                 </div>
-
-                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
-                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-                        <Field label={t("tags.searchLabel")}>
-                            <Input
-                                type="text"
-                                placeholder={t("tags.searchPlaceholder")}
-                                value={filterDraft}
-                                onChange={(e) => setFilterDraft(e.target.value)}
-                            />
-                        </Field>
-                    </div>
-                    <div className="flex w-full justify-end gap-2 pt-2">
-                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-                            {t("common.confirm")}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-                            {t("common.clearFilters")}
-                        </Button>
-                    </div>
-                </div>
-
-                {loadingTags ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("tags.loadingList")}
-                    </div>
-                ) : filteredTags.length === 0 ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("tags.emptyList")}
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredTags.map((tag) => (
-                            <TagItem
-                                key={tag.id}
-                                tag={tag}
-                                onView={() => navigate(`/project/tags/${projectId}/view/${tag.id}`)}
-                                onEdit={() => navigate(`/project/tags/${projectId}/edit/${tag.id}`)}
-                            />
-                        ))}
-                    </div>
-                )}
-                {hasNext ? <div ref={sentinelRef} /> : null}
+            )}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearFilters}
+            loading={loadingInitial}
+            loadingMessage={t("tags.loadingList")}
+            loadingMore={loadingMore}
+            empty={filteredTags.length === 0}
+            emptyMessage={t("tags.emptyList")}
+            footer={<>{hasNext ? <div ref={sentinelRef} /> : null}</>}
+        >
+            <div className="space-y-4">
+                {filteredTags.map((tag) => (
+                    <TagItem
+                        key={tag.id}
+                        tag={tag}
+                        onView={() => navigate(`/project/tags/${projectId}/view/${tag.id}`)}
+                        onEdit={() => navigate(`/project/tags/${projectId}/edit/${tag.id}`)}
+                    />
+                ))}
             </div>
-        </PainelContainer>
+        </ListLayout>
     );
 };
 

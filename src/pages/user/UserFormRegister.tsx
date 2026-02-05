@@ -6,12 +6,15 @@ import { FiArrowRight } from "react-icons/fi";
 import logo from "../../assets/logo-transparente.png";
 import { registerAccount } from "../../infra/http-request/authProvider";
 import notifyProvider from "../../infra/notifyProvider";
+import tokenProvider from "../../infra/tokenProvider";
 import { RegisterData } from "../../models/RegisterData";
 import { Button, Card, Field, Input } from "../../ui";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 const UserFormRegister = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { reloadFromSession } = useOrganization();
 
   const { register, handleSubmit, setValue } = useForm<RegisterData>();
   const [validatingRegister, setValidatingRegister] = useState(false);
@@ -27,8 +30,21 @@ const UserFormRegister = () => {
     }
     const response = await registerAccount(data);
     if (response?.status === 200) {
+      const { token, userId, organizations } = response.data;
+      const defaultOrg = organizations?.[0];
+      tokenProvider.setSession(
+        token,
+        userId,
+        defaultOrg?.id,
+        defaultOrg?.slug,
+        defaultOrg?.role,
+        organizations
+      );
+      reloadFromSession();
       notifyProvider.success(t("auth.registerSuccess"));
-      navigate("/login");
+      navigate("/dashboard");
+    } else if (response?.status === 409) {
+      notifyProvider.error(t("auth.emailAlreadyExists"));
     } else {
       notifyProvider.error(t("auth.registerError"));
     }
@@ -82,6 +98,14 @@ const UserFormRegister = () => {
                 {...register("email")}
                 type="email"
                 placeholder={t("auth.emailPlaceholder")}
+                required
+              />
+            </Field>
+            <Field label={t("auth.organizationName")}>
+              <Input
+                {...register("organizationName")}
+                type="text"
+                placeholder={t("auth.organizationNamePlaceholder")}
                 required
               />
             </Field>

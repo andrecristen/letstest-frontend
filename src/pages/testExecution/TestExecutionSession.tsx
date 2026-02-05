@@ -9,6 +9,7 @@ import notifyProvider from "../../infra/notifyProvider";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import tokenProvider from "../../infra/tokenProvider";
 import { Badge, Button, Card } from "../../ui";
+import { formatDuration } from "../../ui/utils";
 import { FiCheckSquare, FiPause, FiPlay } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
@@ -105,12 +106,6 @@ const TestExecutionSession: React.FC = () => {
         const diff = Math.floor((end.getTime() - assignment.startedAt.getTime()) / 1000) - totalPaused;
         return Math.max(0, diff);
     }, [assignment, now]);
-
-    const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    };
 
     const handleStart = async () => {
         try {
@@ -226,7 +221,7 @@ const TestExecutionSession: React.FC = () => {
                                     {statusLabel}
                                 </Badge>
                                 <div className="text-sm font-semibold text-ink">
-                                    {t("testExecution.elapsedLabel", { time: formatTime(elapsedSeconds) })}
+                                    {t("testExecution.elapsedLabel", { time: formatDuration(elapsedSeconds) })}
                                 </div>
                             </div>
                         </div>

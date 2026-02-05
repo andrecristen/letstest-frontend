@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import PainelContainer from "../../components/PainelContainer";
-import TitleContainer from "../../components/TitleContainer";
-import LoadingOverlay from "../../components/LoadingOverlay";
+import ListLayout from "../../components/ListLayout";
 import { Button, Card } from "../../ui";
 import {
   getNotifications,
@@ -10,6 +8,7 @@ import {
   markNotificationRead,
   NotificationItem,
 } from "../../services/notificationService";
+import { usePageLoading } from "../../hooks/usePageLoading";
 
 const NotificationList: React.FC = () => {
   const { t } = useTranslation();
@@ -39,83 +38,81 @@ const NotificationList: React.FC = () => {
     return notifications;
   }, [notifications, filter]);
 
-  return (
-    <PainelContainer>
-      <div className="space-y-6">
-        <TitleContainer title={t("notifications.listTitle")} />
-        <LoadingOverlay show={loading} />
+  usePageLoading(loading);
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex gap-2">
-            <Button
-              variant={filter === "all" ? "primary" : "outline"}
-              onClick={() => setFilter("all")}
-            >
-              {t("notifications.filterAll")}
-            </Button>
-            <Button
-              variant={filter === "unread" ? "primary" : "outline"}
-              onClick={() => setFilter("unread")}
-            >
-              {t("notifications.filterUnread")}
-            </Button>
-          </div>
+  return (
+    <ListLayout
+      title={t("notifications.listTitle")}
+      extraActions={(
+        <div className="flex gap-2">
           <Button
-            variant="outline"
-            onClick={async () => {
-              await markAllRead();
-              setNotifications((prev) =>
-                prev.map((item) => ({ ...item, readAt: new Date().toISOString() }))
-              );
-            }}
+            variant={filter === "all" ? "primary" : "outline"}
+            onClick={() => setFilter("all")}
           >
-            {t("nav.markAllRead")}
+            {t("notifications.filterAll")}
+          </Button>
+          <Button
+            variant={filter === "unread" ? "primary" : "outline"}
+            onClick={() => setFilter("unread")}
+          >
+            {t("notifications.filterUnread")}
           </Button>
         </div>
-
-        {filteredNotifications.length === 0 ? (
-          <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-            {t("notifications.emptyList")}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredNotifications.map((item) => (
-              <Card
-                key={item.id}
-                className={`space-y-2 ${item.readAt ? "bg-paper/60" : "bg-ocean/5"}`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-ink">{item.notification.title}</span>
-                  <span className="text-xs text-ink/50">
-                    {new Date(item.notification.createdAt).toLocaleString()}
-                  </span>
-                </div>
-                <p className="text-sm text-ink/70">{item.notification.message}</p>
-                {!item.readAt && (
-                  <div className="flex justify-end">
-                    <Button
-                      variant="outline"
-                      onClick={async () => {
-                        await markNotificationRead(item.notificationId);
-                        setNotifications((prev) =>
-                          prev.map((notification) =>
-                            notification.id === item.id
-                              ? { ...notification, readAt: new Date().toISOString() }
-                              : notification
-                          )
-                        );
-                      }}
-                    >
-                      {t("notifications.markRead")}
-                    </Button>
-                  </div>
-                )}
-              </Card>
-            ))}
-          </div>
-        )}
+      )}
+      actions={(
+        <Button
+          variant="outline"
+          onClick={async () => {
+            await markAllRead();
+            setNotifications((prev) =>
+              prev.map((item) => ({ ...item, readAt: new Date().toISOString() }))
+            );
+          }}
+        >
+          {t("nav.markAllRead")}
+        </Button>
+      )}
+      loading={loading}
+      loadingMessage={t("common.loading")}
+      empty={filteredNotifications.length === 0}
+      emptyMessage={t("notifications.emptyList")}
+    >
+      <div className="space-y-3">
+        {filteredNotifications.map((item) => (
+          <Card
+            key={item.id}
+            className={`space-y-2 ${item.readAt ? "bg-paper/60" : "bg-ocean/5"}`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-semibold text-ink">{item.notification.title}</span>
+              <span className="text-xs text-ink/50">
+                {new Date(item.notification.createdAt).toLocaleString()}
+              </span>
+            </div>
+            <p className="text-sm text-ink/70">{item.notification.message}</p>
+            {!item.readAt && (
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    await markNotificationRead(item.notificationId);
+                    setNotifications((prev) =>
+                      prev.map((notification) =>
+                        notification.id === item.id
+                          ? { ...notification, readAt: new Date().toISOString() }
+                          : notification
+                      )
+                    );
+                  }}
+                >
+                  {t("notifications.markRead")}
+                </Button>
+              </div>
+            )}
+          </Card>
+        ))}
       </div>
-    </PainelContainer>
+    </ListLayout>
   );
 };
 

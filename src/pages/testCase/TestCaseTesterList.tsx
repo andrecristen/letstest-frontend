@@ -1,19 +1,18 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TestCaseItem from "./TestCaseItem";
-import PainelContainer from "../../components/PainelContainer";
-import TitleContainer from "../../components/TitleContainer";
+import ListLayout from "../../components/ListLayout";
 import { TestCaseData } from "../../models/TestCaseData";
-import { getMyByProjects } from "../../services/testCaseService";
+import { getMyByProjects, pauseAssignment } from "../../services/testCaseService";
 import notifyProvider from "../../infra/notifyProvider";
 import { Button, Field, Input, Select } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { useInfiniteList } from "../../hooks/useInfiniteList";
-import LoadingOverlay from "../../components/LoadingOverlay";
-import { FiFilter, FiList, FiPlayCircle, FiXCircle } from "react-icons/fi";
+import { FiList, FiPlayCircle, FiPauseCircle, FiCheckSquare } from "react-icons/fi";
 import { getAllTestScenariosByProjects } from "../../services/testScenario";
 import { TestScenarioData } from "../../models/TestScenarioData";
 import tokenProvider from "../../infra/tokenProvider";
+import { usePageLoading } from "../../hooks/usePageLoading";
 
 const TestCaseProjectTesterList: React.FC = () => {
 
@@ -38,7 +37,8 @@ const TestCaseProjectTesterList: React.FC = () => {
     });
     const {
         items: testCases,
-        loading: loadingTestCases,
+        setItems: setTestCases,
+        loadingInitial,
         loadingMore,
         hasNext,
         sentinelRef,
@@ -101,17 +101,84 @@ const TestCaseProjectTesterList: React.FC = () => {
         return { label: t("testCase.statusIdle"), variant: "neutral" as const };
     }, [t]);
 
+    const handlePause = useCallback(
+        async (testCase: TestCaseData) => {
+            if (!testCase.id) return;
+            const confirmed = await notifyProvider.confirm(t("testCase.pauseTestConfirm"), {
+                title: t("testCase.pauseTestButton"),
+                confirmLabel: t("testCase.pauseTestButton"),
+                cancelLabel: t("common.cancel"),
+            });
+            if (!confirmed) return;
+            try {
+                const response = await pauseAssignment(testCase.id);
+                if (response?.status === 200) {
+                    const userId = tokenProvider.getSessionUserId();
+                    setTestCases((prev) =>
+                        prev.map((item) => {
+                            if (item.id !== testCase.id) return item;
+                            const assignments = item.assignments?.map((assignment) =>
+                                assignment.userId === userId
+                                    ? { ...assignment, lastPausedAt: new Date().toISOString() }
+                                    : assignment
+                            );
+                            return { ...item, assignments };
+                        })
+                    );
+                    notifyProvider.success(t("testCase.pauseTestSuccess"));
+                } else {
+                    notifyProvider.error(t("testCase.pauseTestError"));
+                }
+            } catch {
+                notifyProvider.error(t("testCase.pauseTestError"));
+            }
+        },
+        [setTestCases, t]
+    );
+
     const renderExecutionAction = useCallback(
         (testCase: TestCaseData, compact?: boolean) => {
             const status = getExecutionStatus(testCase);
             if (status === "finished") {
                 return null;
             }
+            if (status === "running") {
+                return (
+                    <>
+                        <Button
+                            onClick={() => handlePause(testCase)}
+                            variant="danger"
+                            size="sm"
+                            iconOnly={compact}
+                            className={compact ? "h-10 w-10" : undefined}
+                            leadingIcon={<FiPauseCircle />}
+                            title={compact ? t("testCase.pauseTestButton") : undefined}
+                            aria-label={compact ? t("testCase.pauseTestButton") : undefined}
+                        >
+                            {compact ? <span className="sr-only">{t("testCase.pauseTestButton")}</span> : t("testCase.pauseTestButton")}
+                        </Button>
+                        <Button
+                            onClick={() => navigate(`/test-executions/test/${projectId}/${testCase.id}`)}
+                            variant="primary"
+                            size="sm"
+                            iconOnly={compact}
+                            className={compact ? "h-10 w-10" : undefined}
+                            leadingIcon={<FiCheckSquare />}
+                            title={compact ? t("testCase.reportTestButton") : undefined}
+                            aria-label={compact ? t("testCase.reportTestButton") : undefined}
+                        >
+                            {compact ? <span className="sr-only">{t("testCase.reportTestButton")}</span> : t("testCase.reportTestButton")}
+                        </Button>
+                    </>
+                );
+            }
             return (
                 <Button
                     onClick={() => navigate(`/test-executions/session/${projectId}/${testCase.id}`)}
                     variant="accent"
                     size="sm"
+                    iconOnly={compact}
+                    className={compact ? "h-10 w-10" : undefined}
                     leadingIcon={<FiPlayCircle />}
                     title={compact ? t("testCase.openExecutionButton") : undefined}
                     aria-label={compact ? t("testCase.openExecutionButton") : undefined}
@@ -120,7 +187,7 @@ const TestCaseProjectTesterList: React.FC = () => {
                 </Button>
             );
         },
-        [getExecutionStatus, navigate, projectId, t]
+        [getExecutionStatus, handlePause, navigate, projectId, t]
     );
 
     const applyFilters = () => {
@@ -156,13 +223,13 @@ const TestCaseProjectTesterList: React.FC = () => {
         localStorage.setItem("testCaseTesterViewMode", viewMode);
     }, [viewMode]);
 
-    return (
-        <PainelContainer>
-            <LoadingOverlay show={loadingMore} />
-            <div className="space-y-6">
-                <TitleContainer title={t("testCase.listTitle")} />
+    usePageLoading(loadingInitial);
 
-                <div className="flex flex-wrap items-center justify-end gap-2">
+    return (
+        <ListLayout
+            title={t("testCase.listTitle")}
+            extraActions={(
+                <div className="flex flex-wrap items-center gap-2">
                     <Button
                         type="button"
                         variant={viewMode === "list" ? "primary" : "outline"}
@@ -179,122 +246,112 @@ const TestCaseProjectTesterList: React.FC = () => {
                         {t("testCase.viewKanban")}
                     </Button>
                 </div>
-
-                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
-                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-                        <Field label={t("testCase.searchLabel")}>
-                            <Input
-                                type="text"
-                                placeholder={t("testCase.searchPlaceholder")}
-                                value={filterDraft}
-                                onChange={(e) => setFilterDraft(e.target.value)}
-                            />
-                        </Field>
-                        <Field label={t("common.testScenarioLabel")}>
-                            <Select
-                                value={scenarioDraft ?? ""}
-                                onChange={(event) => {
-                                    const value = event.target.value ? parseInt(event.target.value, 10) : null;
-                                    setScenarioDraft(value);
-                                }}
-                            >
-                                <option value="">{t("common.all")}</option>
-                                {testScenarios.map((scenario) => (
-                                    <option key={scenario.id} value={scenario.id}>
-                                        {scenario.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                        <Field label={t("testCase.statusFilterLabel")}>
-                            <Select
-                                value={statusDraft}
-                                onChange={(event) => setStatusDraft(event.target.value)}
-                            >
-                                <option value="all">{t("common.all")}</option>
-                                <option value="idle">{t("testCase.statusIdle")}</option>
-                                <option value="running">{t("testCase.statusRunning")}</option>
-                                <option value="paused">{t("testCase.statusPaused")}</option>
-                                <option value="finished">{t("testCase.statusFinished")}</option>
-                            </Select>
-                        </Field>
-                    </div>
-                    <div className="flex w-full justify-end gap-2 pt-2">
-                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-                            {t("common.confirm")}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-                            {t("common.clearFilters")}
-                        </Button>
-                    </div>
+            )}
+            filters={(
+                <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                    <Field label={t("testCase.searchLabel")}>
+                        <Input
+                            type="text"
+                            placeholder={t("testCase.searchPlaceholder")}
+                            value={filterDraft}
+                            onChange={(e) => setFilterDraft(e.target.value)}
+                        />
+                    </Field>
+                    <Field label={t("common.testScenarioLabel")}>
+                        <Select
+                            value={scenarioDraft ?? ""}
+                            onChange={(event) => {
+                                const value = event.target.value ? parseInt(event.target.value, 10) : null;
+                                setScenarioDraft(value);
+                            }}
+                        >
+                            <option value="">{t("common.all")}</option>
+                            {testScenarios.map((scenario) => (
+                                <option key={scenario.id} value={scenario.id}>
+                                    {scenario.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
+                    <Field label={t("testCase.statusFilterLabel")}>
+                        <Select
+                            value={statusDraft}
+                            onChange={(event) => setStatusDraft(event.target.value)}
+                        >
+                            <option value="all">{t("common.all")}</option>
+                            <option value="idle">{t("testCase.statusIdle")}</option>
+                            <option value="running">{t("testCase.statusRunning")}</option>
+                            <option value="paused">{t("testCase.statusPaused")}</option>
+                            <option value="finished">{t("testCase.statusFinished")}</option>
+                        </Select>
+                    </Field>
                 </div>
-
-                {loadingTestCases ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("testCase.loadingList")}
-                    </div>
-                ) : filteredTestCases.length === 0 ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("testCase.emptyList")}
-                    </div>
-                ) : viewMode === "list" ? (
-                    <div className="space-y-4">
-                        {filteredTestCases.map((testCase) => {
-                            const status = getExecutionStatus(testCase);
-                            return (
-                                <TestCaseItem
-                                    key={testCase.id}
-                                    testCase={testCase}
-                                    onView={() => navigate(`/test-case/${testCase.id}/view`)}
-                                    onTestExecutions={() => navigate(`/test-executions/${testCase.id}/my`)}
-                                    statusBadge={getStatusBadge(status)}
-                                    customActions={renderExecutionAction(testCase, false)}
-                                />
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <div className="grid gap-4 lg:grid-cols-4">
-                        {["idle", "running", "paused", "finished"].map((statusKey) => {
-                            const columnItems = filteredTestCases.filter(
-                                (item) => getExecutionStatus(item) === statusKey
-                            );
-                            return (
-                                <div key={statusKey} className="flex flex-col gap-3 rounded-2xl border border-ink/10 bg-paper/70 p-4">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs uppercase tracking-[0.2em] text-ink/40">
-                                            {getStatusBadge(statusKey).label}
-                                        </span>
-                                        <span className="text-xs text-ink/50">{columnItems.length}</span>
-                                    </div>
-                                    <div className="space-y-3">
-                                        {columnItems.map((testCase) => (
-                                            <TestCaseItem
-                                                key={testCase.id}
-                                                testCase={testCase}
-                                                onView={() => navigate(`/test-case/${testCase.id}/view`)}
-                                                onTestExecutions={() => navigate(`/test-executions/${testCase.id}/my`)}
-                                                statusBadge={getStatusBadge(statusKey)}
-                                                actionsPosition="footer"
-                                                layout="stacked"
-                                                compactActions
-                                                customActions={renderExecutionAction(testCase, true)}
-                                            />
-                                        ))}
-                                        {columnItems.length === 0 ? (
-                                            <div className="rounded-xl border border-dashed border-ink/10 p-4 text-center text-xs text-ink/40">
-                                                {t("testCase.emptyStatusColumn")}
-                                            </div>
-                                        ) : null}
-                                    </div>
+            )}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearFilters}
+            loading={loadingInitial}
+            loadingMessage={t("testCase.loadingList")}
+            loadingMore={loadingMore}
+            empty={filteredTestCases.length === 0}
+            emptyMessage={t("testCase.emptyList")}
+            footer={<>{hasNext ? <div ref={sentinelRef} /> : null}</>}
+        >
+            {viewMode === "list" ? (
+                <div className="space-y-4">
+                    {filteredTestCases.map((testCase) => {
+                        const status = getExecutionStatus(testCase);
+                        return (
+                            <TestCaseItem
+                                key={testCase.id}
+                                testCase={testCase}
+                                onView={() => navigate(`/test-case/${testCase.id}/view`)}
+                                onTestExecutions={() => navigate(`/test-executions/${testCase.id}/my`)}
+                                statusBadge={getStatusBadge(status)}
+                                customActions={renderExecutionAction(testCase, false)}
+                            />
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="grid gap-4 lg:grid-cols-4">
+                    {["idle", "running", "paused", "finished"].map((statusKey) => {
+                        const columnItems = filteredTestCases.filter(
+                            (item) => getExecutionStatus(item) === statusKey
+                        );
+                        return (
+                            <div key={statusKey} className="flex flex-col gap-3 rounded-2xl border border-ink/10 bg-paper/70 p-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                        {getStatusBadge(statusKey).label}
+                                    </span>
+                                    <span className="text-xs text-ink/50">{columnItems.length}</span>
                                 </div>
-                            );
-                        })}
-                    </div>
-                )}
-                {hasNext ? <div ref={sentinelRef} /> : null}
-            </div>
-        </PainelContainer>
+                                <div className="space-y-3">
+                                    {columnItems.map((testCase) => (
+                                        <TestCaseItem
+                                            key={testCase.id}
+                                            testCase={testCase}
+                                            onView={() => navigate(`/test-case/${testCase.id}/view`)}
+                                            onTestExecutions={() => navigate(`/test-executions/${testCase.id}/my`)}
+                                            statusBadge={getStatusBadge(statusKey)}
+                                            actionsPosition="footer"
+                                            layout="stacked"
+                                            compactActions
+                                            customActions={renderExecutionAction(testCase, true)}
+                                        />
+                                    ))}
+                                    {columnItems.length === 0 ? (
+                                        <div className="rounded-xl border border-dashed border-ink/10 p-4 text-center text-xs text-ink/40">
+                                            {t("testCase.emptyStatusColumn")}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </ListLayout>
     );
 };
 

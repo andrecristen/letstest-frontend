@@ -1,16 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import PainelContainer from "../../components/PainelContainer";
-import TitleContainer from "../../components/TitleContainer";
+import ListLayout from "../../components/ListLayout";
 import { getReportsByTestExecution } from "../../services/reportService";
 import ReportItem from "./ReportItem";
 import { ReportData } from "../../models/ReportData";
 import { FiStar } from "react-icons/fi";
-import { Button, Card, Field, Input } from "../../ui";
+import { Card, Field, Input } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { useInfiniteList } from "../../hooks/useInfiniteList";
-import LoadingOverlay from "../../components/LoadingOverlay";
-import { FiFilter, FiXCircle } from "react-icons/fi";
+import { usePageLoading } from "../../hooks/usePageLoading";
 
 const ReportList: React.FC = () => {
 
@@ -26,6 +24,7 @@ const ReportList: React.FC = () => {
     const {
         items: reports,
         loading: loadingReports,
+        loadingInitial,
         loadingMore,
         hasNext,
         sentinelRef,
@@ -64,33 +63,12 @@ const ReportList: React.FC = () => {
         setSearchTerm("");
     };
 
+    usePageLoading(loadingInitial);
+
     return (
-        <PainelContainer>
-            <LoadingOverlay show={loadingMore} />
-            <div className="space-y-6">
-                <TitleContainer title={t("reports.listTitle", { id: getTestExecutionId() })} />
-
-                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
-                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-                        <Field label={t("reports.searchLabel")}>
-                            <Input
-                                type="text"
-                                placeholder={t("reports.searchPlaceholder")}
-                                value={filterDraft}
-                                onChange={(e) => setFilterDraft(e.target.value)}
-                            />
-                        </Field>
-                    </div>
-                    <div className="flex w-full justify-end gap-2 pt-2">
-                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-                            {t("common.confirm")}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-                            {t("common.clearFilters")}
-                        </Button>
-                    </div>
-                </div>
-
+        <ListLayout
+            title={t("reports.listTitle", { id: getTestExecutionId() })}
+            extraActions={(
                 <Card className="flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
                         <FiStar size={28} />
@@ -102,28 +80,37 @@ const ReportList: React.FC = () => {
                         </p>
                     </div>
                 </Card>
-
-                {loadingReports ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("reports.loadingList")}
-                    </div>
-                ) : filteredReports.length === 0 ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("reports.emptyList")}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                        {filteredReports.map((report) => (
-                            <ReportItem
-                                key={report.id}
-                                report={report}
-                            />
-                        ))}
-                    </div>
-                )}
-                {hasNext ? <div ref={sentinelRef} /> : null}
+            )}
+            filters={(
+                <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                    <Field label={t("reports.searchLabel")}>
+                        <Input
+                            type="text"
+                            placeholder={t("reports.searchPlaceholder")}
+                            value={filterDraft}
+                            onChange={(e) => setFilterDraft(e.target.value)}
+                        />
+                    </Field>
+                </div>
+            )}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearFilters}
+            loading={loadingInitial}
+            loadingMessage={t("reports.loadingList")}
+            loadingMore={loadingMore}
+            empty={filteredReports.length === 0}
+            emptyMessage={t("reports.emptyList")}
+            footer={<>{hasNext ? <div ref={sentinelRef} /> : null}</>}
+        >
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {filteredReports.map((report) => (
+                    <ReportItem
+                        key={report.id}
+                        report={report}
+                    />
+                ))}
             </div>
-        </PainelContainer>
+        </ListLayout>
     );
 };
 

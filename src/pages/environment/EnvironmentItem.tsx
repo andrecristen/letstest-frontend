@@ -17,15 +17,20 @@ const EnvironmentItem: React.FC<EnvironmentItemProps> = ({ environment, onEdit }
                 <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
                     <FiFileText className="h-5 w-5" />
                 </span>
-                <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
-                        #{environment.id}
-                    </p>
+                <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-ink/40">
+                        <span>#{environment.id}</span>
+                        <span className="h-1 w-1 rounded-full bg-ink/20" />
+                        <Badge variant={environment.situation === 1 ? "success" : "danger"}>
+                            {getEnvironmentSituationDescription(environment.situation)}
+                        </Badge>
+                    </div>
                     <p className="font-display text-lg text-ink">{environment.name}</p>
-                    <Badge variant={environment.situation === 1 ? "success" : "danger"}>
-                        {getEnvironmentSituationDescription(environment.situation)}
-                    </Badge>
-                    <p className="text-sm text-ink/60">{environment.description}</p>
+                    {environment.description ? (
+                        <p className="text-sm text-ink/60">{environment.description}</p>
+                    ) : (
+                        <p className="text-sm text-ink/40">{t("common.noComment")}</p>
+                    )}
                 </div>
             </div>
 

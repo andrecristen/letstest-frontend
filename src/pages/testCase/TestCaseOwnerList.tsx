@@ -1,19 +1,18 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TestCaseItem from "./TestCaseItem";
-import PainelContainer from "../../components/PainelContainer";
-import TitleContainer from "../../components/TitleContainer";
+import ListLayout from "../../components/ListLayout";
 import { TestCaseData } from "../../models/TestCaseData";
 import { getAllByProjects } from "../../services/testCaseService";
 import notifyProvider from "../../infra/notifyProvider";
 import { Button, Field, Input, Select } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { useInfiniteList } from "../../hooks/useInfiniteList";
-import LoadingOverlay from "../../components/LoadingOverlay";
-import { FiFilter, FiPlus, FiXCircle } from "react-icons/fi";
+import { FiList, FiPlus } from "react-icons/fi";
 import { getAllTestScenariosByProjects } from "../../services/testScenario";
 import { TestScenarioData } from "../../models/TestScenarioData";
 import AssignTestersModal from "./AssignTestersModal";
+import { usePageLoading } from "../../hooks/usePageLoading";
 
 const TestCaseProjectOwnerList: React.FC = () => {
 
@@ -32,9 +31,16 @@ const TestCaseProjectOwnerList: React.FC = () => {
     const [scenarioDraft, setScenarioDraft] = useState<number | null>(scenarioFilter);
     const [assignOpen, setAssignOpen] = useState(false);
     const [assignTestCase, setAssignTestCase] = useState<TestCaseData | null>(null);
+    const [testerFilter, setTesterFilter] = useState<number | null>(null);
+    const [testerDraft, setTesterDraft] = useState<number | null>(null);
+    const [viewMode, setViewMode] = useState<"list" | "kanban">(() => {
+        const stored = localStorage.getItem("testCaseOwnerViewMode");
+        return stored === "kanban" ? "kanban" : "list";
+    });
     const {
         items: testCases,
         loading: loadingTestCases,
+        loadingInitial,
         loadingMore,
         hasNext,
         sentinelRef,
@@ -55,15 +61,34 @@ const TestCaseProjectOwnerList: React.FC = () => {
         { enabled: Boolean(projectId) }
     );
 
+    const availableTesters = useMemo(() => {
+        const map = new Map<number, { id: number; name: string }>();
+        testCases.forEach((testCase) => {
+            testCase.assignments?.forEach((assignment) => {
+                if (assignment.user?.id && assignment.user?.name) {
+                    map.set(assignment.user.id, { id: assignment.user.id, name: assignment.user.name });
+                }
+            });
+        });
+        return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    }, [testCases]);
+
     const filteredTestCases = useMemo(() => {
-        return testCases.filter((testCase) =>
-            testCase.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [testCases, searchTerm]);
+        return testCases.filter((testCase) => {
+            if (!testCase.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+                return false;
+            }
+            if (testerFilter) {
+                return Boolean(testCase.assignments?.some((assignment) => assignment.userId === testerFilter));
+            }
+            return true;
+        });
+    }, [testCases, searchTerm, testerFilter]);
 
     const applyFilters = () => {
         setSearchTerm(filterDraft);
         setScenarioFilter(scenarioDraft);
+        setTesterFilter(testerDraft);
     };
 
     const clearFilters = () => {
@@ -71,7 +96,34 @@ const TestCaseProjectOwnerList: React.FC = () => {
         setSearchTerm("");
         setScenarioFilter(null);
         setScenarioDraft(null);
+        setTesterFilter(null);
+        setTesterDraft(null);
     };
+
+    const getAssignmentStatus = (testCase: TestCaseData) => {
+        const assignments = testCase.assignments ?? [];
+        if (testerFilter) {
+            const assignment = assignments.find((item) => item.userId === testerFilter);
+            if (!assignment) return "unassigned";
+            if (assignment.finishedAt) return "done";
+            if (assignment.lastPausedAt) return "paused";
+            if (assignment.startedAt) return "in_progress";
+            return "not_started";
+        }
+        if (assignments.length === 0) return "unassigned";
+        if (assignments.some((item) => item.finishedAt)) return "done";
+        if (assignments.some((item) => item.lastPausedAt)) return "paused";
+        if (assignments.some((item) => item.startedAt)) return "in_progress";
+        return "not_started";
+    };
+
+    const columns = [
+        { key: "unassigned", label: t("testCase.kanbanUnassigned"), variant: "neutral" },
+        { key: "not_started", label: t("testCase.kanbanNotStarted"), variant: "info" },
+        { key: "in_progress", label: t("testCase.kanbanInProgress"), variant: "accent" },
+        { key: "paused", label: t("testCase.kanbanPaused"), variant: "danger" },
+        { key: "done", label: t("testCase.kanbanDone"), variant: "success" },
+    ] as const;
 
     const loadTestScenarios = useCallback(async () => {
         if (!projectId) return;
@@ -87,13 +139,16 @@ const TestCaseProjectOwnerList: React.FC = () => {
         loadTestScenarios();
     }, [loadTestScenarios]);
 
-    return (
-        <PainelContainer>
-            <LoadingOverlay show={loadingMore} />
-            <div className="space-y-6">
-            <TitleContainer title={t("testCase.listTitle")} />
+    React.useEffect(() => {
+        localStorage.setItem("testCaseOwnerViewMode", viewMode);
+    }, [viewMode]);
 
-            <div className="flex flex-wrap items-end justify-end gap-4">
+    usePageLoading(loadingInitial);
+
+    return (
+        <ListLayout
+            title={t("testCase.listTitle")}
+            actions={(
                 <Button
                     type="button"
                     onClick={() => navigate(`/test-case/${projectId}/add`)}
@@ -101,9 +156,27 @@ const TestCaseProjectOwnerList: React.FC = () => {
                 >
                     {t("testCase.createNew")}
                 </Button>
-            </div>
-
-            <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
+            )}
+            extraActions={(
+                <>
+                    <Button
+                        type="button"
+                        variant={viewMode === "list" ? "primary" : "outline"}
+                        onClick={() => setViewMode("list")}
+                        leadingIcon={<FiList />}
+                    >
+                        {t("testCase.viewList")}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant={viewMode === "kanban" ? "primary" : "outline"}
+                        onClick={() => setViewMode("kanban")}
+                    >
+                        {t("testCase.viewKanban")}
+                    </Button>
+                </>
+            )}
+            filters={(
                 <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
                     <Field label={t("testCase.searchLabel")}>
                         <Input
@@ -129,65 +202,122 @@ const TestCaseProjectOwnerList: React.FC = () => {
                             ))}
                         </Select>
                     </Field>
+                    <Field label={t("testCase.testerFilterLabel")}>
+                        <Select
+                            value={testerDraft ?? ""}
+                            onChange={(event) => {
+                                const value = event.target.value ? parseInt(event.target.value, 10) : null;
+                                setTesterDraft(value);
+                            }}
+                        >
+                            <option value="">{t("common.all")}</option>
+                            {availableTesters.map((tester) => (
+                                <option key={tester.id} value={tester.id}>
+                                    {tester.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
                 </div>
-                <div className="flex w-full justify-end gap-2 pt-2">
-                    <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-                        {t("common.confirm")}
-                    </Button>
-                    <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-                        {t("common.clearFilters")}
-                    </Button>
-                </div>
-            </div>
-
-            {loadingTestCases ? (
-                <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                    {t("testCase.loadingList")}
-                </div>
-            ) : filteredTestCases.length === 0 ? (
-                <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                    {t("testCase.emptyList")}
-                </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredTestCases.map((testCase) => (
-                            <TestCaseItem
-                                key={testCase.id}
-                                testCase={testCase}
-                                onAssign={() => {
-                                    setAssignTestCase(testCase);
-                                    setAssignOpen(true);
-                                }}
-                                onViewAssignment={() => {
-                                    setAssignTestCase(testCase);
-                                    setAssignOpen(true);
-                                }}
-                                onEdit={() => navigate(`/test-case/${testCase.id}/edit`)}
-                                onView={() => navigate(`/test-case/${testCase.id}/view`)}
-                                onTestExecutions={() => navigate(`/test-executions/${testCase.id}`)}
-                            />
-                        ))}
-                    </div>
-                )}
+            )}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearFilters}
+        loading={loadingInitial}
+        loadingMessage={t("testCase.loadingList")}
+        loadingMore={loadingMore}
+        empty={filteredTestCases.length === 0}
+            emptyMessage={t("testCase.emptyList")}
+        footer={(
+            <>
                 {hasNext ? <div ref={sentinelRef} /> : null}
-            </div>
-            <AssignTestersModal
-                open={assignOpen}
-                projectId={parseInt(projectId || "0", 10)}
-                testCaseId={assignTestCase?.id ?? null}
-                initialSelected={assignTestCase?.assignments?.map((item) => item.userId) ?? []}
-                readOnly={Boolean(assignTestCase?.assignments && assignTestCase.assignments.length > 0)}
-                onClose={() => {
-                    setAssignOpen(false);
-                    setAssignTestCase(null);
-                }}
-                onAssigned={() => {
-                    setAssignOpen(false);
-                    setAssignTestCase(null);
-                    reload();
-                }}
-            />
-        </PainelContainer>
+                <AssignTestersModal
+                    open={assignOpen}
+                    projectId={parseInt(projectId || "0", 10)}
+                    testCaseId={assignTestCase?.id ?? null}
+                    initialSelected={assignTestCase?.assignments?.map((item) => item.userId) ?? []}
+                    readOnly={Boolean(assignTestCase?.assignments && assignTestCase.assignments.length > 0)}
+                    onClose={() => {
+                        setAssignOpen(false);
+                        setAssignTestCase(null);
+                    }}
+                    onAssigned={() => {
+                        setAssignOpen(false);
+                        setAssignTestCase(null);
+                        reload();
+                    }}
+                />
+            </>
+        )}
+    >
+            {viewMode === "list" ? (
+                <div className="space-y-4">
+                    {filteredTestCases.map((testCase) => (
+                        <TestCaseItem
+                            key={testCase.id}
+                            testCase={testCase}
+                            onAssign={() => {
+                                setAssignTestCase(testCase);
+                                setAssignOpen(true);
+                            }}
+                            onViewAssignment={() => {
+                                setAssignTestCase(testCase);
+                                setAssignOpen(true);
+                            }}
+                            onEdit={() => navigate(`/test-case/${testCase.id}/edit`)}
+                            onView={() => navigate(`/test-case/${testCase.id}/view`)}
+                            onTestExecutions={() => navigate(`/test-executions/${testCase.id}`)}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div className="grid gap-4 xl:grid-cols-5">
+                    {columns.map((column) => {
+                        const items = filteredTestCases.filter((testCase) => getAssignmentStatus(testCase) === column.key);
+                        return (
+                            <div
+                                key={column.key}
+                                className="flex min-h-[240px] flex-col gap-3 rounded-2xl border border-ink/10 bg-paper/70 p-3"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs uppercase tracking-[0.2em] text-ink/50">
+                                        {column.label}
+                                    </span>
+                                    <span className="text-xs text-ink/50">{items.length}</span>
+                                </div>
+                                <div className="space-y-3">
+                                    {items.map((testCase) => (
+                                        <TestCaseItem
+                                            key={testCase.id}
+                                            testCase={testCase}
+                                            layout="stacked"
+                                            actionsPosition="footer"
+                                            compactActions
+                                            statusBadge={{ label: column.label, variant: column.variant }}
+                                            onAssign={() => {
+                                                setAssignTestCase(testCase);
+                                                setAssignOpen(true);
+                                            }}
+                                            onViewAssignment={() => {
+                                                setAssignTestCase(testCase);
+                                                setAssignOpen(true);
+                                            }}
+                                            onEdit={() => navigate(`/test-case/${testCase.id}/edit`)}
+                                            onView={() => navigate(`/test-case/${testCase.id}/view`)}
+                                            onTestExecutions={() => navigate(`/test-executions/${testCase.id}`)}
+                                        />
+                                    ))}
+                                    {items.length === 0 ? (
+                                        <div className="rounded-xl border border-dashed border-ink/10 px-3 py-6 text-center text-xs text-ink/50">
+                                            {t("testCase.kanbanEmpty")}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </ListLayout>
     );
 };
 

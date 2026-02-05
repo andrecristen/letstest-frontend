@@ -46,26 +46,32 @@ const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
     };
 
     return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {devices.length > 0 ? (
-                    devices.map(device => (
-                        <Card
-                            key={device.id}
-                            className="flex items-center justify-between"
-                        >
-                            <div className="flex items-center gap-3">
-                                <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
-                                    {renderDeviceIcon(device.type)}
-                                </span>
-                                <div>
-                                    <p className="font-display text-lg text-ink">{device.model}</p>
-                                    <p className="text-sm text-ink/60">{t("common.typeLabel")}: {getDeviceTypeDescription(device.type)}</p>
-                                    <p className="text-sm text-ink/60">{t("common.brandLabel")}: {device.brand}</p>
-                                    <p className="text-sm text-ink/60">{t("common.systemLabel")}: {device.system}</p>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {devices.length > 0 ? (
+                devices.map(device => (
+                    <Card
+                        key={device.id}
+                        className="flex flex-col gap-4"
+                    >
+                        <div className="flex items-start gap-3">
+                            <span className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70">
+                                {renderDeviceIcon(device.type)}
+                            </span>
+                            <div className="space-y-2">
+                                <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-ink/40">
+                                    {device.id ? <span>#{device.id}</span> : null}
+                                    <span className="h-1 w-1 rounded-full bg-ink/20" />
+                                    <span>{getDeviceTypeDescription(device.type)}</span>
+                                </div>
+                                <p className="font-display text-lg text-ink">{device.model}</p>
+                                <div className="space-y-1 text-sm text-ink/60">
+                                    <p>{t("common.brandLabel")}: {device.brand}</p>
+                                    <p>{t("common.systemLabel")}: {device.system}</p>
                                 </div>
                             </div>
-                            {onDelete ? (
+                        </div>
+                        {onDelete ? (
+                            <div className="flex justify-end">
                                 <Button
                                     variant="danger"
                                     size="sm"
@@ -74,15 +80,15 @@ const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
                                 >
                                     {t("common.delete")}
                                 </Button>
-                            ) : null}
-                        </Card>
-                    ))
-                ) : (
-                    <div className="col-span-full rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("devices.empty")}
-                    </div>
-                )}
-            </div>
+                            </div>
+                        ) : null}
+                    </Card>
+                ))
+            ) : (
+                <div className="col-span-full rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+                    {t("devices.empty")}
+                </div>
+            )}
         </div>
     );
 };

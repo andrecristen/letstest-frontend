@@ -5,7 +5,6 @@ import {
   FiUser,
   FiGitPullRequest,
   FiPlay,
-  FiSearch,
   FiLogOut,
   FiMail,
   FiGlobe,
@@ -13,6 +12,9 @@ import {
   FiTool,
   FiVideo,
   FiCheckSquare,
+  FiUsers,
+  FiKey,
+  FiLink,
 } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -29,6 +31,9 @@ import {
   NotificationItem,
 } from "../services/notificationService";
 import type { Socket } from "socket.io-client";
+import OrganizationSelector from "./OrganizationSelector";
+import { useOrganization } from "../contexts/OrganizationContext";
+import { useConfig } from "../contexts/ConfigContext";
 
 interface Menu {
   name: string;
@@ -44,6 +49,9 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, i18n } = useTranslation();
+  const { clearContext } = useOrganization();
+  const { isSelfHosted, billingEnabled } = useConfig();
+  const { isOwner } = useOrganization();
 
   const [isMenuOpen, setIsMenuOpen] = useState(
     localStorage.getItem("isMenuOpen") === "true"
@@ -288,11 +296,16 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
   const menus: Menu[] = [
     { name: t("nav.dashboard"), route: "/dashboard", icon: <FiBarChart2 /> },
-    { name: t("nav.findProjects"), route: "/find-new-projects", icon: <FiSearch /> },
+    // { name: t("nav.findProjects"), route: "/find-new-projects", icon: <FiSearch /> },
     { name: t("nav.manageProjects"), route: "/my-owner-projects", icon: <FiGitPullRequest /> },
     { name: t("nav.testProjects"), route: "/my-test-projects", icon: <FiPlay /> },
-    { name: t("nav.invitations"), route: "/involvements/invitations", icon: <FiMail /> },
-    { name: t("nav.requests"), route: "/involvements/requests", icon: <FiMail /> },
+    { name: t("nav.myOrganizations"), route: "/my-organizations", icon: <FiUsers /> },
+    ...(billingEnabled && isOwner ? [{ name: t("nav.billing"), route: "/billing", icon: <FiBarChart2 /> }] : []),
+    ...(billingEnabled && isOwner ? [{ name: t("nav.apiKeys"), route: "/organization/api-keys", icon: <FiKey /> }] : []),
+    ...(billingEnabled && isOwner ? [{ name: t("nav.webhooks"), route: "/organization/webhooks", icon: <FiLink /> }] : []),
+    // { name: t("nav.invitations"), route: "/involvements/invitations", icon: <FiMail /> },
+    // { name: t("nav.requests"), route: "/involvements/requests", icon: <FiMail /> },
+    { name: t("nav.orgInvites"), route: "/my-invites", icon: <FiMail /> },
     { name: t("nav.myProfile"), route: "/profile", icon: <FiUser /> },
   ];
 
@@ -349,11 +362,19 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-paper/80 px-6 py-4 backdrop-blur">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="Logo" className="h-8" />
-            <div className="hidden sm:block">
-              <p className="font-display text-lg text-ink">{t("common.panel")}</p>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="Logo" className="h-8" />
+              <div className="hidden sm:block">
+                <p className="font-display text-lg text-ink">{t("common.panel")}</p>
+              </div>
             </div>
+            <OrganizationSelector />
+            {isSelfHosted && (
+              <span className="rounded-full bg-ocean/10 px-2 py-1 text-xs font-medium text-ocean">
+                {t("common.selfHosted")}
+              </span>
+            )}
           </div>
 
           <div className="relative flex items-center gap-4">
@@ -530,6 +551,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
               >
                 <button
                   onClick={() => {
+                    clearContext();
                     tokenProvider.removeSession();
                     notifyProvider.info(t("nav.logoutSuccess"));
                     navigate("/login");

@@ -8,10 +8,12 @@ import tokenProvider from "../../infra/tokenProvider";
 import { AuthData } from "../../models/AuthData";
 import logo from "../../assets/logo-transparente.png";
 import { Button, Card, Field, Input } from "../../ui";
+import { useOrganization } from "../../contexts/OrganizationContext";
 
 const UserFormLogin = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { reloadFromSession } = useOrganization();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +26,17 @@ const UserFormLogin = () => {
       const data: AuthData = { email, password };
       const response = await auth(data);
       if (response?.status === 200) {
-        tokenProvider.setSession(response.data.token, response.data.userId);
+        const { token, userId, organizations } = response.data;
+        const defaultOrg = organizations?.[0];
+        tokenProvider.setSession(
+          token,
+          userId,
+          defaultOrg?.id,
+          defaultOrg?.slug,
+          defaultOrg?.role,
+          organizations
+        );
+        reloadFromSession();
         notifyProvider.success(t("auth.loginSuccess"));
         navigate("/dashboard");
         return;

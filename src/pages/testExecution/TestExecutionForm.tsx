@@ -18,6 +18,7 @@ import { DeviceData } from '../../models/DeviceData';
 import { getDevicesByUserId } from "../../services/deviceService";
 import tokenProvider from "../../infra/tokenProvider";
 import { useTranslation } from 'react-i18next';
+import { formatDuration } from '../../ui/utils';
 
 const TestExecutionForm = () => {
 
@@ -34,6 +35,8 @@ const TestExecutionForm = () => {
     const [loadingTestCase, setLoadingTestCase] = useState(false);
     const [loadingDevices, setLoadingDevices] = useState(false);
     const [timerTime, setTimerTime] = useState<number>(0);
+    const [executionTimeText, setExecutionTimeText] = useState<string>("0");
+    const [executionTimeError, setExecutionTimeError] = useState<string | null>(null);
     const lastLoadedTestCaseIdRef = useRef<number | null>(null);
     const navigate = useNavigate();
 
@@ -82,6 +85,10 @@ const TestExecutionForm = () => {
                     : new Date();
             const elapsedSeconds = Math.max(0, Math.floor((end.getTime() - startedAt.getTime()) / 1000) - totalPausedSeconds);
             setTimerTime(elapsedSeconds);
+            const totalMinutes = Math.max(0, Math.round(elapsedSeconds / 60));
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            setExecutionTimeText(hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}` : `${minutes}`);
         }
         setLoadingTestCase(false);
     }, [getTestCaseId, setValue]);
@@ -141,10 +148,32 @@ const TestExecutionForm = () => {
         navigate("/devices");
     }
 
-    const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const parseExecutionTime = (value: string) => {
+        const trimmed = value.trim();
+        if (!trimmed) return { seconds: 0, error: null };
+        if (trimmed.includes(":")) {
+            const [hoursRaw, minutesRaw] = trimmed.split(":");
+            const hours = Number(hoursRaw);
+            const minutes = Number(minutesRaw);
+            if (!Number.isFinite(hours) || !Number.isFinite(minutes) || minutes < 0 || minutes > 59 || hours < 0) {
+                return { seconds: 0, error: t("testExecution.executionTimeInvalid") };
+            }
+            return { seconds: (hours * 60 + minutes) * 60, error: null };
+        }
+        const minutes = Number(trimmed);
+        if (!Number.isFinite(minutes) || minutes < 0) {
+            return { seconds: 0, error: t("testExecution.executionTimeInvalid") };
+        }
+        return { seconds: minutes * 60, error: null };
+    };
+
+    const handleExecutionTimeChange = (value: string) => {
+        setExecutionTimeText(value);
+        const parsed = parseExecutionTime(value);
+        setExecutionTimeError(parsed.error);
+        if (!parsed.error) {
+            setTimerTime(parsed.seconds);
+        }
     };
 
     return (
@@ -213,20 +242,22 @@ const TestExecutionForm = () => {
                                 <div className="flex flex-wrap items-center gap-3">
                                     <input
                                         id="testTime"
-                                        type="number"
-                                        min={0}
-                                        step={1}
-                                        value={Math.ceil(timerTime / 60)}
-                                        onChange={(event) => {
-                                            const minutes = Number(event.target.value);
-                                            setTimerTime(Number.isFinite(minutes) ? minutes * 60 : 0);
-                                        }}
-                                        className="mt-1 block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={executionTimeText}
+                                        onChange={(event) => handleExecutionTimeChange(event.target.value)}
+                                        placeholder={t("testExecution.executionTimePlaceholder")}
+                                        className={`mt-1 block w-full px-3 py-2 border ${executionTimeError ? "border-red-500" : "border-gray-300"} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
                                     />
                                     <span className="text-sm text-gray-500">
-                                        {t("testExecution.executionTimeHint", { time: formatTime(timerTime) })}
+                                        {t("testExecution.executionTimeHint", { time: formatDuration(timerTime) })}
                                     </span>
                                 </div>
+                                {executionTimeError ? (
+                                    <p className="text-sm text-red-600">{executionTimeError}</p>
+                                ) : (
+                                    <p className="text-xs text-gray-500">{t("testExecution.executionTimeFormatHint")}</p>
+                                )}
                             </div>
                             <div>
                                 <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>

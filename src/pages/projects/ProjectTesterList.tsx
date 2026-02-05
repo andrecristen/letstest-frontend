@@ -2,15 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTestProjects } from '../../services/projectService';
 import { getProjectSituationDescription, getProjectVisibilityDescription } from '../../models/ProjectData';
-import PainelContainer from '../../components/PainelContainer';
-import TitleContainer from '../../components/TitleContainer';
+import ListLayout from '../../components/ListLayout';
 import { ProjectData } from '../../models/ProjectData';
 import notifyProvider from '../../infra/notifyProvider';
-import { Badge, Button, Card, Field, Input } from '../../ui';
+import { Badge, Card, Field, Input } from '../../ui';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteList } from '../../hooks/useInfiniteList';
-import LoadingOverlay from '../../components/LoadingOverlay';
-import { FiFilter, FiXCircle } from "react-icons/fi";
+import { usePageLoading } from '../../hooks/usePageLoading';
 
 const ProjectTesterList: React.FC = () => {
 
@@ -21,6 +19,7 @@ const ProjectTesterList: React.FC = () => {
     const {
         items: projects,
         loading: loadingProjects,
+        loadingInitial,
         loadingMore,
         hasNext,
         sentinelRef,
@@ -64,7 +63,7 @@ const ProjectTesterList: React.FC = () => {
     };
 
     const filteredProjects = useMemo(() => {
-        return projects.filter(
+        return (projects || []).filter(
             (project) => project.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [projects, searchTerm]);
@@ -78,78 +77,64 @@ const ProjectTesterList: React.FC = () => {
         setSearchTerm('');
     };
 
+    usePageLoading(loadingInitial);
+
     return (
-        <PainelContainer>
-            <LoadingOverlay show={loadingMore} />
-            <div className="space-y-6">
-            <TitleContainer title={t("projects.testerTitle")} textHelp={t("projects.testerHelp")} />
-
-                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
-                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-                        <Field label={t('projects.searchLabel')}>
-                            <Input
-                                type="text"
-                                placeholder={t('projects.searchPlaceholder')}
-                                value={filterDraft}
-                                onChange={(e) => setFilterDraft(e.target.value)}
-                            />
-                        </Field>
-                    </div>
-                    <div className="flex w-full justify-end gap-2 pt-2">
-                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-                            {t("common.confirm")}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-                            {t("common.clearFilters")}
-                        </Button>
-                    </div>
+        <ListLayout
+            title={t("projects.testerTitle")}
+            textHelp={t("projects.testerHelp")}
+            filters={(
+                <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                    <Field label={t('projects.searchLabel')}>
+                        <Input
+                            type="text"
+                            placeholder={t('projects.searchPlaceholder')}
+                            value={filterDraft}
+                            onChange={(e) => setFilterDraft(e.target.value)}
+                        />
+                    </Field>
                 </div>
-
-                {loadingProjects ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t('projects.loadingOwnerList')}
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredProjects.length > 0 ? (
-                            filteredProjects.map((project) => (
-                                <Card
-                                    key={project.id}
-                                    className="cursor-pointer transition-transform hover:-translate-y-1"
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyCard(event, project)}
-                                    onClick={(event: React.MouseEvent<HTMLDivElement>) => handleClickTestProject(event, project)}
-                                >
-                                    <div className="space-y-2">
-                                        <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
-                                            #{project.id}
-                                        </p>
-                                        <h3 className="font-display text-lg text-ink">
-                                            {project.name}
-                                        </h3>
-                                    </div>
-                                    <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-ink/60">
-                                        <Badge variant={getSituationVariant(project.situation)}>
-                                            {getProjectSituationDescription(project.situation)}
-                                        </Badge>
-                                        <span>{getProjectVisibilityDescription(project.visibility)}</span>
-                                    </div>
-                                    <p className="mt-4 text-sm text-ink/60">
-                                        {project.description}
-                                    </p>
-                                </Card>
-                            ))
-                        ) : (
-                            <div className="col-span-full rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                                {t('projects.emptyOwnerList')}
-                            </div>
-                        )}
-                    </div>
-                )}
-                {hasNext ? <div ref={sentinelRef} /> : null}
+            )}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearFilters}
+            loading={loadingInitial}
+            loadingMessage={t('projects.loadingOwnerList')}
+            loadingMore={loadingMore}
+            empty={filteredProjects.length === 0}
+            emptyMessage={t('projects.emptyOwnerList')}
+            footer={<>{hasNext ? <div ref={sentinelRef} /> : null}</>}
+        >
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {filteredProjects.map((project) => (
+                    <Card
+                        key={project.id}
+                        className="cursor-pointer transition-transform hover:-translate-y-1"
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyCard(event, project)}
+                        onClick={(event: React.MouseEvent<HTMLDivElement>) => handleClickTestProject(event, project)}
+                    >
+                        <div className="space-y-2">
+                            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                                #{project.id}
+                            </p>
+                            <h3 className="font-display text-lg text-ink">
+                                {project.name}
+                            </h3>
+                        </div>
+                        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-ink/60">
+                            <Badge variant={getSituationVariant(project.situation)}>
+                                {getProjectSituationDescription(project.situation)}
+                            </Badge>
+                            <span>{getProjectVisibilityDescription(project.visibility)}</span>
+                        </div>
+                        <p className="mt-4 text-sm text-ink/60">
+                            {project.description}
+                        </p>
+                    </Card>
+                ))}
             </div>
-        </PainelContainer>
+        </ListLayout>
     );
 }
 

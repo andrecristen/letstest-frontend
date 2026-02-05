@@ -34,6 +34,9 @@ const apiTokenProvider = {
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
+                if (err.response.status === 402) {
+                    window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
+                }
                 return err.response;
             }
             return null;
@@ -51,6 +54,9 @@ const apiTokenProvider = {
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
+                if (err.response.status === 402) {
+                    window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
+                }
                 return err.response;
             }
             return null;
@@ -63,6 +69,9 @@ const apiTokenProvider = {
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
+                if (err.response.status === 402) {
+                    window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
+                }
                 return err.response;
             }
             return null;
@@ -75,6 +84,9 @@ const apiTokenProvider = {
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
                 validateToken(err, useNavigate);
+                if (err.response.status === 402) {
+                    window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
+                }
                 return err.response;
             }
             return null;

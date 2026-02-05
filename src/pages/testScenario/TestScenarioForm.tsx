@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge } from '../../ui';
 import { getProjectById } from '../../services/projectService';
 import { ApprovalStatusEnum, getApprovalStatusLabel, getApprovalStatusVariant } from '../../models/ApprovalStatus';
+import { getMyProjectRole } from '../../services/involvementService';
 
 const TestScenarioForm = () => {
     const { t } = useTranslation();
@@ -30,6 +31,7 @@ const TestScenarioForm = () => {
     const [approvalEnabled, setApprovalEnabled] = useState(false);
     const [approvalStatus, setApprovalStatus] = useState<number | null>(null);
     const [hasExecutions, setHasExecutions] = useState(false);
+    const [permissionChecked, setPermissionChecked] = useState(false);
     const navigate = useNavigate();
 
     const updateTemplate = watch('templateId');
@@ -93,15 +95,34 @@ const TestScenarioForm = () => {
         }
     }, [getProjectId, getTestScenarioId, setValue]);
 
+    const checkPermission = useCallback(async (targetProjectId: number) => {
+        if (isViewMode) {
+            setPermissionChecked(true);
+            return true;
+        }
+        const role = await getMyProjectRole(targetProjectId);
+        if (!role?.canManageTests) {
+            notifyProvider.error(t("common.noPermission"));
+            navigate(-1);
+            return false;
+        }
+        setPermissionChecked(true);
+        return true;
+    }, [isViewMode, navigate, t]);
+
     const load = useCallback(async () => {
-        if (getProjectId()) {
+        let targetProjectId = getProjectId();
+        if (getTestScenarioId()) {
+            await getTestScenario();
+            targetProjectId = updatedProjectId || targetProjectId;
+        }
+        if (targetProjectId) {
+            const hasPermission = await checkPermission(targetProjectId);
+            if (!hasPermission) return;
             await getProject();
             await getTemplates();
         }
-        if (getTestScenarioId()) {
-            await getTestScenario();
-        }
-    }, [getProjectId, getProject, getTestScenarioId, getTemplates, getTestScenario]);
+    }, [getProjectId, getProject, getTestScenarioId, getTemplates, getTestScenario, checkPermission, updatedProjectId]);
 
     useEffect(() => {
         load();
@@ -144,7 +165,7 @@ const TestScenarioForm = () => {
     return (
         <PainelContainer>
             <TitleContainer title={t("testScenario.pageTitle")} />
-            <LoadingOverlay show={loadingTemplates || loadingTestScenario || loadingProject} />
+            <LoadingOverlay show={loadingTemplates || loadingTestScenario || loadingProject || !permissionChecked} />
             {approvalEnabled && (
                 <div className="rounded-2xl border border-ink/10 bg-paper px-4 py-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">

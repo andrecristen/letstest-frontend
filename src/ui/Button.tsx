@@ -9,6 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   isLoading?: boolean;
   leadingIcon?: React.ReactNode;
+  iconOnly?: boolean;
 }
 
 const baseStyles =
@@ -38,6 +39,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className,
       isLoading,
       leadingIcon,
+      iconOnly = false,
       children,
       ...props
     },
@@ -46,14 +48,22 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(baseStyles, variantStyles[variant], sizeStyles[size], className)}
+        className={cn(
+          baseStyles,
+          variantStyles[variant],
+          sizeStyles[size],
+          iconOnly ? "p-0" : null,
+          className
+        )}
         {...props}
       >
         {isLoading ? (
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-sand/70 border-t-transparent" />
         ) : (
           <>
-            {leadingIcon && <span className="mr-2 text-lg">{leadingIcon}</span>}
+            {leadingIcon && (
+              <span className={iconOnly ? "text-lg" : "mr-2 text-lg"}>{leadingIcon}</span>
+            )}
             {children}
           </>
         )}

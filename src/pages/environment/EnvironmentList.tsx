@@ -1,8 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import EnvironmentItem from "./EnvironmentItem";
-import PainelContainer from "../../components/PainelContainer";
-import TitleContainer from "../../components/TitleContainer";
+import ListLayout from "../../components/ListLayout";
 import { EnvironmentData } from "../../models/EnvironmentData";
 import { getAllByProjects } from "../../services/environmentService";
 import EnvironmentForm from "./EnvironmentForm";
@@ -11,8 +10,8 @@ import notifyProvider from "../../infra/notifyProvider";
 import { Button, Field, Input } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { useInfiniteList } from "../../hooks/useInfiniteList";
-import LoadingOverlay from "../../components/LoadingOverlay";
-import { FiFilter, FiPlus, FiXCircle } from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
+import { usePageLoading } from "../../hooks/usePageLoading";
 
 const EnvironmentList: React.FC = () => {
 
@@ -29,6 +28,7 @@ const EnvironmentList: React.FC = () => {
     const {
         items: environments,
         loading: loadingEnvironments,
+        loadingInitial,
         loadingMore,
         hasNext,
         sentinelRef,
@@ -72,60 +72,52 @@ const EnvironmentList: React.FC = () => {
         setSearchTerm("");
     };
 
-    return (
-        <PainelContainer>
-            <LoadingOverlay show={loadingMore} />
-            <div className="space-y-6">
-                <TitleContainer title={t("environment.listTitle")} />
-                <div className="flex flex-wrap items-end justify-end gap-4">
-                    <Button type="button" onClick={handleClickNewEnvironment} leadingIcon={<FiPlus />}>
-                        {t("environment.createNew")}
-                    </Button>
-                </div>
+    usePageLoading(loadingInitial);
 
-                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
-                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-                        <Field label={t("environment.searchLabel")}>
-                            <Input
-                                type="text"
-                                placeholder={t("environment.searchPlaceholder")}
-                                value={filterDraft}
-                                onChange={(e) => setFilterDraft(e.target.value)}
-                            />
-                        </Field>
-                    </div>
-                    <div className="flex w-full justify-end gap-2 pt-2">
-                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-                            {t("common.confirm")}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-                            {t("common.clearFilters")}
-                        </Button>
-                    </div>
+    return (
+        <ListLayout
+            title={t("environment.listTitle")}
+            actions={(
+                <Button type="button" onClick={handleClickNewEnvironment} leadingIcon={<FiPlus />}>
+                    {t("environment.createNew")}
+                </Button>
+            )}
+            filters={(
+                <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                    <Field label={t("environment.searchLabel")}>
+                        <Input
+                            type="text"
+                            placeholder={t("environment.searchPlaceholder")}
+                            value={filterDraft}
+                            onChange={(e) => setFilterDraft(e.target.value)}
+                        />
+                    </Field>
                 </div>
-                {loadingEnvironments ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("environment.loadingList")}
-                    </div>
-                ) : filteredEnvironments.length === 0 ? (
-                    <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                        {t("environment.emptyList")}
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredEnvironments.map((environment) => (
-                            <EnvironmentItem
-                                key={environment.id}
-                                environment={environment}
-                                onEdit={() => handleClickEnvironment(environment)}
-                            />
-                        ))}
-                    </div>
-                )}
-                {hasNext ? <div ref={sentinelRef} /> : null}
-                <EnvironmentForm projectId={getProjectId()} ref={formDialogRef} callbackSubmit={reload} />
+            )}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearFilters}
+            loading={loadingInitial}
+            loadingMessage={t("environment.loadingList")}
+            loadingMore={loadingMore}
+            empty={filteredEnvironments.length === 0}
+            emptyMessage={t("environment.emptyList")}
+            footer={(
+                <>
+                    {hasNext ? <div ref={sentinelRef} /> : null}
+                    <EnvironmentForm projectId={getProjectId()} ref={formDialogRef} callbackSubmit={reload} />
+                </>
+            )}
+        >
+            <div className="grid grid-cols-1 gap-4">
+                {filteredEnvironments.map((environment) => (
+                    <EnvironmentItem
+                        key={environment.id}
+                        environment={environment}
+                        onEdit={() => handleClickEnvironment(environment)}
+                    />
+                ))}
             </div>
-        </PainelContainer>
+        </ListLayout>
     );
 };
 

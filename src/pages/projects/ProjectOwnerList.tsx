@@ -1,10 +1,9 @@
 import React, { useMemo, useRef, useState } from "react";
-import { FiEdit, FiFilter, FiPlus, FiXCircle } from "react-icons/fi";
+import { FiEdit, FiPlus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { getMyProjects } from "../../services/projectService";
 import { getProjectSituationDescription, getProjectVisibilityDescription, getProjectSituationList, getProjectVisibilityList } from "../../models/ProjectData";
-import PainelContainer from "../../components/PainelContainer";
-import TitleContainer from "../../components/TitleContainer";
+import ListLayout from "../../components/ListLayout";
 import ProjectForm from "./ProjectForm";
 import { ProjectData } from "../../models/ProjectData";
 import { FormDialogBaseExtendsRef } from "../../components/FormDialogBase";
@@ -12,7 +11,7 @@ import notifyProvider from "../../infra/notifyProvider";
 import { Badge, Button, Card, Field, Input, Select } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { useInfiniteList } from "../../hooks/useInfiniteList";
-import LoadingOverlay from "../../components/LoadingOverlay";
+import { usePageLoading } from "../../hooks/usePageLoading";
 import tokenProvider from "../../infra/tokenProvider";
 
 const ProjectOwnerList: React.FC = () => {
@@ -32,6 +31,7 @@ const ProjectOwnerList: React.FC = () => {
   const {
     items: projects,
     loading: loadingProjects,
+    loadingInitial,
     loadingMore,
     hasNext,
     sentinelRef,
@@ -92,7 +92,7 @@ const ProjectOwnerList: React.FC = () => {
   };
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) =>
+    return (projects || []).filter((project) =>
       project.name.toLowerCase().includes(filters.search.toLowerCase())
     );
   }, [projects, filters.search]);
@@ -112,148 +112,136 @@ const ProjectOwnerList: React.FC = () => {
     setFilters(reset);
   };
 
+  usePageLoading(loadingInitial);
+
   return (
-    <PainelContainer>
-      <LoadingOverlay show={loadingMore} />
-      <div className="space-y-6">
-        <TitleContainer title={t("projects.ownerTitle")} textHelp={t("projects.ownerHelp")} />
-
-        <div className="flex flex-wrap items-end justify-end gap-4">
-          <Button type="button" onClick={handleClickNewProject} leadingIcon={<FiPlus />}>
-            {t("projects.createNew")}
-          </Button>
+    <ListLayout
+      title={t("projects.ownerTitle")}
+      textHelp={t("projects.ownerHelp")}
+      actions={(
+        <Button type="button" onClick={handleClickNewProject} leadingIcon={<FiPlus />}>
+          {t("projects.createNew")}
+        </Button>
+      )}
+      filters={(
+        <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+          <Field label={t("projects.searchLabel")}>
+            <Input
+              type="text"
+              placeholder={t("projects.searchPlaceholder")}
+              value={filterDraft.search}
+              onChange={(e) => setFilterDraft((prev) => ({ ...prev, search: e.target.value }))}
+            />
+          </Field>
+          <Field label={t("common.status")}>
+            <Select
+              value={filterDraft.situation ?? ""}
+              onChange={(event) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  situation: event.target.value ? parseInt(event.target.value, 10) : null,
+                }))
+              }
+            >
+              <option value="">{t("common.all")}</option>
+              {getProjectSituationList().map((situation) => (
+                <option key={`situation-${situation.id}`} value={situation.id ?? ""}>
+                  {situation.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label={t("common.visibility")}>
+            <Select
+              value={filterDraft.visibility ?? ""}
+              onChange={(event) =>
+                setFilterDraft((prev) => ({
+                  ...prev,
+                  visibility: event.target.value ? parseInt(event.target.value, 10) : null,
+                }))
+              }
+            >
+              {visibilityOptions.map((visibility) => (
+                <option key={`visibility-${visibility.id ?? "all"}`} value={visibility.id ?? ""}>
+                  {visibility.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
         </div>
-
-        <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
-          <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-            <Field label={t("projects.searchLabel")}>
-              <Input
-                type="text"
-                placeholder={t("projects.searchPlaceholder")}
-                value={filterDraft.search}
-                onChange={(e) => setFilterDraft((prev) => ({ ...prev, search: e.target.value }))}
-              />
-            </Field>
-            <Field label={t("common.status")}>
-              <Select
-                value={filterDraft.situation ?? ""}
-                onChange={(event) =>
-                  setFilterDraft((prev) => ({
-                    ...prev,
-                    situation: event.target.value ? parseInt(event.target.value, 10) : null,
-                  }))
-                }
-              >
-                <option value="">{t("common.all")}</option>
-                {getProjectSituationList().map((situation) => (
-                  <option key={`situation-${situation.id}`} value={situation.id ?? ""}>
-                    {situation.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label={t("common.visibility")}>
-              <Select
-                value={filterDraft.visibility ?? ""}
-                onChange={(event) =>
-                  setFilterDraft((prev) => ({
-                    ...prev,
-                    visibility: event.target.value ? parseInt(event.target.value, 10) : null,
-                  }))
-                }
-              >
-                {visibilityOptions.map((visibility) => (
-                  <option key={`visibility-${visibility.id ?? "all"}`} value={visibility.id ?? ""}>
-                    {visibility.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          </div>
-          <div className="flex w-full justify-end gap-2 pt-2">
-            <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-              {t("common.confirm")}
-            </Button>
-            <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-              {t("common.clearFilters")}
-            </Button>
-          </div>
-        </div>
-
-        {loadingProjects ? (
-          <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-            {t("projects.loadingOwnerList")}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
-                <Card
-                  key={project.id}
-                  className="relative cursor-pointer transition-transform hover:-translate-y-1"
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyCard(event, project)}
-                  onClick={(event: React.MouseEvent<HTMLDivElement>) => handleClickManageProject(event, project)}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-2">
-                      {project.creatorId === currentUserId ? (
-                        <Badge
-                          variant="neutral"
-                          className="border-violet-300/70 bg-violet-100/70 text-violet-700"
-                        >
-                          {t("projects.roleOwner")}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="neutral"
-                          className="border-slate-200 bg-slate-100 text-slate-700"
-                        >
-                          {t("projects.roleManager")}
-                        </Badge>
-                      )}
-                      <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
-                        #{project.id}
-                      </p>
-                      <h3 className="font-display text-lg text-ink">
-                        {project.name}
-                      </h3>
-                    </div>
-                    {project.creatorId === currentUserId ? (
-                      <button
-                        type="button"
-                        aria-label={t("projects.editAria")}
-                        className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 transition-colors hover:text-ink"
-                        onClick={(event) => handleClickEditProject(event, project)}
-                      >
-                        <FiEdit className="h-5 w-5" />
-                      </button>
-                    ) : null}
-                  </div>
-                  <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-ink/60">
-                    <Badge variant={getSituationVariant(project.situation)}>
-                      {getProjectSituationDescription(project.situation)}
-                    </Badge>
-                    <span>{getProjectVisibilityDescription(project.visibility)}</span>
-                  </div>
-                  <p className="mt-4 text-sm text-ink/60">
-                    {project.description}
-                  </p>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-full rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
-                {t("projects.emptyOwnerList")}
+      )}
+      onApplyFilters={applyFilters}
+      onClearFilters={clearFilters}
+      loading={loadingInitial}
+      loadingMessage={t("projects.loadingOwnerList")}
+      loadingMore={loadingMore}
+      empty={filteredProjects.length === 0}
+      emptyMessage={t("projects.emptyOwnerList")}
+      footer={(
+        <>
+          {hasNext ? <div ref={sentinelRef} /> : null}
+          <ProjectForm ref={formDialogRef} callbackSubmit={reload} />
+        </>
+      )}
+    >
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {filteredProjects.map((project) => (
+          <Card
+            key={project.id}
+            className="relative cursor-pointer transition-transform hover:-translate-y-1"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => handleKeyCard(event, project)}
+            onClick={(event: React.MouseEvent<HTMLDivElement>) => handleClickManageProject(event, project)}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-2">
+                {project.creatorId === currentUserId ? (
+                  <Badge
+                    variant="neutral"
+                    className="border-violet-300/70 bg-violet-100/70 text-violet-700"
+                  >
+                    {t("projects.roleOwner")}
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="neutral"
+                    className="border-slate-200 bg-slate-100 text-slate-700"
+                  >
+                    {t("projects.roleManager")}
+                  </Badge>
+                )}
+                <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
+                  #{project.id}
+                </p>
+                <h3 className="font-display text-lg text-ink">
+                  {project.name}
+                </h3>
               </div>
-            )}
-          </div>
-        )}
-
-        {hasNext ? <div ref={sentinelRef} /> : null}
-        <ProjectForm ref={formDialogRef} callbackSubmit={reload} />
+              {project.creatorId === currentUserId ? (
+                <button
+                  type="button"
+                  aria-label={t("projects.editAria")}
+                  className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 transition-colors hover:text-ink"
+                  onClick={(event) => handleClickEditProject(event, project)}
+                >
+                  <FiEdit className="h-5 w-5" />
+                </button>
+              ) : null}
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-ink/60">
+              <Badge variant={getSituationVariant(project.situation)}>
+                {getProjectSituationDescription(project.situation)}
+              </Badge>
+              <span>{getProjectVisibilityDescription(project.visibility)}</span>
+            </div>
+            <p className="mt-4 text-sm text-ink/60">
+              {project.description}
+            </p>
+          </Card>
+        ))}
       </div>
-    </PainelContainer>
+    </ListLayout>
   );
 }
 

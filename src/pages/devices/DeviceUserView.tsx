@@ -1,16 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import PainelContainer from '../../components/PainelContainer';
+import ListLayout from '../../components/ListLayout';
 import DeviceForm from './DeviceForm';
 import DeviceList from './DeviceList';
-import LoadingOverlay from '../../components/LoadingOverlay';
 import { DeviceData, getDeviceTypeList } from '../../models/DeviceData';
 import { getMy } from '../../services/deviceService';
-import TitleContainer from '../../components/TitleContainer';
 import notifyProvider from '../../infra/notifyProvider';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteList } from '../../hooks/useInfiniteList';
-import { Button, Field, Input, Select } from '../../ui';
-import { FiFilter, FiXCircle } from 'react-icons/fi';
+import { Field, Input, Select } from '../../ui';
+import { usePageLoading } from '../../hooks/usePageLoading';
 
 const DeviceUserView: React.FC = () => {
 
@@ -24,6 +22,7 @@ const DeviceUserView: React.FC = () => {
     const {
         items: devices,
         loading,
+        loadingInitial,
         loadingMore,
         hasNext,
         sentinelRef,
@@ -64,59 +63,53 @@ const DeviceUserView: React.FC = () => {
         setFilters(reset);
     };
 
+    usePageLoading(loadingInitial);
+
     return (
-        <PainelContainer>
-            <LoadingOverlay show={loading || loadingMore} />
-            <div className="space-y-6">
-                <TitleContainer title={t("devices.myTitle")} />
-
-                <div className="flex flex-wrap items-center justify-end">
-                    <DeviceForm onDeviceAdded={reload} variant="compact" />
+        <ListLayout
+            title={t("devices.myTitle")}
+            actions={<DeviceForm onDeviceAdded={reload} variant="compact" />}
+            filters={(
+                <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
+                    <Field label={t("devices.searchLabel")}>
+                        <Input
+                            type="text"
+                            placeholder={t("devices.searchPlaceholder")}
+                            value={filterDraft.search}
+                            onChange={(event) => setFilterDraft((prev) => ({ ...prev, search: event.target.value }))}
+                        />
+                    </Field>
+                    <Field label={t("common.typeLabel")}>
+                        <Select
+                            value={filterDraft.type ?? ""}
+                            onChange={(event) =>
+                                setFilterDraft((prev) => ({
+                                    ...prev,
+                                    type: event.target.value ? parseInt(event.target.value, 10) : null,
+                                }))
+                            }
+                        >
+                            <option value="">{t("common.all")}</option>
+                            {deviceTypes.map((type) => (
+                                <option key={`type-${type.id}`} value={type.id}>
+                                    {type.name}
+                                </option>
+                            ))}
+                        </Select>
+                    </Field>
                 </div>
-
-                <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
-                    <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-                        <Field label={t("devices.searchLabel")}>
-                            <Input
-                                type="text"
-                                placeholder={t("devices.searchPlaceholder")}
-                                value={filterDraft.search}
-                                onChange={(event) => setFilterDraft((prev) => ({ ...prev, search: event.target.value }))}
-                            />
-                        </Field>
-                        <Field label={t("common.typeLabel")}>
-                            <Select
-                                value={filterDraft.type ?? ""}
-                                onChange={(event) =>
-                                    setFilterDraft((prev) => ({
-                                        ...prev,
-                                        type: event.target.value ? parseInt(event.target.value, 10) : null,
-                                    }))
-                                }
-                            >
-                                <option value="">{t("common.all")}</option>
-                                {deviceTypes.map((type) => (
-                                    <option key={`type-${type.id}`} value={type.id}>
-                                        {type.name}
-                                    </option>
-                                ))}
-                            </Select>
-                        </Field>
-                    </div>
-                    <div className="flex w-full justify-end gap-2 pt-2">
-                        <Button type="button" variant="primary" onClick={applyFilters} leadingIcon={<FiFilter />}>
-                            {t("common.confirm")}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={clearFilters} leadingIcon={<FiXCircle />}>
-                            {t("common.clearFilters")}
-                        </Button>
-                    </div>
-                </div>
-
-                <DeviceList devices={filteredDevices} onDelete={reload} />
-                {hasNext ? <div ref={sentinelRef} /> : null}
-            </div>
-        </PainelContainer>
+            )}
+            onApplyFilters={applyFilters}
+            onClearFilters={clearFilters}
+            loading={loadingInitial}
+            loadingMessage={t("common.loading")}
+            loadingMore={loadingMore}
+            empty={filteredDevices.length === 0}
+            emptyMessage={t("devices.empty")}
+            footer={<>{hasNext ? <div ref={sentinelRef} /> : null}</>}
+        >
+            <DeviceList devices={filteredDevices} onDelete={reload} />
+        </ListLayout>
     );
 };
 

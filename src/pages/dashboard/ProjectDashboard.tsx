@@ -5,7 +5,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 import { Badge, Button, Card, Field, Input, Select } from "../../ui";
 import { useTranslation } from "react-i18next";
 import { getMyProjects, getOverviewProject, getTestProjects } from "../../services/projectService";
-import { InvolvementSituationEnum, InvolvementTypeEnum } from "../../models/InvolvementData";
+import { InvolvementTypeEnum } from "../../models/InvolvementData";
 import { ProjectData } from "../../models/ProjectData";
 import { ReportType } from "../../models/ReportData";
 import { TestExecutionData } from "../../models/TestExecutionData";
@@ -153,9 +153,6 @@ const ProjectDashboard: React.FC = () => {
 
   const involvementSummary = useMemo(() => {
     const involvements = projectOverview?.involvements ?? [];
-    const accepted = involvements.filter(
-      (involvement) => involvement.situation === InvolvementSituationEnum.Accepted
-    );
     const managerIds = new Set<number>();
     const testerIds = new Set<number>();
 
@@ -163,7 +160,7 @@ const ProjectDashboard: React.FC = () => {
       managerIds.add(projectOverview.creator.id);
     }
 
-    accepted.forEach((involvement) => {
+    involvements.forEach((involvement) => {
       if (involvement.type === InvolvementTypeEnum.Manager) {
         if (involvement.userId) managerIds.add(involvement.userId);
       }

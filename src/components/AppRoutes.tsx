@@ -7,7 +7,6 @@ import ProjectOwnerList from "../pages/projects/ProjectOwnerList";
 import UserFormRegister from "../pages/user/UserFormRegister";
 import ProjectPageView from "../pages/projects/ProjectPageView";
 import InvolvementOwnerList from "../pages/involvement/InvolvementOwnerList";
-import ProjectPublicList from "../pages/projects/ProjectPublicList";
 import TemplateForm from "../pages/templates/TemplateForm";
 import TemplateList from "../pages/templates/TemplateList";
 import TestCaseProjectOwnerList from "../pages/testCase/TestCaseOwnerList";
@@ -23,8 +22,6 @@ import HabilityUserView from "../pages/habilities/HabilityUserView";
 import UserFormProfileView from "../pages/user/UserFormProfileView";
 import EnvironmentList from "../pages/environment/EnvironmentList";
 import ReportList from "../pages/reports/ReportList";
-import InvolvementInvitationsView from "../pages/involvement/InvolvementInvitationsView";
-import InvolvementRequestsView from "../pages/involvement/InvolvementRequestsView";
 import TagList from "../pages/tags/TagList";
 import TagForm from "../pages/tags/TagForm";
 import TestScenarioList from "../pages/testScenario/TestScenarioList";
@@ -33,12 +30,42 @@ import ProjectOverView from "../pages/projects/ProjectOverView";
 import ProjectDashboard from "../pages/dashboard/ProjectDashboard";
 import ProjectNotificationSettings from "../pages/notifications/ProjectNotificationSettings";
 import NotificationList from "../pages/notifications/NotificationList";
+import OrganizationSettings from "../pages/organization/OrganizationSettings";
+import OrganizationMembers from "../pages/organization/OrganizationMembers";
+import MyInvites from "../pages/organization/MyInvites";
+import OrganizationList from "../pages/organization/OrganizationList";
+import ApiKeyManagement from "../pages/organization/ApiKeyManagement";
+import WebhookManagement from "../pages/organization/WebhookManagement";
+import BillingOverview from "../pages/billing/BillingOverview";
+import PlanSelection from "../pages/billing/PlanSelection";
+import BillingSuccess from "../pages/billing/BillingSuccess";
+import UpgradeModal from "./UpgradeModal";
+import { OrganizationProvider, useOrganization } from "../contexts/OrganizationContext";
+import { ConfigProvider } from "../contexts/ConfigContext";
 import { useTranslation } from "react-i18next";
+import { Navigate } from "react-router-dom";
+import { PageLoadingProvider } from "../contexts/PageLoadingContext";
+import PageLoadingOverlay from "./PageLoadingOverlay";
+import ConfirmOverlay from "./ConfirmOverlay";
+
+const BillingGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isOwner } = useOrganization();
+    if (!isOwner) {
+        return <Navigate to="/dashboard" replace />;
+    }
+    return <>{children}</>;
+};
 
 const AppRoutes = () => {
     const { t } = useTranslation();
 
     return (
+        <ConfigProvider>
+        <OrganizationProvider>
+        <PageLoadingProvider>
+        <UpgradeModal />
+        <PageLoadingOverlay />
+        <ConfirmOverlay />
         <Router>
             <Routes>
                 {/* Public Access */}
@@ -79,18 +106,29 @@ const AppRoutes = () => {
                 <Route path="/test-executions/test/:projectId/:testCaseId" element={<TestExecutionForm />}></Route>
                 <Route path="/test-executions/:testCaseId/my" element={<TestExecutionList />}></Route>
                 {/* Shared */}
-                <Route path="/find-new-projects" element={<ProjectPublicList />}></Route>
                 <Route path="/profile" element={<UserFormProfileEdit />}></Route>
                 <Route path="/profile/:userId" element={<UserFormProfileView />}></Route>
                 <Route path="/devices" element={<DeviceUserView />}></Route>
                 <Route path="/habilities" element={<HabilityUserView />}></Route>
                 <Route path="/notifications" element={<NotificationList />}></Route>
                 <Route path="/reports/test-execution/:testExecutionId" element={<ReportList />}></Route>
-                <Route path="/involvements" element={<InvolvementInvitationsView />}></Route>
-                <Route path="/involvements/invitations" element={<InvolvementInvitationsView />}></Route>
-                <Route path="/involvements/requests" element={<InvolvementRequestsView />}></Route>
+                {/* Organization */}
+                <Route path="/my-organizations" element={<OrganizationList />}></Route>
+                <Route path="/organization/settings" element={<OrganizationSettings />}></Route>
+                <Route path="/organization/members" element={<OrganizationMembers />}></Route>
+                <Route path="/my-invites" element={<MyInvites />}></Route>
+                <Route path="/invite/accept" element={<MyInvites />}></Route>
+                <Route path="/organization/api-keys" element={<BillingGuard><ApiKeyManagement /></BillingGuard>}></Route>
+                <Route path="/organization/webhooks" element={<BillingGuard><WebhookManagement /></BillingGuard>}></Route>
+                {/* Billing */}
+                <Route path="/billing" element={<BillingGuard><BillingOverview /></BillingGuard>}></Route>
+                <Route path="/billing/plans" element={<BillingGuard><PlanSelection /></BillingGuard>}></Route>
+                <Route path="/billing/success" element={<BillingGuard><BillingSuccess /></BillingGuard>}></Route>
             </Routes>
         </Router>
+        </PageLoadingProvider>
+        </OrganizationProvider>
+        </ConfigProvider>
     );
 }
 
