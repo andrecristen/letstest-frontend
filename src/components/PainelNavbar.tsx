@@ -256,11 +256,6 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     }
   };
 
-  const handleComingSoon = (message: string) => {
-    notifyProvider.info(message);
-    setIsToolsOpen(false);
-  };
-
   const openChecklist = () => {
     setIsChecklistOpen(true);
     setIsToolsOpen(false);
