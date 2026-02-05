@@ -19,7 +19,6 @@ const TemplateList: React.FC = () => {
     const [filterDraft, setFilterDraft] = useState(searchTerm);
     const {
         items: templates,
-        loading: loadingTemplates,
         loadingInitial,
         loadingMore,
         hasNext,

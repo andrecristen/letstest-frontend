@@ -22,7 +22,6 @@ const TestExecutionList: React.FC = () => {
 
     const {
         items: testExecutions,
-        loading: loadingTestExecutions,
         loadingInitial,
         loadingMore,
         hasNext,

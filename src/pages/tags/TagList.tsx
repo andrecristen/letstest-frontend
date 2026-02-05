@@ -20,7 +20,6 @@ const TagList: React.FC = () => {
     const [filterDraft, setFilterDraft] = useState(searchTerm);
     const {
         items: tags,
-        loading: loadingTags,
         loadingInitial,
         loadingMore,
         hasNext,

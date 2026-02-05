@@ -39,7 +39,6 @@ const TestCaseProjectOwnerList: React.FC = () => {
     });
     const {
         items: testCases,
-        loading: loadingTestCases,
         loadingInitial,
         loadingMore,
         hasNext,

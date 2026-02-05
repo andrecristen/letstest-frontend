@@ -19,7 +19,6 @@ import { TestScenarioData } from '../../models/TestScenarioData';
 import { useTranslation } from 'react-i18next';
 import { getProjectById } from '../../services/projectService';
 import { ApprovalStatusEnum } from '../../models/ApprovalStatus';
-import { getMyProjectRole } from '../../services/involvementService';
 
 const TestCaseForm = () => {
     const { t } = useTranslation();

@@ -23,7 +23,6 @@ const ReportList: React.FC = () => {
 
     const {
         items: reports,
-        loading: loadingReports,
         loadingInitial,
         loadingMore,
         hasNext,

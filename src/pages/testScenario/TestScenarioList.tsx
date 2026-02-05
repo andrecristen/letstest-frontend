@@ -22,7 +22,6 @@ const TestScenarioList: React.FC = () => {
     const [filterDraft, setFilterDraft] = useState(searchTerm);
     const {
         items: testScenarios,
-        loading: loadingTestScenarios,
         loadingInitial,
         loadingMore,
         hasNext,
