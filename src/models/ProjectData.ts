@@ -17,6 +17,7 @@ export type ProjectData = {
     creator?: UserData;
     involvements?: InvolvementData[];
     testScenarios?: TestScenarioData[];
+    createdAt?: string;
 }
 
 export enum ProjectVisibilityEnum {

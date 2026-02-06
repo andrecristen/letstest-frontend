@@ -40,6 +40,8 @@ const ProjectDashboard: React.FC = () => {
   const [chartRangeMode, setChartRangeMode] = useState<"preset" | "custom">("preset");
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [customStartDraft, setCustomStartDraft] = useState<string>("");
+  const [customEndDraft, setCustomEndDraft] = useState<string>("");
   const currentUserId = tokenProvider.getSessionUserId();
 
   const loadProjects = useCallback(async () => {
@@ -72,6 +74,11 @@ const ProjectDashboard: React.FC = () => {
     try {
       const response = await getOverviewProject(selectedProjectId);
       setProjectOverview(response?.data ?? null);
+      if (response?.data?.createdAt) {
+        console.log("[dashboard] project createdAt:", response.data.createdAt);
+      } else {
+        console.log("[dashboard] project createdAt: (missing)");
+      }
       setScenarioFilter("all");
       setTesterFilter("all");
       setStatusFilter("all");
@@ -88,6 +95,52 @@ const ProjectDashboard: React.FC = () => {
   useEffect(() => {
     loadOverview();
   }, [loadOverview]);
+
+  const projectStartDate = useMemo(() => {
+    if (!projectOverview?.createdAt) return "";
+    const createdAt = new Date(projectOverview.createdAt);
+    if (Number.isNaN(createdAt.getTime())) return "";
+    return createdAt.toISOString().split("T")[0];
+  }, [projectOverview?.createdAt]);
+
+  const isStartBeforeProject = useMemo(() => {
+    if (!projectStartDate) return false;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(customStartDraft)) return false;
+    const start = new Date(`${customStartDraft}T00:00:00`);
+    const projectStart = new Date(`${projectStartDate}T00:00:00`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(projectStart.getTime())) return false;
+    return start < projectStart;
+  }, [customStartDraft, projectStartDate]);
+
+  useEffect(() => {
+    if (chartRangeMode !== "custom") return;
+    const timeout = window.setTimeout(() => {
+      const clampDate = (value: string, min?: string, max?: string) => {
+        if (!value) return "";
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "";
+        const year = Number(value.slice(0, 4));
+        if (!Number.isFinite(year) || year < 1000) return "";
+        const date = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(date.getTime())) return "";
+        if (min) {
+          const minDate = new Date(`${min}T00:00:00`);
+          if (!Number.isNaN(minDate.getTime()) && date < minDate) return min;
+        }
+        if (max) {
+          const maxDate = new Date(`${max}T00:00:00`);
+          if (!Number.isNaN(maxDate.getTime()) && date > maxDate) return max;
+        }
+        return value;
+      };
+
+      const nextStart = clampDate(customStartDraft, projectStartDate || undefined, customEndDraft || undefined);
+      const nextEnd = clampDate(customEndDraft, nextStart || projectStartDate || undefined);
+
+      if (nextStart) setCustomStartDate(nextStart);
+      if (nextEnd) setCustomEndDate(nextEnd);
+    }, 400);
+    return () => window.clearTimeout(timeout);
+  }, [customStartDraft, customEndDraft, chartRangeMode, projectStartDate]);
 
   const scenarios = useMemo(() => projectOverview?.testScenarios ?? [], [projectOverview]);
 
@@ -377,6 +430,27 @@ const ProjectDashboard: React.FC = () => {
   }, [filteredExecutions]);
 
   const chartDayCount = executionChartData.length || 1;
+  const projectAgeDays = useMemo(() => {
+    if (projectOverview?.createdAt) {
+      const createdAt = new Date(projectOverview.createdAt);
+      if (!Number.isNaN(createdAt.getTime())) {
+        const diff = Math.ceil((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+        return Math.max(1, diff);
+      }
+    }
+
+    const firstReported = baseExecutions
+      .filter((execution) => execution.reported)
+      .map((execution) => new Date(execution.reported as string))
+      .sort((a, b) => a.getTime() - b.getTime())[0];
+
+    if (firstReported) {
+      const diff = Math.ceil((Date.now() - firstReported.getTime()) / (1000 * 60 * 60 * 24));
+      return Math.max(1, diff);
+    }
+
+    return chartDayCount;
+  }, [projectOverview?.createdAt, baseExecutions, chartDayCount]);
 
   const isInvalidCustomRange =
     chartRangeMode === "custom" &&
@@ -721,6 +795,8 @@ const ProjectDashboard: React.FC = () => {
                     const value = event.target.value;
                     if (value === "custom") {
                       setChartRangeMode("custom");
+                      setCustomStartDraft(customStartDate || projectStartDate);
+                      setCustomEndDraft(customEndDate);
                       return;
                     }
                     setChartRangeMode("preset");
@@ -739,12 +815,20 @@ const ProjectDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <Field
                     label={t("dashboard.startDateLabel")}
-                    error={isInvalidCustomRange ? t("dashboard.invalidRange") : undefined}
+                    error={
+                      isStartBeforeProject
+                        ? t("dashboard.startDateBeforeProject")
+                        : isInvalidCustomRange
+                        ? t("dashboard.invalidRange")
+                        : undefined
+                    }
                   >
                     <Input
                       type="date"
-                      value={customStartDate}
-                      onChange={(event) => setCustomStartDate(event.target.value)}
+                      value={customStartDraft}
+                      min={projectStartDate || undefined}
+                      max={customEndDraft || undefined}
+                      onChange={(event) => setCustomStartDraft(event.target.value)}
                     />
                   </Field>
                   <Field
@@ -753,8 +837,9 @@ const ProjectDashboard: React.FC = () => {
                   >
                     <Input
                       type="date"
-                      value={customEndDate}
-                      onChange={(event) => setCustomEndDate(event.target.value)}
+                      value={customEndDraft}
+                      min={customStartDraft || projectStartDate || undefined}
+                      onChange={(event) => setCustomEndDraft(event.target.value)}
                     />
                   </Field>
                 </div>
@@ -771,9 +856,9 @@ const ProjectDashboard: React.FC = () => {
                   <span className="font-semibold text-ink">{filteredExecutions.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>{t("dashboard.averagePerDay")}</span>
+                  <span>{t("dashboard.averagePerDayProject")}</span>
                   <span className="font-semibold text-ink">
-                    {(filteredExecutions.length / chartDayCount).toFixed(1)}
+                    {(filteredExecutions.length / projectAgeDays).toFixed(1)}
                   </span>
                 </div>
               </div>
