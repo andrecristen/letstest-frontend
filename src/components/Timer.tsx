@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { FiCheckSquare, FiPlay, FiSkipBack, FiVideo } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
+import { Button, Card } from '../ui';
 
 interface TimerProps {
     title: string;
@@ -151,38 +152,45 @@ const Timer: React.FC<TimerProps> = ({
     };
 
     return (
-        <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-4">{title}</h1>
-            <p className="text-xl mb-4">{t('timer.elapsed', { time: formatTime(timeElapsed) })}</p>
+        <Card className="space-y-4">
+            <div>
+                <h1 className="font-display text-2xl text-ink">{title}</h1>
+            </div>
+            <p className="text-xl text-ink/70">{t('timer.elapsed', { time: formatTime(timeElapsed) })}</p>
             {isInitial ? (
-                <button disabled={disabled} type="button" onClick={handleStart} className="action-button-blue m-2">
-                    <FiPlay className="m-2 text-2xl" /> {timeElapsed ? t('timer.continue') : t('timer.start')}
-                </button>
+                <Button
+                    disabled={disabled}
+                    type="button"
+                    onClick={handleStart}
+                    leadingIcon={<FiPlay />}
+                >
+                    {timeElapsed ? t('timer.continue') : t('timer.start')}
+                </Button>
             ) : (
-                <>
+                <div className="flex flex-wrap gap-2">
                     {isRunning ? (
-                        <button type="button" onClick={handlePause} className="action-button-teal m-2">
-                            <FiSkipBack className="m-2 text-2xl" /> {t('timer.pause')}
-                        </button>
+                        <Button type="button" variant="outline" onClick={handlePause} leadingIcon={<FiSkipBack />}>
+                            {t('timer.pause')}
+                        </Button>
                     ) : isPaused ? (
-                        <button type="button" onClick={handleResume} className="action-button-blue m-2">
-                            <FiPlay className="m-2 text-2xl" /> {t('timer.resume')}
-                        </button>
+                        <Button type="button" onClick={handleResume} leadingIcon={<FiPlay />}>
+                            {t('timer.resume')}
+                        </Button>
                     ) : null}
-                    <button type="button" onClick={handleReset} className="action-button-teal m-2">
-                        <FiSkipBack className="m-2 text-2xl" /> {t('timer.reset')}
-                    </button>
-                    <button type="button" onClick={handleStop} className="action-button-red m-2">
-                        <FiCheckSquare className="m-2 text-2xl" /> {t('timer.finish')}
-                    </button>
+                    <Button type="button" variant="outline" onClick={handleReset} leadingIcon={<FiSkipBack />}>
+                        {t('timer.reset')}
+                    </Button>
+                    <Button type="button" variant="danger" onClick={handleStop} leadingIcon={<FiCheckSquare />}>
+                        {t('timer.finish')}
+                    </Button>
                     {!isRecording && (
-                        <button type="button" onClick={handleRecord} className="action-button-purple m-2">
-                            <FiVideo className="m-2 text-2xl" /> {t('timer.recordScreen')}
-                        </button>
+                        <Button type="button" variant="ghost" onClick={handleRecord} leadingIcon={<FiVideo />}>
+                            {t('timer.recordScreen')}
+                        </Button>
                     )}
-                </>
+                </div>
             )}
-        </div>
+        </Card>
     );
 };
 

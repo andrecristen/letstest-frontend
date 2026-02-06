@@ -55,7 +55,7 @@ const ListLayout: React.FC<ListLayoutProps> = ({
         )}
 
         {filters && (
-          <div className="w-full rounded-2xl border border-ink/10 bg-paper/70 p-4">
+          <div className="w-full rounded-3xl border border-ink/10 bg-paper/80 p-4 shadow-soft">
             {filters}
             {(onApplyFilters || onClearFilters) && (
               <div className="flex w-full justify-end gap-2 pt-2">
@@ -75,11 +75,11 @@ const ListLayout: React.FC<ListLayoutProps> = ({
         )}
 
         {loading ? (
-          <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+          <div className="rounded-3xl border border-ink/10 bg-paper/80 p-10 text-center text-sm text-ink/60 shadow-soft">
             {loadingMessage ?? t("common.loading")}
           </div>
         ) : empty ? (
-          <div className="rounded-2xl border border-ink/10 bg-paper/70 p-10 text-center text-sm text-ink/60">
+          <div className="rounded-3xl border border-ink/10 bg-paper/80 p-10 text-center text-sm text-ink/60 shadow-soft">
             {emptyMessage ?? t("common.noComment")}
           </div>
         ) : (
@@ -87,7 +87,7 @@ const ListLayout: React.FC<ListLayoutProps> = ({
         )}
 
         {loadingMore && !loading ? (
-          <div className="rounded-2xl border border-ink/10 bg-paper/70 px-4 py-3 text-center text-xs text-ink/60">
+          <div className="rounded-2xl border border-ink/10 bg-paper/80 px-4 py-3 text-center text-xs text-ink/60 shadow-soft">
             {loadingMoreMessage ?? t("common.loading")}
           </div>
         ) : null}

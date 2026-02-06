@@ -13,7 +13,7 @@ import LoadingOverlay from '../../components/LoadingOverlay';
 import { TestScenarioData } from '../../models/TestScenarioData';
 import { createTestScenario, getTestScenarioById, updateTestScenario } from '../../services/testScenario';
 import { useTranslation } from 'react-i18next';
-import { Badge } from '../../ui';
+import { Badge, Button, Field, Input, Select } from '../../ui';
 import { getProjectById } from '../../services/projectService';
 import { ApprovalStatusEnum, getApprovalStatusLabel, getApprovalStatusVariant } from '../../models/ApprovalStatus';
 import { getMyProjectRole } from '../../services/involvementService';
@@ -185,38 +185,42 @@ const TestScenarioForm = () => {
             )}
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
-                    <div className="py-2">
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">#</label>
-                        <input
+                    <Field id="id" label="#" hint={t("common.idLabel")}>
+                        <Input
                             {...register('id')}
+                            id="id"
                             disabled
-                            className="form-input"
-                            placeholder={t("common.idLabel")}
+                            className="bg-ink/5"
                         />
-                    </div>
+                    </Field>
                 )}
-                <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">{t("common.nameLabel")}</label>
-                    <input
+                <Field
+                    id="name"
+                    label={t("common.nameLabel")}
+                    error={errors.name?.message as string | undefined}
+                >
+                    <Input
                         type="text"
                         id="name"
                         disabled={isReadOnly}
                         {...register('name', { required: t("common.nameRequired") })}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                        hasError={Boolean(errors.name)}
                     />
-                    {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
-                </div>
+                </Field>
                 {!getTestScenarioId() && (
-                    <div className="py-2">
-                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>
-                        <select
+                    <Field
+                        id="templateId"
+                        label={t("common.templateLabel")}
+                        error={errors.templateId?.message as string | undefined}
+                    >
+                        <Select
                             {...register('templateId', {
                                 required: t("testScenario.templateRequired"),
                                 setValueAs: (value) => parseInt(value, 10),
                                 onChange: handleChangeTemplate,
                             })}
                             disabled={isReadOnly}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                            hasError={Boolean(errors.templateId)}
                         >
                             <option value="">{t("common.selectTemplate")}</option>
                             {templates.map((template) => (
@@ -224,31 +228,30 @@ const TestScenarioForm = () => {
                                     {template.name}
                                 </option>
                             ))}
-                        </select>
-                        {errors.templateId && <span className="text-red-500 text-sm">{errors.templateId.message}</span>}
-                    </div>
+                        </Select>
+                    </Field>
                 )}
                 {!getTestScenarioId() && approvalEnabled && (
-                    <div className="py-2">
-                        <label htmlFor="approvalStatus" className="block text-sm font-medium text-gray-700">{t("common.status")}</label>
-                        <select
+                    <Field id="approvalStatus" label={t("common.status")}>
+                        <Select
                             id="approvalStatus"
                             {...register("approvalStatus", {
                                 setValueAs: (value) => parseInt(value, 10),
                             })}
-                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-purple-500"
                         >
                             <option value={ApprovalStatusEnum.Draft}>{t("approval.draft")}</option>
                             <option value={ApprovalStatusEnum.Approved}>{t("approval.approved")}</option>
-                        </select>
-                    </div>
+                        </Select>
+                    </Field>
                 )}
                 <div className="py-2">
-                    <fieldset className="border rounded p-4">
-                        <legend className="text-lg font-semibold">{t("testScenario.definitionLegend")}</legend>
+                    <fieldset className="rounded-3xl border border-ink/10 bg-paper/70 p-4">
+                        <legend className="px-2 text-sm font-semibold text-ink">
+                            {t("testScenario.definitionLegend")}
+                        </legend>
                         {!updateTemplate && !getTestScenarioId() && (
-                            <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
-                                <strong className="font-bold mr-2">{t("common.attention")}</strong>
+                            <div className="mb-4 flex items-center gap-2 rounded-2xl border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-ember">
+                                <strong className="font-semibold">{t("common.attention")}</strong>
                                 <span>{t("common.selectTemplateWarning")}</span>
                             </div>
                         )}
@@ -260,13 +263,16 @@ const TestScenarioForm = () => {
                     </fieldset>
                 </div>
                 {!loadingTemplates && !isReadOnly && (
-                    <button
-                        type="submit"
-                        className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
-                    >
-                        <FiSave className="mr-2" />
-                        {t("common.save")}
-                    </button>
+                    <div className="pt-4">
+                        <Button
+                            type="submit"
+                            variant="accent"
+                            size="lg"
+                            leadingIcon={<FiSave />}
+                        >
+                            {t("common.save")}
+                        </Button>
+                    </div>
                 )}
             </form>
         </PainelContainer>

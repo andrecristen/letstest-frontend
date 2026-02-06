@@ -19,6 +19,7 @@ import { TestScenarioData } from '../../models/TestScenarioData';
 import { useTranslation } from 'react-i18next';
 import { getProjectById } from '../../services/projectService';
 import { ApprovalStatusEnum } from '../../models/ApprovalStatus';
+import { Button, Field, Input, Select } from "../../ui";
 
 const TestCaseForm = () => {
     const { t } = useTranslation();
@@ -209,56 +210,65 @@ const TestCaseForm = () => {
             <TitleContainer title={t("testCase.pageTitle")} />
             <LoadingOverlay show={loadingTemplates || loadingTestCase || loadingEnvironments || loadingTestScenarios || loadingProject} />
             {approvalEnabled && hasExecutions && (
-                <div className="rounded-2xl border border-ink/10 bg-paper px-4 py-3">
-                    <p className="text-sm text-ink/60">
-                        {t("testCase.lockedByExecution")}
-                    </p>
+                <div className="rounded-2xl border border-ember/30 bg-ember/10 px-4 py-3 text-ember">
+                    <p className="text-sm">{t("testCase.lockedByExecution")}</p>
                 </div>
             )}
             <form onSubmit={handleSubmit(onSubmit)} className="w-full flex flex-col gap-4">
                 {updateId && (
-                    <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">#</label>
-                        <input
+                    <Field id="id" label="#" hint={t("common.idLabel")}>
+                        <Input
                             {...register('id')}
+                            id="id"
                             disabled
-                            className="form-input"
-                            placeholder={t("common.idLabel")}
+                            className="bg-ink/5"
                         />
-                    </div>
+                    </Field>
                 )}
-                <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">{t("common.nameLabel")}</label>
-                    <input
+                <Field
+                    id="name"
+                    label={t("common.nameLabel")}
+                    error={errors.name?.message as string | undefined}
+                >
+                    <Input
                         type="text"
                         id="name"
                         disabled={isReadOnly}
                         {...register('name', { required: t("common.nameRequired") })}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                        hasError={Boolean(errors.name)}
                     />
-                    {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
-                </div>
-                <div>
-                    <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">{t("common.dueDateLabel")}</label>
-                    <input
+                </Field>
+                <Field id="dueDate" label={t("common.dueDateLabel")}>
+                    <Input
                         type="date"
                         id="dueDate"
                         disabled={isReadOnly}
                         {...register('dueDate', {
                             setValueAs: (value) => (value ? value : null),
                         })}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
                     />
-                </div>
-                <div>
-                    <label htmlFor="environmentId" className="block text-sm font-medium text-gray-700">{t("common.environmentLabel")} {!isReadOnly ? (<button className="text-lg" onClick={handleClickNewEnvironment} type="button"><FiPlusCircle /></button>) : null}</label>
-                    <select
+                </Field>
+                <Field
+                    id="environmentId"
+                    label={
+                        <span className="inline-flex items-center gap-2">
+                            {t("common.environmentLabel")}
+                            {!isReadOnly ? (
+                                <button className="text-lg text-ocean hover:text-ink" onClick={handleClickNewEnvironment} type="button">
+                                    <FiPlusCircle />
+                                </button>
+                            ) : null}
+                        </span>
+                    }
+                    error={errors.environmentId?.message as string | undefined}
+                >
+                    <Select
                         {...register('environmentId', {
                             required: t("testCase.environmentRequired"),
                             setValueAs: (value) => parseInt(value, 10),
                         })}
                         disabled={isReadOnly}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.environmentId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                        hasError={Boolean(errors.environmentId)}
                     >
                         <option value="">{t("common.selectEnvironment")}</option>
                         {environments.map((environment) => (
@@ -266,19 +276,30 @@ const TestCaseForm = () => {
                                 {environment.name}
                             </option>
                         ))}
-                    </select>
-                    {errors.environmentId && <span className="text-red-500 text-sm">{errors.environmentId.message}</span>}
-                </div>
-                <div>
-                    <label htmlFor="testScenarioId" className="block text-sm font-medium text-gray-700">{t("common.testScenarioLabel")} {!isReadOnly ? (<button className="text-lg" onClick={handleClickNewTestScenario} type="button"><FiPlusCircle /></button>) : null}</label>
-                    <select
+                    </Select>
+                </Field>
+                <Field
+                    id="testScenarioId"
+                    label={
+                        <span className="inline-flex items-center gap-2">
+                            {t("common.testScenarioLabel")}
+                            {!isReadOnly ? (
+                                <button className="text-lg text-ocean hover:text-ink" onClick={handleClickNewTestScenario} type="button">
+                                    <FiPlusCircle />
+                                </button>
+                            ) : null}
+                        </span>
+                    }
+                    error={errors.testScenarioId?.message as string | undefined}
+                >
+                    <Select
                         id='testScenarioId'
                         {...register('testScenarioId', {
                             required: t("testCase.testScenarioRequired"),
                             setValueAs: (value) => parseInt(value, 10),
                         })}
                         disabled={isReadOnly}
-                        className={`mt-1 block w-full px-3 py-2 border ${errors.testScenarioId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                        hasError={Boolean(errors.testScenarioId)}
                     >
                         <option value="">{t("common.selectScenario")}</option>
                         {testScenarios
@@ -288,20 +309,22 @@ const TestCaseForm = () => {
                                     {testScenario.name}
                                 </option>
                             ))}
-                    </select>
-                    {errors.testScenarioId && <span className="text-red-500 text-sm">{errors.testScenarioId.message}</span>}
-                </div>
+                    </Select>
+                </Field>
                 {!getTestCaseId() && (
-                    <div className="py-2">
-                        <label htmlFor="templateId" className="block text-sm font-medium text-gray-700">{t("common.templateLabel")}</label>
-                        <select
+                    <Field
+                        id="templateId"
+                        label={t("common.templateLabel")}
+                        error={errors.templateId?.message as string | undefined}
+                    >
+                        <Select
                             {...register('templateId', {
                                 required: t("testCase.templateRequired"),
                                 setValueAs: (value) => parseInt(value, 10),
                                 onChange: handleChangeTemplate,
                             })}
                             disabled={isReadOnly}
-                            className={`mt-1 block w-full px-3 py-2 border ${errors.templateId ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+                            hasError={Boolean(errors.templateId)}
                         >
                             <option value="">{t("common.selectTemplate")}</option>
                             {templates.map((template) => (
@@ -309,16 +332,17 @@ const TestCaseForm = () => {
                                     {template.name}
                                 </option>
                             ))}
-                        </select>
-                        {errors.templateId && <span className="text-red-500 text-sm">{errors.templateId.message}</span>}
-                    </div>
+                        </Select>
+                    </Field>
                 )}
                 <div className="py-2">
-                    <fieldset className="border rounded p-4">
-                        <legend className="text-lg font-semibold">{t("testCase.definitionLegend")}</legend>
+                    <fieldset className="rounded-3xl border border-ink/10 bg-paper/70 p-4">
+                        <legend className="px-2 text-sm font-semibold text-ink">
+                            {t("testCase.definitionLegend")}
+                        </legend>
                         {!updateTemplate && !getTestCaseId() && (
-                            <div className="bg-red-100 border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
-                                <strong className="font-bold mr-2">{t("common.attention")}</strong>
+                            <div className="mb-4 flex items-center gap-2 rounded-2xl border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-ember">
+                                <strong className="font-semibold">{t("common.attention")}</strong>
                                 <span>{t("common.selectTemplateWarning")}</span>
                             </div>
                         )}
@@ -330,13 +354,16 @@ const TestCaseForm = () => {
                     </fieldset>
                 </div>
                 {!loadingTemplates && !isReadOnly && (
-                    <button
-                        type="submit"
-                        className="mt-10 text-lg bg-green-500 hover:bg-green-600 text-white px-4 py-2 flex justify-center items-center rounded-md"
-                    >
-                        <FiSave className="mr-2" />
-                        {t("common.save")}
-                    </button>
+                    <div className="pt-4">
+                        <Button
+                            type="submit"
+                            variant="accent"
+                            size="lg"
+                            leadingIcon={<FiSave />}
+                        >
+                            {t("common.save")}
+                        </Button>
+                    </div>
                 )}
             </form>
         </PainelContainer>

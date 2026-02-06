@@ -31,17 +31,17 @@ const DeviceList: React.FC<DeviceListProps> = ({ devices, onDelete }) => {
     const renderDeviceIcon = (type: number) => {
         switch (type) {
             case 1:
-                return <FiSmartphone className="text-purple-700 w-6 h-6" />;
+                return <FiSmartphone className="text-ocean w-6 h-6" />;
             case 2:
-                return <FiLayers className="text-purple-700 w-6 h-6" />;
+                return <FiLayers className="text-ocean w-6 h-6" />;
             case 3:
-                return <FiMonitor className="text-purple-700 w-6 h-6" />;
+                return <FiMonitor className="text-ocean w-6 h-6" />;
             case 4:
-                return <FiTablet className="text-purple-700 w-6 h-6" />;
+                return <FiTablet className="text-ocean w-6 h-6" />;
             case 5:
-                return <FiWatch className="text-purple-700 w-6 h-6" />;
+                return <FiWatch className="text-ocean w-6 h-6" />;
             default:
-                return <FiImage className="text-purple-700 w-6 h-6" />;
+                return <FiImage className="text-ocean w-6 h-6" />;
         }
     };
 

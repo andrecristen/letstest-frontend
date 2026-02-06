@@ -31,17 +31,17 @@ const HabilityList: React.FC<HabilityListProps> = ({ habilities, onDelete }) => 
     const renderHabilityIcon = (type: number) => {
         switch (type) {
             case 1:
-                return <FiStar className="text-purple-700 w-6 h-6" />;
+                return <FiStar className="text-ember w-6 h-6" />;
             case 2:
-                return <FiFile className="text-purple-700 w-6 h-6" />;
+                return <FiFile className="text-ember w-6 h-6" />;
             case 3:
-                return <FiBookOpen className="text-purple-700 w-6 h-6" />;
+                return <FiBookOpen className="text-ember w-6 h-6" />;
             case 4:
-                return <FiGlobe className="text-purple-700 w-6 h-6" />;
+                return <FiGlobe className="text-ember w-6 h-6" />;
             case 5:
-                return <FiAward className="text-purple-700 w-6 h-6" />;
+                return <FiAward className="text-ember w-6 h-6" />;
             default:
-                return <FiSmile className="text-purple-700 w-6 h-6" />;
+                return <FiSmile className="text-ember w-6 h-6" />;
         }
     };
 

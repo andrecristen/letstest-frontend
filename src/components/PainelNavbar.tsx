@@ -317,10 +317,10 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-sand">
+    <div className="flex h-screen overflow-hidden bg-transparent">
       <nav
         className={cn(
-          "sticky top-0 flex h-screen flex-col gap-6 border-r border-ink/10 bg-shale px-3 py-6 text-sand transition-all duration-300",
+          "sticky top-0 flex h-screen flex-col gap-6 border-r border-ink/10 bg-shale px-3 py-6 text-sand shadow-soft transition-all duration-300",
           isMenuOpen ? "w-64" : "w-20"
         )}
       >
@@ -362,7 +362,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
       </nav>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-paper/80 px-6 py-4 backdrop-blur">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-paper/90 px-6 py-4 backdrop-blur">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <img src={logo} alt="Logo" className="h-8" />
@@ -380,17 +380,17 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
           <div className="relative flex items-center gap-4">
             <div className="relative">
-              <button
-                onClick={toggleToolsMenu}
-                className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
-                ref={toolsButtonRef}
-                aria-label={t("nav.tools")}
-              >
+            <button
+              onClick={toggleToolsMenu}
+              className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 shadow-soft hover:text-ink"
+              ref={toolsButtonRef}
+              aria-label={t("nav.tools")}
+            >
                 <FiTool />
               </button>
               {isToolsOpen && (
                 <div
-                  className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper p-2 text-sm text-ink/70 shadow-soft"
+                  className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper/95 p-2 text-sm text-ink/70 shadow-soft"
                   ref={toolsMenuRef}
                 >
                   <button
@@ -412,7 +412,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             </div>
             <button
               onClick={toggleNotificationMenu}
-              className="relative rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
+              className="relative rounded-full border border-ink/10 bg-paper p-2 text-ink/70 shadow-soft hover:text-ink"
               ref={notificationButtonRef}
               aria-label="Notificacoes"
             >
@@ -425,7 +425,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             </button>
             {isNotificationOpen && (
               <div
-                className="absolute right-14 top-12 z-20 w-80 rounded-xl border border-ink/10 bg-paper p-4 text-sm text-ink/70 shadow-soft"
+                className="absolute right-14 top-12 z-20 w-80 rounded-xl border border-ink/10 bg-paper/95 p-4 text-sm text-ink/70 shadow-soft"
                 ref={notificationMenuRef}
               >
                 <div className="flex items-center justify-between pb-2">
@@ -502,12 +502,12 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             )}
 
             <div className="relative">
-              <button
-                onClick={toggleLanguageMenu}
-                className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 hover:text-ink"
-                ref={languageButtonRef}
-                aria-label="Idioma"
-              >
+            <button
+              onClick={toggleLanguageMenu}
+              className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 shadow-soft hover:text-ink"
+              ref={languageButtonRef}
+              aria-label="Idioma"
+            >
                 <FiGlobe />
                 <span className="text-xs font-semibold uppercase tracking-[0.2em]">
                   {i18n.language === "en" ? "EN" : "PT"}
@@ -515,7 +515,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
               </button>
               {isLanguageOpen && (
                 <div
-                  className="absolute right-0 top-12 z-20 w-40 rounded-xl border border-ink/10 bg-paper p-2 text-sm text-ink/70 shadow-soft"
+                  className="absolute right-0 top-12 z-20 w-40 rounded-xl border border-ink/10 bg-paper/95 p-2 text-sm text-ink/70 shadow-soft"
                   ref={languageMenuRef}
                 >
                   {languageOptions.map((option) => (
@@ -539,7 +539,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
             <button
               onClick={toggleUserMenu}
-              className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 hover:text-ink"
+              className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 shadow-soft hover:text-ink"
               ref={userButtonRef}
               aria-label="Menu do usuario"
             >
@@ -550,7 +550,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             </button>
             {isUserMenuOpen && (
               <div
-                className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper p-2 text-sm text-ink/70 shadow-soft"
+                className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper/95 p-2 text-sm text-ink/70 shadow-soft"
                 ref={userMenuRef}
               >
                 <button
@@ -576,7 +576,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
         </header>
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="rounded-3xl border border-ink/10 bg-paper/70 p-6 shadow-soft">
+          <div className="rounded-[28px] border border-ink/10 bg-paper/85 p-6 shadow-soft">
             {children}
           </div>
         </div>

@@ -13,16 +13,16 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseStyles =
-  "inline-flex items-center justify-center rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean/60 disabled:opacity-60 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center rounded-xl font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean/50 focus-visible:ring-offset-2 focus-visible:ring-offset-sand disabled:opacity-60 disabled:cursor-not-allowed";
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-ink text-sand hover:translate-y-[-1px] hover:shadow-lift",
+    "bg-ink text-sand shadow-soft hover:translate-y-[-1px] hover:shadow-lift",
   outline:
-    "border border-ink/20 text-ink hover:border-ink/40 hover:bg-ink/5",
+    "border border-ink/20 bg-paper/70 text-ink hover:border-ink/40 hover:bg-ink/5",
   ghost: "text-ink hover:bg-ink/5",
-  accent: "bg-ember text-sand hover:bg-ember/90 hover:shadow-soft",
-  danger: "bg-red-600 text-white hover:bg-red-700",
+  accent: "bg-ember text-sand shadow-soft hover:bg-ember/90 hover:shadow-lift",
+  danger: "bg-red-600 text-white shadow-soft hover:bg-red-700 hover:shadow-lift",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

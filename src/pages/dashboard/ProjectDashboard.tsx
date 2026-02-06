@@ -133,6 +133,32 @@ const ProjectDashboard: React.FC = () => {
     return filteredExecutions.flatMap((execution) => execution.reports ?? []);
   }, [filteredExecutions]);
 
+  const caseSummary = useMemo(() => {
+    const testCases = scenarios.flatMap((scenario) => scenario.testCases ?? []);
+    const executedCaseIds = new Set<number>();
+    baseExecutions.forEach((execution) => {
+      if (execution.testCaseId) executedCaseIds.add(execution.testCaseId);
+    });
+
+    const executedCases = executedCaseIds.size;
+    const totalCases = testCases.length;
+    const coverageRate = totalCases ? Math.round((executedCases / totalCases) * 100) : 0;
+    const pendingReports = baseExecutions.filter((execution) => (execution.reports ?? []).length === 0).length;
+
+    const lastReported = baseExecutions
+      .filter((execution) => execution.reported)
+      .map((execution) => new Date(execution.reported as string))
+      .sort((a, b) => b.getTime() - a.getTime())[0];
+
+    return {
+      totalCases,
+      executedCases,
+      coverageRate,
+      pendingReports,
+      lastReported,
+    };
+  }, [baseExecutions, scenarios]);
+
   const summary = useMemo(() => {
     const testCases = scenarios.flatMap((scenario) => scenario.testCases ?? []);
     const totalExecutions = filteredExecutions.length;
@@ -150,6 +176,15 @@ const ProjectDashboard: React.FC = () => {
       approvalRate,
     };
   }, [filteredExecutions.length, reports, scenarios]);
+
+  const qualitySignal = useMemo(() => {
+    const totalReviews = summary.approved + summary.rejected;
+    const rejectionRate = totalReviews ? summary.rejected / totalReviews : 0;
+
+    if (rejectionRate >= 0.4) return { level: "high", value: Math.round(rejectionRate * 100) };
+    if (rejectionRate >= 0.2) return { level: "medium", value: Math.round(rejectionRate * 100) };
+    return { level: "low", value: Math.round(rejectionRate * 100) };
+  }, [summary.approved, summary.rejected]);
 
   const involvementSummary = useMemo(() => {
     const involvements = projectOverview?.involvements ?? [];
@@ -227,6 +262,35 @@ const ProjectDashboard: React.FC = () => {
       })
       .sort((a, b) => b.rate - a.rate);
   }, [filteredExecutions, scenarioFilter, scenarios]);
+
+  const topFailure = scenarioFailureRates[0];
+
+  const actionItems = useMemo(() => {
+    const items: string[] = [];
+
+    if (baseExecutions.length === 0) {
+      items.push(t("dashboard.actionNoExecutions"));
+      return items;
+    }
+
+    if (caseSummary.pendingReports > 0) {
+      items.push(t("dashboard.actionPendingReports", { count: caseSummary.pendingReports }));
+    }
+
+    if (caseSummary.totalCases > 0 && caseSummary.coverageRate < 60) {
+      items.push(t("dashboard.actionLowCoverage", { rate: caseSummary.coverageRate }));
+    }
+
+    if (topFailure && topFailure.total > 0 && topFailure.rate >= 30) {
+      items.push(t("dashboard.actionHotspot", { name: topFailure.name, rate: topFailure.rate }));
+    }
+
+    if ((summary.approved + summary.rejected) === 0) {
+      items.push(t("dashboard.actionNoReviews"));
+    }
+
+    return items;
+  }, [baseExecutions.length, caseSummary.coverageRate, caseSummary.pendingReports, caseSummary.totalCases, summary.approved, summary.rejected, topFailure, t]);
 
   const executionChartData = useMemo(() => {
     const days: { date: Date; label: string; key: string; count: number }[] = [];
@@ -454,6 +518,70 @@ const ProjectDashboard: React.FC = () => {
             </Button>
           </div>
         </Card>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <Card className="space-y-4 bg-paper/95 p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.keyMetricsTitle")}</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-ink/10 bg-sand/60 p-3">
+                <p className="text-xs text-ink/50">{t("dashboard.executedCases")}</p>
+                <p className="text-lg font-semibold text-ink">
+                  {caseSummary.executedCases}/{caseSummary.totalCases}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-ink/10 bg-sand/60 p-3">
+                <p className="text-xs text-ink/50">{t("dashboard.coverageRate")}</p>
+                <p className="text-lg font-semibold text-ink">{caseSummary.coverageRate}%</p>
+              </div>
+              <div className="rounded-2xl border border-ink/10 bg-sand/60 p-3">
+                <p className="text-xs text-ink/50">{t("dashboard.pendingReports")}</p>
+                <p className="text-lg font-semibold text-ink">{caseSummary.pendingReports}</p>
+              </div>
+              <div className="rounded-2xl border border-ink/10 bg-sand/60 p-3">
+                <p className="text-xs text-ink/50">{t("dashboard.lastActivity")}</p>
+                <p className="text-sm font-semibold text-ink">
+                  {caseSummary.lastReported ? caseSummary.lastReported.toLocaleDateString() : t("dashboard.lastActivityEmpty")}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="space-y-4 bg-paper/95 p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.qualitySignalTitle")}</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm text-ink/70">
+                <span>{t("dashboard.qualitySignalLabel")}</span>
+                <Badge variant={qualitySignal.level === "high" ? "danger" : qualitySignal.level === "medium" ? "accent" : "success"}>
+                  {t(`dashboard.qualitySignal.${qualitySignal.level}`)}
+                </Badge>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-ink/10">
+                <div
+                  className={qualitySignal.level === "high" ? "h-full rounded-full bg-red-500" : qualitySignal.level === "medium" ? "h-full rounded-full bg-ember" : "h-full rounded-full bg-pine"}
+                  style={{ width: `${qualitySignal.value}%` }}
+                />
+              </div>
+              <p className="text-xs text-ink/60">
+                {t("dashboard.qualitySignalValue", { value: qualitySignal.value })}
+              </p>
+            </div>
+          </Card>
+
+          <Card className="space-y-4 bg-paper/95 p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.actionItemsTitle")}</p>
+            {actionItems.length === 0 ? (
+              <p className="text-sm text-ink/60">{t("dashboard.actionItemsEmpty")}</p>
+            ) : (
+              <div className="space-y-2">
+                {actionItems.map((item, index) => (
+                  <div key={`${item}-${index}`} className="rounded-2xl border border-ink/10 bg-sand/60 px-3 py-2 text-sm text-ink/70">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card className="space-y-4 bg-paper/95 p-6">

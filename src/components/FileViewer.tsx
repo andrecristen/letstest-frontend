@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import FormDialogBase, { FormDialogBaseRef } from './FormDialogBase';
 import { FileData } from '../models/FileData';
 import { FiFile } from 'react-icons/fi';
+import { Button } from '../ui';
 import DocViewer, { DocViewerRenderers, IDocument } from "@cyntler/react-doc-viewer";
 import { useTranslation } from 'react-i18next';
 
@@ -36,10 +37,18 @@ const FileViewer: React.FC<FileViewerProps> = ({ files }) => {
 
     return (
         <>
-            <ul>
+            <ul className="space-y-2">
                 {files.map((file) => (
                     <li key={file.id}>
-                        <button className="inline-flex items-center w-full px-4 py-2 bg-purple-500 text-white font-bold rounded-md hover:bg-purple-700 transition-colors mb-2" onClick={() => openFileViewer(file)}><FiFile className="m-2" />{file.name}</button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full justify-start"
+                            leadingIcon={<FiFile />}
+                            onClick={() => openFileViewer(file)}
+                        >
+                            {file.name}
+                        </Button>
                     </li>
                 ))}
             </ul>
