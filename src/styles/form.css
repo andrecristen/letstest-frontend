@@ -3,19 +3,19 @@
 }
 
 .action-button-blue {
-    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-4 py-2 font-semibold text-sand shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ocean/90 hover:shadow-lift md:w-40;
+    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-4 py-2 font-semibold text-sand-fixed shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ocean/90 hover:shadow-lift md:w-40;
 }
 
 .action-button-green {
-    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-pine px-4 py-2 font-semibold text-sand shadow-soft transition-all hover:-translate-y-[1px] hover:bg-pine/90 hover:shadow-lift md:w-40;
+    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-pine px-4 py-2 font-semibold text-sand-fixed shadow-soft transition-all hover:-translate-y-[1px] hover:bg-pine/90 hover:shadow-lift md:w-40;
 }
 
 .action-button-teal {
-    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-4 py-2 font-semibold text-sand shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ocean/90 hover:shadow-lift md:w-40;
+    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-4 py-2 font-semibold text-sand-fixed shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ocean/90 hover:shadow-lift md:w-40;
 }
 
 .action-button-purple {
-    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-2 font-semibold text-sand shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ink/90 hover:shadow-lift md:w-40;
+    @apply inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ink-fixed px-4 py-2 font-semibold text-sand-fixed shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ink-fixed/90 hover:shadow-lift dark:bg-paper-fixed dark:text-ink-fixed dark:hover:bg-paper-fixed/90 md:w-40;
 }
 
 .action-button-red {

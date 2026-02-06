@@ -4,27 +4,25 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: 'Spline Sans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background:
-    radial-gradient(1200px 520px at 10% -10%, rgba(242, 193, 78, 0.25), transparent 70%),
-    radial-gradient(900px 520px at 90% 0%, rgba(47, 111, 143, 0.22), transparent 60%),
-    linear-gradient(180deg, rgba(251, 250, 248, 0.9) 0%, rgba(246, 241, 235, 0.9) 100%),
-    #f6f1eb;
-  color: #101418;
-  min-height: 100vh;
-}
-
-code {
-  font-family: 'JetBrains Mono', monospace;
-}
-
 @layer base {
-  html {
+  :root {
+    --color-ink: 16 20 24;
+    --color-paper: 251 250 248;
+    --color-sand: 246 241 235;
+    --color-shale: 27 36 48;
+    --color-stone: 231 224 216;
+    --color-mist: 238 242 245;
     color-scheme: light;
+  }
+
+  .dark {
+    --color-ink: 230 228 224;
+    --color-paper: 22 28 36;
+    --color-sand: 32 40 52;
+    --color-shale: 14 18 22;
+    --color-stone: 50 58 70;
+    --color-mist: 38 46 58;
+    color-scheme: dark;
   }
 
   ::selection {
@@ -36,10 +34,28 @@ code {
   }
 
   a:hover {
-    color: #101418;
+    color: rgb(var(--color-ink));
   }
 }
 
+body {
+  margin: 0;
+  font-family: 'Spline Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(1200px 520px at 10% -10%, rgba(242, 193, 78, 0.25), transparent 70%),
+    radial-gradient(900px 520px at 90% 0%, rgba(47, 111, 143, 0.22), transparent 60%),
+    linear-gradient(180deg, rgb(var(--color-paper) / 0.9) 0%, rgb(var(--color-sand) / 0.9) 100%),
+    rgb(var(--color-sand));
+  color: rgb(var(--color-ink));
+  min-height: 100vh;
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .dropdown-menu {
-  z-index: 1000; /* Ou qualquer outro valor alto o suficiente para colocar o dropdown acima dos outros elementos */
+  z-index: 1000;
 }

@@ -22,7 +22,7 @@ const TitleContainer: React.FC<TitleContainerProps> = ({ title, textHelp }) => {
       </h1>
       <button
         onClick={handleBack}
-        className="rounded-xl border border-ink/10 bg-ink px-3 py-2 text-sand shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ink/90 hover:shadow-lift"
+        className="rounded-xl border border-ink/10 bg-ink-fixed px-3 py-2 text-sand-fixed shadow-soft transition-all hover:-translate-y-[1px] hover:bg-ink-fixed/90 hover:shadow-lift dark:bg-paper-fixed dark:text-ink-fixed dark:hover:bg-paper-fixed/90"
       >
         <FiSkipBack className="h-5 w-5" />
       </button>

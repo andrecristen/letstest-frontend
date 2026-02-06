@@ -50,6 +50,7 @@ import { ConfigProvider } from "../contexts/ConfigContext";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router-dom";
 import { PageLoadingProvider } from "../contexts/PageLoadingContext";
+import { ThemeProvider } from "../contexts/ThemeContext";
 import PageLoadingOverlay from "./PageLoadingOverlay";
 import ConfirmOverlay from "./ConfirmOverlay";
 
@@ -65,6 +66,7 @@ const AppRoutes = () => {
     const { t } = useTranslation();
 
     return (
+        <ThemeProvider>
         <ConfigProvider>
         <OrganizationProvider>
         <PageLoadingProvider>
@@ -139,6 +141,7 @@ const AppRoutes = () => {
         </PageLoadingProvider>
         </OrganizationProvider>
         </ConfigProvider>
+        </ThemeProvider>
     );
 }
 

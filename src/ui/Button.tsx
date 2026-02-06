@@ -17,7 +17,7 @@ const baseStyles =
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-ink text-sand shadow-soft hover:translate-y-[-1px] hover:shadow-lift",
+    "bg-ink-fixed text-sand-fixed dark:bg-paper-fixed dark:text-ink-fixed shadow-soft hover:translate-y-[-1px] hover:shadow-lift",
   outline:
     "border border-ink/20 bg-paper/70 text-ink hover:border-ink/40 hover:bg-ink/5",
   ghost: "text-ink hover:bg-ink/5",

@@ -16,6 +16,8 @@ import {
   FiKey,
   FiLink,
   FiX,
+  FiSun,
+  FiMoon,
 } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -35,6 +37,7 @@ import type { Socket } from "socket.io-client";
 import OrganizationSelector from "./OrganizationSelector";
 import { useOrganization } from "../contexts/OrganizationContext";
 import { useConfig } from "../contexts/ConfigContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 interface Menu {
   name: string;
@@ -54,6 +57,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const { isSelfHosted, billingEnabled } = useConfig();
   const { isOwner } = useOrganization();
   const userName = useMemo(() => tokenProvider.getSessionUserName(), []);
+  const { isDark, toggleTheme } = useTheme();
 
   const [isMenuOpen, setIsMenuOpen] = useState(
     localStorage.getItem("isMenuOpen") === "true"
@@ -328,11 +332,11 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             className="absolute inset-0 bg-ink/50"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <nav className="relative flex h-full w-64 flex-col gap-6 bg-shale px-3 py-6 text-sand shadow-soft">
+          <nav className="relative flex h-full w-64 flex-col gap-6 bg-shale-fixed px-3 py-6 text-sand-fixed shadow-soft">
             <div className="flex items-center justify-between px-2">
               <span className="font-display text-lg tracking-wide"></span>
               <button
-                className="rounded-lg p-2 text-sand/80 hover:bg-sand/10"
+                className="rounded-lg p-2 text-sand-fixed/80 hover:bg-sand-fixed/10"
                 onClick={() => setIsMobileMenuOpen(false)}
                 aria-label="Close menu"
               >
@@ -350,8 +354,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
                     className={cn(
                       "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all",
                       isActive
-                        ? "bg-sand/10 text-sand"
-                        : "text-sand/70 hover:bg-sand/10 hover:text-sand"
+                        ? "bg-sand-fixed/10 text-sand-fixed"
+                        : "text-sand-fixed/70 hover:bg-sand-fixed/10 hover:text-sand-fixed"
                     )}
                   >
                     <span className="text-lg">{menu.icon}</span>
@@ -367,7 +371,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
       {/* Desktop sidebar */}
       <nav
         className={cn(
-          "sticky top-0 hidden h-screen flex-col gap-6 border-r border-ink/10 bg-shale px-3 py-6 text-sand shadow-soft transition-all duration-300 md:flex",
+          "sticky top-0 hidden h-screen flex-col gap-6 border-r border-ink/10 bg-shale-fixed px-3 py-6 text-sand-fixed shadow-soft transition-all duration-300 md:flex",
           isMenuOpen ? "w-64" : "w-20"
         )}
       >
@@ -376,7 +380,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             <span className="font-display text-lg tracking-wide"></span>
           )}
           <button
-            className="rounded-lg p-2 text-sand/80 hover:bg-sand/10"
+            className="rounded-lg p-2 text-sand-fixed/80 hover:bg-sand-fixed/10"
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >
@@ -395,8 +399,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all",
                   isActive
-                    ? "bg-sand/10 text-sand"
-                    : "text-sand/70 hover:bg-sand/10 hover:text-sand"
+                    ? "bg-sand-fixed/10 text-sand-fixed"
+                    : "text-sand-fixed/70 hover:bg-sand-fixed/10 hover:text-sand-fixed"
                 )}
                 title={isMenuOpen ? "" : menu.name}
               >
@@ -555,6 +559,14 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
                 </div>
               </div>
             )}
+
+            <button
+              onClick={toggleTheme}
+              className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 shadow-soft hover:text-ink"
+              aria-label={isDark ? "Light mode" : "Dark mode"}
+            >
+              {isDark ? <FiSun /> : <FiMoon />}
+            </button>
 
             <div className="relative">
             <button

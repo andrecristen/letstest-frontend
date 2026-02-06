@@ -195,7 +195,7 @@ const TestCaseItem: React.FC<TestCaseItemProps> = ({
             <div
                 className={
                     actionsPosition === "footer"
-                        ? "mt-auto flex w-full flex-wrap items-center gap-2 border-t border-ink/10 bg-white/70 px-3 py-3"
+                        ? "mt-auto flex w-full flex-wrap items-center gap-2 border-t border-ink/10 bg-paper/70 px-3 py-3"
                         : layout === "stacked"
                             ? "flex flex-wrap items-center gap-2 px-4 pb-4"
                             : "flex flex-wrap items-center gap-2"

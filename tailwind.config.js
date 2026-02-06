@@ -1,17 +1,22 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     "./src/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
     extend: {
       colors: {
-        ink: "#101418",
-        shale: "#1b2430",
-        mist: "#eef2f5",
-        sand: "#f6f1eb",
-        paper: "#fbfaf8",
-        stone: "#e7e0d8",
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+        shale: "rgb(var(--color-shale) / <alpha-value>)",
+        mist: "rgb(var(--color-mist) / <alpha-value>)",
+        sand: "rgb(var(--color-sand) / <alpha-value>)",
+        paper: "rgb(var(--color-paper) / <alpha-value>)",
+        stone: "rgb(var(--color-stone) / <alpha-value>)",
+        "ink-fixed": "#101418",
+        "sand-fixed": "#f6f1eb",
+        "shale-fixed": "#1b2430",
+        "paper-fixed": "#fbfaf8",
         ocean: "#2f6f8f",
         ember: "#e76f51",
         citron: "#f2c14e",
@@ -23,8 +28,8 @@ module.exports = {
         mono: ["JetBrains Mono", "monospace"],
       },
       boxShadow: {
-        soft: "0 20px 60px -40px rgba(16, 20, 24, 0.55)",
-        lift: "0 18px 45px -30px rgba(16, 20, 24, 0.6)",
+        soft: "0 20px 60px -40px rgb(var(--color-ink) / 0.35)",
+        lift: "0 18px 45px -30px rgb(var(--color-ink) / 0.4)",
       },
       borderRadius: {
         xl: "1rem",
