@@ -16,8 +16,8 @@ const TitleContainer: React.FC<TitleContainerProps> = ({ title, textHelp }) => {
   };
 
   return (
-    <div className="flex items-center justify-between rounded-3xl border border-ink/10 bg-paper/90 px-6 py-4 shadow-soft">
-      <h1 className="inline-flex items-center gap-3 font-display text-2xl text-ink">
+    <div className="flex items-center justify-between rounded-2xl border border-ink/10 bg-paper/90 px-4 py-3 shadow-soft md:rounded-3xl md:px-6 md:py-4">
+      <h1 className="inline-flex items-center gap-3 font-display text-xl text-ink md:text-2xl">
         {title} {textHelp && <Tooltip text={textHelp} />}
       </h1>
       <button

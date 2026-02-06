@@ -87,6 +87,14 @@ const tokenProvider = {
             organizationRole,
             organizations,
         }));
+        if (organizationId) {
+            localStorage.setItem('lastOrganizationId', String(organizationId));
+        }
+    },
+
+    getLastOrganizationId(): number | null {
+        const value = localStorage.getItem('lastOrganizationId');
+        return value ? Number(value) : null;
     },
 
     updateOrganization(
@@ -103,6 +111,7 @@ const tokenProvider = {
             session.organizationRole = organizationRole;
             localStorage.setItem('session', JSON.stringify(session));
         }
+        localStorage.setItem('lastOrganizationId', String(organizationId));
     },
 
     updateSessionToken(token: string, refreshToken?: string) {

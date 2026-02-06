@@ -27,7 +27,10 @@ const UserFormLogin = () => {
       const response = await auth(data);
       if (response?.status === 200) {
         const { token, refreshToken, userId, userName, organizations } = response.data;
-        const defaultOrg = organizations?.[0];
+        const lastOrgId = tokenProvider.getLastOrganizationId();
+        const defaultOrg =
+          (lastOrgId && organizations?.find((org: any) => org.id === lastOrgId)) ||
+          organizations?.[0];
         tokenProvider.setSession(
           token,
           refreshToken,

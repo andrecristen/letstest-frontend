@@ -15,6 +15,7 @@ import {
   FiUsers,
   FiKey,
   FiLink,
+  FiX,
 } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -57,6 +58,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(
     localStorage.getItem("isMenuOpen") === "true"
   );
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [menuSelected, setMenuSelected] = useState(location.pathname);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -314,13 +316,58 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     event.preventDefault();
     navigate(route);
     setMenuSelected(route);
+    setIsMobileMenuOpen(false);
   };
 
   return (
     <div className="flex h-screen overflow-hidden bg-transparent">
+      {/* Mobile sidebar overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-ink/50"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <nav className="relative flex h-full w-64 flex-col gap-6 bg-shale px-3 py-6 text-sand shadow-soft">
+            <div className="flex items-center justify-between px-2">
+              <span className="font-display text-lg tracking-wide"></span>
+              <button
+                className="rounded-lg p-2 text-sand/80 hover:bg-sand/10"
+                onClick={() => setIsMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <FiX className="text-xl" />
+              </button>
+            </div>
+            <div className="flex flex-col gap-2">
+              {menus.map((menu) => {
+                const isActive = menu.route === menuSelected;
+                return (
+                  <button
+                    key={menu.name}
+                    type="button"
+                    onClick={(event) => handleClickMenu(event, menu.route)}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-all",
+                      isActive
+                        ? "bg-sand/10 text-sand"
+                        : "text-sand/70 hover:bg-sand/10 hover:text-sand"
+                    )}
+                  >
+                    <span className="text-lg">{menu.icon}</span>
+                    <span className="font-medium">{menu.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
       <nav
         className={cn(
-          "sticky top-0 flex h-screen flex-col gap-6 border-r border-ink/10 bg-shale px-3 py-6 text-sand shadow-soft transition-all duration-300",
+          "sticky top-0 hidden h-screen flex-col gap-6 border-r border-ink/10 bg-shale px-3 py-6 text-sand shadow-soft transition-all duration-300 md:flex",
           isMenuOpen ? "w-64" : "w-20"
         )}
       >
@@ -362,8 +409,16 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
       </nav>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-paper/90 px-6 py-4 backdrop-blur">
-          <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-ink/10 bg-paper/90 px-3 py-2 backdrop-blur md:px-6 md:py-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Mobile hamburger button */}
+            <button
+              className="rounded-lg p-2 text-ink/70 hover:bg-ink/5 md:hidden"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <FiMenu className="text-xl" />
+            </button>
             <div className="flex items-center gap-3">
               <img src={logo} alt="Logo" className="h-8" />
               <div className="hidden sm:block">
@@ -372,13 +427,13 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             </div>
             <OrganizationSelector />
             {isSelfHosted && (
-              <span className="rounded-full bg-ocean/10 px-2 py-1 text-xs font-medium text-ocean">
+              <span className="hidden rounded-full bg-ocean/10 px-2 py-1 text-xs font-medium text-ocean sm:inline-flex">
                 {t("common.selfHosted")}
               </span>
             )}
           </div>
 
-          <div className="relative flex items-center gap-4">
+          <div className="relative flex items-center gap-2 md:gap-4">
             <div className="relative">
             <button
               onClick={toggleToolsMenu}
@@ -390,7 +445,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
               </button>
               {isToolsOpen && (
                 <div
-                  className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper/95 p-2 text-sm text-ink/70 shadow-soft"
+                  className="absolute right-0 top-12 z-20 w-[calc(100vw-2rem)] rounded-xl border border-ink/10 bg-paper/95 p-2 text-sm text-ink/70 shadow-soft sm:w-56"
                   ref={toolsMenuRef}
                 >
                   <button
@@ -425,7 +480,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             </button>
             {isNotificationOpen && (
               <div
-                className="absolute right-14 top-12 z-20 w-80 rounded-xl border border-ink/10 bg-paper/95 p-4 text-sm text-ink/70 shadow-soft"
+                className="absolute right-0 top-12 z-20 w-[calc(100vw-2rem)] rounded-xl border border-ink/10 bg-paper/95 p-4 text-sm text-ink/70 shadow-soft sm:w-80"
                 ref={notificationMenuRef}
               >
                 <div className="flex items-center justify-between pb-2">
@@ -504,7 +559,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
             <div className="relative">
             <button
               onClick={toggleLanguageMenu}
-              className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 shadow-soft hover:text-ink"
+              className="flex items-center gap-1 rounded-full border border-ink/10 bg-paper px-2 py-2 text-ink/70 shadow-soft hover:text-ink md:gap-2 md:px-3"
               ref={languageButtonRef}
               aria-label="Idioma"
             >
@@ -539,18 +594,18 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
             <button
               onClick={toggleUserMenu}
-              className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 shadow-soft hover:text-ink"
+              className="flex items-center gap-1 rounded-full border border-ink/10 bg-paper px-2 py-2 text-ink/70 shadow-soft hover:text-ink md:gap-2 md:px-3"
               ref={userButtonRef}
               aria-label="Menu do usuario"
             >
               <FiUser />
-              <span className="max-w-[140px] truncate text-sm font-medium text-ink/70">
+              <span className="hidden max-w-[140px] truncate text-sm font-medium text-ink/70 sm:inline">
                 {userName || t("nav.myProfile")}
               </span>
             </button>
             {isUserMenuOpen && (
               <div
-                className="absolute right-0 top-12 z-20 w-56 rounded-xl border border-ink/10 bg-paper/95 p-2 text-sm text-ink/70 shadow-soft"
+                className="absolute right-0 top-12 z-20 w-[calc(100vw-2rem)] rounded-xl border border-ink/10 bg-paper/95 p-2 text-sm text-ink/70 shadow-soft sm:w-56"
                 ref={userMenuRef}
               >
                 <button
@@ -575,8 +630,8 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div className="rounded-[28px] border border-ink/10 bg-paper/85 p-6 shadow-soft">
+        <div className="flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6">
+          <div className="rounded-2xl border border-ink/10 bg-paper/85 p-4 shadow-soft md:rounded-[28px] md:p-6">
             {children}
           </div>
         </div>

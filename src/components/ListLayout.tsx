@@ -48,7 +48,7 @@ const ListLayout: React.FC<ListLayoutProps> = ({
         <TitleContainer title={title} textHelp={textHelp} />
 
         {(actions || extraActions) && (
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-2">{extraActions}</div>
             <div className="flex flex-wrap items-center gap-2">{actions}</div>
           </div>

@@ -176,11 +176,11 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
   const showHeader = !isViewMode;
 
   return (
-    <div className="flex w-full min-h-12 overflow-hidden rounded-lg border border-ink/15 bg-paper shadow-sm">
+    <div className="flex w-full min-h-12 flex-col overflow-hidden rounded-lg border border-ink/15 bg-paper shadow-sm sm:flex-row">
       {columnsRow.map((column, index) => (
         <div
           key={`column` + column.id}
-          className={`group flex w-full flex-auto flex-col border-r border-ink/10 bg-paper/80 ${draggedColumnIndex === index ? "opacity-60" : ""}`}
+          className={`group flex w-full flex-auto flex-col border-b border-ink/10 bg-paper/80 sm:border-b-0 sm:border-r ${draggedColumnIndex === index ? "opacity-60" : ""}`}
         >
           {showHeader ? (
             <div
@@ -193,7 +193,7 @@ const CustomizableRow: React.FC<CustomizableRowProps> = ({ projectId, columns, o
             >
               <span className="flex-1 text-center">{getColumnLabel(index)}</span>
               {operation === Operation.Edit && !hiddeColumnsActions ? (
-                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex items-center gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                   <button
                     type="button"
                     className="rounded-full p-1 text-ink/60 transition hover:bg-ink/10 hover:text-ink"

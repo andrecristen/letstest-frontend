@@ -14,7 +14,7 @@ const Modal = ({ open, onClose, containerStyle, className, style, children }: Mo
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-12" style={containerStyle}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 py-4 md:py-12" style={containerStyle}>
       <div
         className="absolute inset-0 bg-ink/40 backdrop-blur-sm"
         onClick={onClose}

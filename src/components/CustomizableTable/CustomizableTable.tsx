@@ -138,13 +138,13 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
             {customizableTableRows.map((row, index) => (
                 <div
                     key={row.id}
-                    className={`flex items-stretch gap-1 ${draggedRowIndex === index ? "opacity-60" : ""}`}
+                    className={`flex flex-col gap-1 sm:flex-row sm:items-stretch ${draggedRowIndex === index ? "opacity-60" : ""}`}
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={() => handleRowDrop(index)}
                 >
                     {props.operation !== Operation.View ? (
                         <div
-                            className="flex min-w-[40px] flex-col items-center justify-center rounded-md border border-ink/10 bg-paper/70 text-xs font-semibold text-ink/60 cursor-move"
+                            className="flex min-w-[40px] items-center justify-center rounded-md border border-ink/10 bg-paper/70 px-2 py-1 text-xs font-semibold text-ink/60 cursor-move sm:flex-col sm:px-0 sm:py-0"
                             draggable={props.operation === Operation.Edit || props.forceShowAddRows}
                             onDragStart={() => handleRowDragStart(index)}
                             onDragEnd={handleRowDragEnd}
@@ -163,7 +163,7 @@ const CustomizableTable = React.forwardRef<CustomizableTableRef, CustomizableTab
                         onChange={(updatedColumns) => updateRow(index, updatedColumns)}
                     />
                     {props.operation === Operation.Edit || props.forceShowAddRows ? (
-                        <div className="flex flex-col overflow-hidden rounded-lg border border-ink/10 bg-paper/70">
+                        <div className="flex flex-row overflow-hidden rounded-lg border border-ink/10 bg-paper/70 sm:flex-col">
                             <button
                                 type="button"
                                 onClick={() => duplicateRow(index)}

@@ -782,7 +782,7 @@ const ProjectDashboard: React.FC = () => {
         </div>
 
         <Card className="space-y-6 bg-paper/95 p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-ink/40">{t("dashboard.dailyExecutionsTitle")}</p>
               <p className="text-sm text-ink/60">{t("dashboard.dailyExecutionsSubtitle")}</p>
