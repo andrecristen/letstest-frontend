@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FiMenu,
   FiBell,
@@ -52,6 +52,7 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
   const { clearContext } = useOrganization();
   const { isSelfHosted, billingEnabled } = useConfig();
   const { isOwner } = useOrganization();
+  const userName = useMemo(() => tokenProvider.getSessionUserName(), []);
 
   const [isMenuOpen, setIsMenuOpen] = useState(
     localStorage.getItem("isMenuOpen") === "true"
@@ -538,11 +539,14 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
 
             <button
               onClick={toggleUserMenu}
-              className="rounded-full border border-ink/10 bg-paper p-2 text-ink/70 hover:text-ink"
+              className="flex items-center gap-2 rounded-full border border-ink/10 bg-paper px-3 py-2 text-ink/70 hover:text-ink"
               ref={userButtonRef}
               aria-label="Menu do usuario"
             >
               <FiUser />
+              <span className="max-w-[140px] truncate text-sm font-medium text-ink/70">
+                {userName || t("nav.myProfile")}
+              </span>
             </button>
             {isUserMenuOpen && (
               <div

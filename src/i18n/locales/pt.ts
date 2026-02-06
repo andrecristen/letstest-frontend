@@ -596,6 +596,7 @@ const pt = {
     limitSubtitle: "Faca upgrade para continuar",
     limitDescription: "Voce atingiu um limite do plano para esta acao.",
     limitMetric: "{{metric}}: {{current}} / {{limit}}",
+    limitIncludesInvites: "Inclui convites pendentes: {{pending}}",
     upgradeAction: "Ver planos",
     successTitle: "Pagamento confirmado",
     successSubtitle: "Seu plano foi atualizado.",

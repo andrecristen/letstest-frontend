@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiPlus, FiTrash2, FiCopy, FiRefreshCw, FiChevronDown, FiChevronUp } from "react-icons/fi";
@@ -6,6 +6,7 @@ import { useOrganization } from "../../contexts/OrganizationContext";
 import * as webhookService from "../../services/webhookService";
 import type { Webhook, WebhookEvent, WebhookDelivery } from "../../services/webhookService";
 import notifyProvider from "../../infra/notifyProvider";
+import { requestConfirm } from "../../infra/confirmManager";
 import { Button, Card, Field, Input, Badge } from "../../ui";
 import PainelContainer from "../../components/PainelContainer";
 import TitleContainer from "../../components/TitleContainer";
@@ -25,7 +26,7 @@ const WEBHOOK_EVENTS: WebhookEvent[] = [
 const WebhookManagement: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { currentOrganization, isOwner } = useOrganization();
+  const { currentOrganization, isOwner, switchOrganization } = useOrganization();
 
   const [loading, setLoading] = useState(false);
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
@@ -39,6 +40,8 @@ const WebhookManagement: React.FC = () => {
   const [deliveries, setDeliveries] = useState<WebhookDelivery[]>([]);
   const [loadingDeliveries, setLoadingDeliveries] = useState(false);
 
+  const refreshAttemptedRef = useRef<Record<number, boolean>>({});
+
   const loadWebhooks = useCallback(async () => {
     setLoading(true);
     try {
@@ -47,6 +50,11 @@ const WebhookManagement: React.FC = () => {
         setWebhooks(response.data?.webhooks ?? []);
         setWebhookLimit(response.data?.limit ?? null);
       } else if (response?.status === 403) {
+        if (currentOrganization && !refreshAttemptedRef.current[currentOrganization.id]) {
+          refreshAttemptedRef.current[currentOrganization.id] = true;
+          await switchOrganization(currentOrganization.id);
+          return;
+        }
         notifyProvider.error(t("webhooks.noAccess"));
       }
     } catch {
@@ -54,7 +62,7 @@ const WebhookManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [currentOrganization, switchOrganization, t]);
 
   const loadDeliveries = async (webhookId: number) => {
     setLoadingDeliveries(true);
@@ -113,7 +121,10 @@ const WebhookManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm(t("webhooks.confirmDelete"))) return;
+    const confirmed = await requestConfirm({
+      message: t("webhooks.confirmDelete"),
+    });
+    if (!confirmed) return;
     try {
       const response = await webhookService.deleteWebhook(id);
       if (response?.status === 200) {
@@ -142,7 +153,10 @@ const WebhookManagement: React.FC = () => {
   };
 
   const handleRegenerateSecret = async (id: number) => {
-    if (!window.confirm(t("webhooks.confirmRegenerate"))) return;
+    const confirmed = await requestConfirm({
+      message: t("webhooks.confirmRegenerate"),
+    });
+    if (!confirmed) return;
     try {
       const response = await webhookService.regenerateWebhookSecret(id);
       if (response?.status === 200) {

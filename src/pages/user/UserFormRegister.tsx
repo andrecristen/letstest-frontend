@@ -30,11 +30,12 @@ const UserFormRegister = () => {
     }
     const response = await registerAccount(data);
     if (response?.status === 200) {
-      const { token, userId, organizations } = response.data;
+      const { token, userId, userName, organizations } = response.data;
       const defaultOrg = organizations?.[0];
       tokenProvider.setSession(
         token,
         userId,
+        userName,
         defaultOrg?.id,
         defaultOrg?.slug,
         defaultOrg?.role,

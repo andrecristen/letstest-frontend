@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiUserPlus, FiTrash2, FiEdit2, FiX, FiCheck, FiClock, FiRefreshCw, FiMail } from "react-icons/fi";
 import { useOrganization } from "../../contexts/OrganizationContext";
 import * as organizationService from "../../services/organizationService";
 import type { OrganizationMember, PendingInvite } from "../../services/organizationService";
+import { getUsage } from "../../services/billingService";
+import type { BillingUsageSummary } from "../../models/BillingData";
 import notifyProvider from "../../infra/notifyProvider";
 import tokenProvider from "../../infra/tokenProvider";
+import { requestConfirm } from "../../infra/confirmManager";
 import { Button, Card, Field, Input, Select } from "../../ui";
 import PainelContainer from "../../components/PainelContainer";
 import TitleContainer from "../../components/TitleContainer";
@@ -41,15 +44,27 @@ const OrganizationMembers: React.FC = () => {
     const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
     const [editingRole, setEditingRole] = useState("");
     const [resendingInviteId, setResendingInviteId] = useState<number | null>(null);
+    const [usage, setUsage] = useState<BillingUsageSummary | null>(null);
 
     const loadMembers = useCallback(async () => {
         if (!currentOrganization) return;
         setIsLoading(true);
         try {
-            const response = await organizationService.getMembers(currentOrganization.id);
-            if (response?.data) {
-                setMembers(response.data.members || []);
-                setPendingInvites(response.data.pendingInvites || []);
+            const [membersResult, usageResult] = await Promise.allSettled([
+                organizationService.getMembers(currentOrganization.id),
+                getUsage(),
+            ]);
+            if (membersResult.status === "fulfilled") {
+                const response = membersResult.value;
+                if (response?.data) {
+                    setMembers(response.data.members || []);
+                    setPendingInvites(response.data.pendingInvites || []);
+                }
+            } else {
+                notifyProvider.error(t("organization.loadMembersError"));
+            }
+            if (usageResult.status === "fulfilled") {
+                setUsage(usageResult.value?.data ?? null);
             }
         } catch (error) {
             notifyProvider.error(t("organization.loadMembersError"));
@@ -71,9 +86,23 @@ const OrganizationMembers: React.FC = () => {
         }
     }, [loadMembers, canManage]);
 
+    const seatLimit = usage?.limits?.seats ?? null;
+    const seatUsage = usage?.usage?.seats ?? members.length;
+    const seatPending = pendingInvites.length;
+    const seatCurrent = Math.max(seatUsage, members.length);
+    const seatTotal = seatCurrent + seatPending;
+    const canInviteMore = useMemo(() => {
+        if (seatLimit === null) return true;
+        return seatTotal < seatLimit;
+    }, [seatLimit, seatTotal]);
+
     const handleInvite = async (event: React.FormEvent) => {
         event.preventDefault();
         if (!currentOrganization) return;
+        if (!canInviteMore) {
+            notifyProvider.error(t("billing.limitDescription"));
+            return;
+        }
 
         setIsInviting(true);
         try {
@@ -81,6 +110,9 @@ const OrganizationMembers: React.FC = () => {
                 email: inviteEmail,
                 role: inviteRole,
             });
+            if (response?.status === 402) {
+                return;
+            }
             if (response?.status === 201) {
                 const message = response.data?.userExists
                     ? t("organization.inviteCreatedUserExists")
@@ -123,7 +155,10 @@ const OrganizationMembers: React.FC = () => {
 
     const handleRemoveMember = async (userId: number, userName: string) => {
         if (!currentOrganization) return;
-        if (!window.confirm(t("organization.confirmRemove", { name: userName }))) return;
+        const confirmed = await requestConfirm({
+            message: t("organization.confirmRemove", { name: userName }),
+        });
+        if (!confirmed) return;
 
         try {
             const response = await organizationService.removeMember(currentOrganization.id, userId);
@@ -140,7 +175,10 @@ const OrganizationMembers: React.FC = () => {
 
     const handleCancelInvite = async (inviteId: number, email: string) => {
         if (!currentOrganization) return;
-        if (!window.confirm(t("organization.confirmCancelInvite", { email }))) return;
+        const confirmed = await requestConfirm({
+            message: t("organization.confirmCancelInvite", { email }),
+        });
+        if (!confirmed) return;
 
         try {
             const response = await organizationService.cancelInvite(currentOrganization.id, inviteId);
@@ -209,6 +247,7 @@ const OrganizationMembers: React.FC = () => {
                         <Button
                             onClick={() => setShowInviteModal(true)}
                             leadingIcon={<FiUserPlus />}
+                            disabled={!canInviteMore}
                         >
                             {t("organization.inviteMember")}
                         </Button>
@@ -219,9 +258,32 @@ const OrganizationMembers: React.FC = () => {
             {/* Active Members */}
             <Card className="mt-6 overflow-hidden">
                 <div className="border-b border-ink/10 bg-ink/5 px-4 py-3">
-                    <h3 className="text-sm font-medium text-ink">
-                        {t("organization.activeMembers")} ({members.length})
-                    </h3>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 className="text-sm font-medium text-ink">
+                                {t("organization.activeMembers")} ({members.length})
+                            </h3>
+                            {seatLimit !== null && (
+                                <p className="text-xs text-ink/50">
+                                    {t("billing.limitMetric", {
+                                        metric: t("billing.metricSeats"),
+                                        current: seatTotal,
+                                        limit: seatLimit,
+                                    })}
+                                    {seatPending > 0 ? (
+                                        <span className="ml-2">
+                                            {t("billing.limitIncludesInvites", { pending: seatPending })}
+                                        </span>
+                                    ) : null}
+                                </p>
+                            )}
+                        </div>
+                        {!canInviteMore && (
+                            <p className="text-xs font-medium text-rose-600">
+                                {t("billing.limitDescription")}
+                            </p>
+                        )}
+                    </div>
                 </div>
                 {isLoading ? (
                     <div className="p-6 text-center text-ink/60">
@@ -279,18 +341,30 @@ const OrganizationMembers: React.FC = () => {
                                                         </option>
                                                     ))}
                                                 </Select>
-                                                <button
+                                                <Button
+                                                    variant="accent"
+                                                    size="sm"
+                                                    iconOnly
+                                                    className="h-9 w-9"
                                                     onClick={() => handleUpdateRole(member.userId)}
-                                                    className="text-green-600 hover:text-green-800"
+                                                    leadingIcon={<FiCheck />}
+                                                    title={t("common.save")}
+                                                    aria-label={t("common.save")}
                                                 >
-                                                    <FiCheck />
-                                                </button>
-                                                <button
+                                                    <span className="sr-only">{t("common.save")}</span>
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    iconOnly
+                                                    className="h-9 w-9"
                                                     onClick={() => setEditingMemberId(null)}
-                                                    className="text-red-600 hover:text-red-800"
+                                                    leadingIcon={<FiX />}
+                                                    title={t("common.cancel")}
+                                                    aria-label={t("common.cancel")}
                                                 >
-                                                    <FiX />
-                                                </button>
+                                                    <span className="sr-only">{t("common.cancel")}</span>
+                                                </Button>
                                             </div>
                                         ) : (
                                             <span className="inline-flex items-center rounded-full bg-ink/10 px-2 py-1 text-xs capitalize">
@@ -303,22 +377,32 @@ const OrganizationMembers: React.FC = () => {
                                             {member.userId !== currentUserId && (
                                                 <div className="flex justify-end gap-2">
                                                     {isOwner && editingMemberId !== member.userId && member.role !== "owner" && (
-                                                        <button
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            iconOnly
+                                                            className="h-9 w-9"
                                                             onClick={() => startEditingRole(member)}
-                                                            className="text-ink/50 hover:text-ink"
+                                                            leadingIcon={<FiEdit2 size={16} />}
                                                             title={t("organization.editRole")}
+                                                            aria-label={t("organization.editRole")}
                                                         >
-                                                            <FiEdit2 size={16} />
-                                                        </button>
+                                                            <span className="sr-only">{t("organization.editRole")}</span>
+                                                        </Button>
                                                     )}
                                                     {member.role !== "owner" && (isOwner || member.role === "member") && (
-                                                        <button
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            iconOnly
+                                                            className="h-9 w-9 text-red-500 hover:text-red-700"
                                                             onClick={() => handleRemoveMember(member.userId, member.user.name)}
-                                                            className="text-red-500 hover:text-red-700"
+                                                            leadingIcon={<FiTrash2 size={16} />}
                                                             title={t("organization.removeMember")}
+                                                            aria-label={t("organization.removeMember")}
                                                         >
-                                                            <FiTrash2 size={16} />
-                                                        </button>
+                                                            <span className="sr-only">{t("organization.removeMember")}</span>
+                                                        </Button>
                                                     )}
                                                 </div>
                                             )}
@@ -385,24 +469,36 @@ const OrganizationMembers: React.FC = () => {
                                     {canManage && (
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <button
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    iconOnly
+                                                    className="h-9 w-9"
                                                     onClick={() => handleResendInvite(invite.id)}
-                                                    className="text-blue-500 hover:text-blue-700"
+                                                    leadingIcon={
+                                                        <FiRefreshCw
+                                                            size={16}
+                                                            className={resendingInviteId === invite.id ? "animate-spin" : ""}
+                                                        />
+                                                    }
                                                     title={t("organization.resendInvite")}
+                                                    aria-label={t("organization.resendInvite")}
                                                     disabled={resendingInviteId === invite.id}
                                                 >
-                                                    <FiRefreshCw
-                                                        size={16}
-                                                        className={resendingInviteId === invite.id ? "animate-spin" : ""}
-                                                    />
-                                                </button>
-                                                <button
+                                                    <span className="sr-only">{t("organization.resendInvite")}</span>
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    iconOnly
+                                                    className="h-9 w-9 text-red-500 hover:text-red-700"
                                                     onClick={() => handleCancelInvite(invite.id, invite.email)}
-                                                    className="text-red-500 hover:text-red-700"
+                                                    leadingIcon={<FiTrash2 size={16} />}
                                                     title={t("organization.cancelInvite")}
+                                                    aria-label={t("organization.cancelInvite")}
                                                 >
-                                                    <FiTrash2 size={16} />
-                                                </button>
+                                                    <span className="sr-only">{t("organization.cancelInvite")}</span>
+                                                </Button>
                                             </div>
                                         </td>
                                     )}

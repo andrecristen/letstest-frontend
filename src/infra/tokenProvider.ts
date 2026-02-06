@@ -9,6 +9,7 @@ export type Organization = {
 export type Session = {
     token: string;
     userId: number;
+    userName?: string;
     organizationId?: number;
     organizationSlug?: string;
     organizationRole?: string;
@@ -25,6 +26,11 @@ const tokenProvider = {
     getSessionToken() {
         const session = this.getSession();
         return session && session.token ? session.token : null;
+    },
+
+    getSessionUserName() {
+        const session = this.getSession();
+        return session?.userName ?? null;
     },
 
     getOrganizationId() {
@@ -58,6 +64,7 @@ const tokenProvider = {
     setSession(
         token: string,
         userId: number,
+        userName?: string,
         organizationId?: number,
         organizationSlug?: string,
         organizationRole?: string,
@@ -66,6 +73,7 @@ const tokenProvider = {
         localStorage.setItem('session', JSON.stringify({
             token,
             userId,
+            userName,
             organizationId,
             organizationSlug,
             organizationRole,

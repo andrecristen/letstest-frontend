@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiPlus, FiTrash2, FiCopy, FiKey } from "react-icons/fi";
@@ -6,6 +6,7 @@ import { useOrganization } from "../../contexts/OrganizationContext";
 import * as apiKeyService from "../../services/apiKeyService";
 import type { ApiKey, ApiKeyScope } from "../../services/apiKeyService";
 import notifyProvider from "../../infra/notifyProvider";
+import { requestConfirm } from "../../infra/confirmManager";
 import { Button, Card, Field, Input, Badge } from "../../ui";
 import PainelContainer from "../../components/PainelContainer";
 import TitleContainer from "../../components/TitleContainer";
@@ -23,7 +24,7 @@ const AVAILABLE_SCOPES: { key: ApiKeyScope; label: string }[] = [
 const ApiKeyManagement: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { currentOrganization, isOwner } = useOrganization();
+  const { currentOrganization, isOwner, switchOrganization } = useOrganization();
 
   const [loading, setLoading] = useState(false);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -34,6 +35,8 @@ const ApiKeyManagement: React.FC = () => {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
+  const refreshAttemptedRef = useRef<Record<number, boolean>>({});
+
   const loadApiKeys = useCallback(async () => {
     setLoading(true);
     try {
@@ -41,6 +44,11 @@ const ApiKeyManagement: React.FC = () => {
       if (response?.status === 200) {
         setApiKeys(response.data ?? []);
       } else if (response?.status === 403) {
+        if (currentOrganization && !refreshAttemptedRef.current[currentOrganization.id]) {
+          refreshAttemptedRef.current[currentOrganization.id] = true;
+          await switchOrganization(currentOrganization.id);
+          return;
+        }
         notifyProvider.error(t("apiKeys.noAccess"));
       }
     } catch {
@@ -48,7 +56,7 @@ const ApiKeyManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [currentOrganization, switchOrganization, t]);
 
   useEffect(() => {
     if (currentOrganization && isOwner) {
@@ -90,7 +98,10 @@ const ApiKeyManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm(t("apiKeys.confirmDelete"))) return;
+    const confirmed = await requestConfirm({
+      message: t("apiKeys.confirmDelete"),
+    });
+    if (!confirmed) return;
     try {
       const response = await apiKeyService.deleteApiKey(id);
       if (response?.status === 200) {

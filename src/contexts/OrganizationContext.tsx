@@ -101,6 +101,7 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
                         tokenProvider.setSession(
                             session.token,
                             session.userId,
+                            session.userName,
                             firstOrg.id,
                             firstOrg.slug,
                             firstOrg.role,

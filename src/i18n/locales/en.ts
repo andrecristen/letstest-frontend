@@ -596,6 +596,7 @@ const en = {
     limitSubtitle: "Upgrade to keep going",
     limitDescription: "You reached a plan limit for this action.",
     limitMetric: "{{metric}}: {{current}} / {{limit}}",
+    limitIncludesInvites: "Includes pending invites: {{pending}}",
     upgradeAction: "See plans",
     successTitle: "Payment confirmed",
     successSubtitle: "Your plan has been updated.",

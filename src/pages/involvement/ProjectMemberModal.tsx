@@ -66,6 +66,9 @@ const ProjectMemberModal: React.FC<ProjectMemberModalProps> = ({
   const handleAdd = async (userId: number) => {
     try {
       const response = await addMember(projectId, userId, type);
+      if (response?.status === 402) {
+        return;
+      }
       if (response?.status === 201 || response?.status === 200) {
         notifyProvider.success(t("involvement.addSuccess"));
         onAdded();
