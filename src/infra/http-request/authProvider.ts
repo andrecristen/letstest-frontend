@@ -25,3 +25,25 @@ export const registerAccount = async (data: RegisterData) => {
         return null;
     }
 };
+
+export const requestPasswordReset = async (email: string) => {
+    try {
+        return await api.post('/users/auth/forgot-password', { email });
+    } catch (err) {
+        if (axios.isAxiosError(err) && err.response) {
+            return err.response;
+        }
+        return null;
+    }
+};
+
+export const resetPassword = async (token: string, password: string) => {
+    try {
+        return await api.post('/users/auth/reset-password', { token, password });
+    } catch (err) {
+        if (axios.isAxiosError(err) && err.response) {
+            return err.response;
+        }
+        return null;
+    }
+};

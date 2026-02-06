@@ -30,10 +30,11 @@ const UserFormRegister = () => {
     }
     const response = await registerAccount(data);
     if (response?.status === 200) {
-      const { token, userId, userName, organizations } = response.data;
+      const { token, refreshToken, userId, userName, organizations } = response.data;
       const defaultOrg = organizations?.[0];
       tokenProvider.setSession(
         token,
+        refreshToken,
         userId,
         userName,
         defaultOrg?.id,
@@ -43,7 +44,7 @@ const UserFormRegister = () => {
       );
       reloadFromSession();
       notifyProvider.success(t("auth.registerSuccess"));
-      navigate("/dashboard");
+      navigate("/onboarding/org-setup");
     } else if (response?.status === 409) {
       notifyProvider.error(t("auth.emailAlreadyExists"));
     } else {

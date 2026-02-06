@@ -100,6 +100,7 @@ export const OrganizationProvider: React.FC<{ children: ReactNode }> = ({ childr
                     if (session) {
                         tokenProvider.setSession(
                             session.token,
+                            session.refreshToken,
                             session.userId,
                             session.userName,
                             firstOrg.id,

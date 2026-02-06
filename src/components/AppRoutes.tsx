@@ -5,6 +5,8 @@ import { InvolvementTypeEnum } from '../models/InvolvementData';
 import UserFormLogin from "../pages/user/UserFormLogin";
 import ProjectOwnerList from "../pages/projects/ProjectOwnerList";
 import UserFormRegister from "../pages/user/UserFormRegister";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import ResetPassword from "../pages/auth/ResetPassword";
 import ProjectPageView from "../pages/projects/ProjectPageView";
 import InvolvementOwnerList from "../pages/involvement/InvolvementOwnerList";
 import TemplateForm from "../pages/templates/TemplateForm";
@@ -39,6 +41,9 @@ import WebhookManagement from "../pages/organization/WebhookManagement";
 import BillingOverview from "../pages/billing/BillingOverview";
 import PlanSelection from "../pages/billing/PlanSelection";
 import BillingSuccess from "../pages/billing/BillingSuccess";
+import OnboardingOrgSetup from "../pages/onboarding/OnboardingOrgSetup";
+import OnboardingInviteTeam from "../pages/onboarding/OnboardingInviteTeam";
+import OnboardingFirstProject from "../pages/onboarding/OnboardingFirstProject";
 import UpgradeModal from "./UpgradeModal";
 import { OrganizationProvider, useOrganization } from "../contexts/OrganizationContext";
 import { ConfigProvider } from "../contexts/ConfigContext";
@@ -72,6 +77,11 @@ const AppRoutes = () => {
                 <Route path="/" element={<UserFormLogin />}></Route>
                 <Route path="/login" element={<UserFormLogin />}></Route>
                 <Route path="/register" element={<UserFormRegister />}></Route>
+                <Route path="/forgot-password" element={<ForgotPassword />}></Route>
+                <Route path="/reset-password" element={<ResetPassword />}></Route>
+                <Route path="/onboarding/org-setup" element={<OnboardingOrgSetup />}></Route>
+                <Route path="/onboarding/invite-team" element={<OnboardingInviteTeam />}></Route>
+                <Route path="/onboarding/first-project" element={<OnboardingFirstProject />}></Route>
                 {/* Private Access */}
                 {/* Manager */}
                 <Route path="/dashboard" element={<ProjectDashboard />}></Route>

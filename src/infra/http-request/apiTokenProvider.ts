@@ -12,6 +12,38 @@ const getExtraConfigs = () => {
     }
 };
 
+let refreshPromise: Promise<boolean> | null = null;
+
+const refreshSession = async (): Promise<boolean> => {
+    const refreshToken = tokenProvider.getRefreshToken();
+    if (!refreshToken) {
+        return false;
+    }
+    if (!refreshPromise) {
+        refreshPromise = api
+            .post("/users/auth/refresh", {
+                refreshToken,
+                organizationId: tokenProvider.getOrganizationId(),
+            })
+            .then((response) => {
+                if (response?.status === 200 && response.data?.token) {
+                    const { token, refreshToken: newRefreshToken, organizations } = response.data;
+                    tokenProvider.updateSessionToken(token, newRefreshToken);
+                    if (organizations) {
+                        tokenProvider.updateOrganizations(organizations);
+                    }
+                    return true;
+                }
+                return false;
+            })
+            .catch(() => false)
+            .finally(() => {
+                refreshPromise = null;
+            });
+    }
+    return refreshPromise;
+};
+
 const validateToken = (error: AxiosError, navigate: ReturnType<typeof useNavigate>) => {
     if (error.response?.status === 401) {
         tokenProvider.removeSession();
@@ -33,7 +65,15 @@ const apiTokenProvider = {
             return await api.get(path, finalConfigs);
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
-                validateToken(err, useNavigate);
+                if (err.response.status === 401) {
+                    const refreshed = await refreshSession();
+                    if (refreshed) {
+                        const retryConfigs = { ...extraConfigs, ...getExtraConfigs() };
+                        return await api.get(path, retryConfigs);
+                    }
+                    validateToken(err, useNavigate);
+                    return err.response;
+                }
                 if (err.response.status === 402) {
                     window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
                 }
@@ -53,7 +93,15 @@ const apiTokenProvider = {
             return await api.post(path, body, finalConfigs);
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
-                validateToken(err, useNavigate);
+                if (err.response.status === 401) {
+                    const refreshed = await refreshSession();
+                    if (refreshed) {
+                        const retryConfigs = { ...extraConfigs, ...getExtraConfigs() };
+                        return await api.post(path, body, retryConfigs);
+                    }
+                    validateToken(err, useNavigate);
+                    return err.response;
+                }
                 if (err.response.status === 402) {
                     window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
                 }
@@ -68,7 +116,14 @@ const apiTokenProvider = {
             return await api.put(path, body, getExtraConfigs());
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
-                validateToken(err, useNavigate);
+                if (err.response.status === 401) {
+                    const refreshed = await refreshSession();
+                    if (refreshed) {
+                        return await api.put(path, body, getExtraConfigs());
+                    }
+                    validateToken(err, useNavigate);
+                    return err.response;
+                }
                 if (err.response.status === 402) {
                     window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
                 }
@@ -83,7 +138,14 @@ const apiTokenProvider = {
             return await api.delete(path, getExtraConfigs());
         } catch (err) {
             if (axios.isAxiosError(err) && err.response) {
-                validateToken(err, useNavigate);
+                if (err.response.status === 401) {
+                    const refreshed = await refreshSession();
+                    if (refreshed) {
+                        return await api.delete(path, getExtraConfigs());
+                    }
+                    validateToken(err, useNavigate);
+                    return err.response;
+                }
                 if (err.response.status === 402) {
                     window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
                 }

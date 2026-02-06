@@ -8,6 +8,7 @@ export type Organization = {
 
 export type Session = {
     token: string;
+    refreshToken?: string;
     userId: number;
     userName?: string;
     organizationId?: number;
@@ -26,6 +27,11 @@ const tokenProvider = {
     getSessionToken() {
         const session = this.getSession();
         return session && session.token ? session.token : null;
+    },
+
+    getRefreshToken() {
+        const session = this.getSession();
+        return session?.refreshToken ?? null;
     },
 
     getSessionUserName() {
@@ -63,6 +69,7 @@ const tokenProvider = {
 
     setSession(
         token: string,
+        refreshToken: string | undefined,
         userId: number,
         userName?: string,
         organizationId?: number,
@@ -72,6 +79,7 @@ const tokenProvider = {
     ) {
         localStorage.setItem('session', JSON.stringify({
             token,
+            refreshToken,
             userId,
             userName,
             organizationId,
@@ -93,6 +101,17 @@ const tokenProvider = {
             session.organizationId = organizationId;
             session.organizationSlug = organizationSlug;
             session.organizationRole = organizationRole;
+            localStorage.setItem('session', JSON.stringify(session));
+        }
+    },
+
+    updateSessionToken(token: string, refreshToken?: string) {
+        const session = this.getSession();
+        if (session) {
+            session.token = token;
+            if (refreshToken) {
+                session.refreshToken = refreshToken;
+            }
             localStorage.setItem('session', JSON.stringify(session));
         }
     },

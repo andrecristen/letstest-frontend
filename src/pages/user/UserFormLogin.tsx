@@ -26,10 +26,11 @@ const UserFormLogin = () => {
       const data: AuthData = { email, password };
       const response = await auth(data);
       if (response?.status === 200) {
-        const { token, userId, userName, organizations } = response.data;
+        const { token, refreshToken, userId, userName, organizations } = response.data;
         const defaultOrg = organizations?.[0];
         tokenProvider.setSession(
           token,
+          refreshToken,
           userId,
           userName,
           defaultOrg?.id,
@@ -124,6 +125,13 @@ const UserFormLogin = () => {
               href="/register"
             >
               {t("auth.createAccount")}
+            </a>
+            <span className="mx-2 text-ink/30">•</span>
+            <a
+              className="font-semibold text-ocean hover:text-ink"
+              href="/forgot-password"
+            >
+              {t("auth.forgotPassword")}
             </a>
           </div>
         </Card>

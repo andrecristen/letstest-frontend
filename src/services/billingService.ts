@@ -19,3 +19,7 @@ export const createCheckout = async (plan: string) => {
 export const createPortal = async () => {
   return await apiTokenProvider.post("/billing/portal", {});
 };
+
+export const syncPlans = async () => {
+  return await apiTokenProvider.post("/billing/plans/sync", {});
+};
