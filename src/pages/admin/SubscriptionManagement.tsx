@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiEdit2, FiSearch } from "react-icons/fi";
 import * as adminService from "../../services/adminService";
-import type { AdminSubscription } from "../../services/adminService";
+import type { AdminSubscription, AdminBillingPlan } from "../../services/adminService";
 import tokenProvider from "../../infra/tokenProvider";
 import notifyProvider from "../../infra/notifyProvider";
 import { Button, Card, Field, Badge } from "../../ui";
@@ -14,10 +14,10 @@ import Modal from "../../ui/Modal";
 
 const SYSTEM_ACCESS_LEVEL = 99;
 
-const planColors: Record<string, "neutral" | "info" | "success"> = {
-  free: "neutral",
-  pro: "info",
-  enterprise: "success",
+const getPlanBadgeVariant = (plan: AdminBillingPlan | null | undefined) => {
+  if (!plan) return "neutral" as const;
+  if ((plan.priceMonthlyCents ?? 0) === 0) return "neutral" as const;
+  return "info" as const;
 };
 
 const statusColors: Record<string, "success" | "danger" | "neutral"> = {
@@ -36,6 +36,7 @@ const SubscriptionManagement: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [subscriptions, setSubscriptions] = useState<AdminSubscription[]>([]);
+  const [plans, setPlans] = useState<AdminBillingPlan[]>([]);
   const [search, setSearch] = useState("");
   const [editingSub, setEditingSub] = useState<AdminSubscription | null>(null);
   const [selectedPlan, setSelectedPlan] = useState("");
@@ -69,12 +70,25 @@ const SubscriptionManagement: React.FC = () => {
     }
   }, [navigate, t]);
 
+  const loadPlans = useCallback(async () => {
+    try {
+      const response = await adminService.getAdminPlans();
+      if (response?.status === 200) {
+        const nextPlans = response.data ?? [];
+        setPlans(nextPlans);
+      }
+    } catch {
+      // Silent fail: subscription view still works without plan list.
+    }
+  }, []);
+
   useEffect(() => {
     const accessLevel = tokenProvider.getAccessLevel();
     if (accessLevel && accessLevel >= SYSTEM_ACCESS_LEVEL) {
       loadSubscriptions();
+      loadPlans();
     }
-  }, [loadSubscriptions]);
+  }, [loadPlans, loadSubscriptions]);
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -123,6 +137,13 @@ const SubscriptionManagement: React.FC = () => {
     );
   }
 
+  const getPlanByKey = (planKey?: string | null) =>
+    plans.find((plan) => plan.key === planKey) ?? null;
+
+  const editablePlans = plans
+    .filter((plan) => plan.active && plan.configured)
+    .sort((a, b) => (a.priceMonthlyCents ?? 0) - (b.priceMonthlyCents ?? 0));
+
   return (
     <PainelContainer>
       <LoadingOverlay show={loading} />
@@ -167,8 +188,11 @@ const SubscriptionManagement: React.FC = () => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                      <Badge variant={planColors[sub.plan] ?? "neutral"} className="text-xs">
-                        {sub.plan.toUpperCase()}
+                      <Badge
+                        variant={getPlanBadgeVariant(getPlanByKey(sub.plan))}
+                        className="text-xs"
+                      >
+                        {getPlanByKey(sub.plan)?.name ?? sub.plan}
                       </Badge>
                       <Badge variant={statusColors[sub.status] ?? "neutral"} className="text-xs">
                         {sub.status}
@@ -223,8 +247,11 @@ const SubscriptionManagement: React.FC = () => {
 
         <div className="space-y-4">
           <Field label={t("admin.currentPlan")}>
-            <Badge variant={planColors[editingSub?.plan ?? ""] ?? "neutral"} className="text-sm">
-              {editingSub?.plan?.toUpperCase()}
+            <Badge
+              variant={getPlanBadgeVariant(getPlanByKey(editingSub?.plan))}
+              className="text-sm"
+            >
+              {getPlanByKey(editingSub?.plan)?.name ?? editingSub?.plan}
             </Badge>
           </Field>
 
@@ -234,9 +261,11 @@ const SubscriptionManagement: React.FC = () => {
               onChange={(e) => setSelectedPlan(e.target.value)}
               className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
-              <option value="free">Free</option>
-              <option value="pro">Pro</option>
-              <option value="enterprise">Enterprise</option>
+              {editablePlans.map((plan) => (
+                <option key={plan.id} value={plan.key}>
+                  {plan.name}
+                </option>
+              ))}
             </select>
           </Field>
         </div>

@@ -55,7 +55,7 @@ const PlanSelection: React.FC = () => {
             <Card key={plan.key} className="space-y-4 p-6">
               <div className="space-y-1">
                 <p className="text-xs uppercase tracking-[0.2em] text-ink/40">
-                  {t(`billing.plan_${plan.key}`)}
+                  {plan.name}
                 </p>
                 <h3 className="font-display text-xl text-ink">{plan.name}</h3>
                 <p className="text-sm text-ink/60">
@@ -85,7 +85,7 @@ const PlanSelection: React.FC = () => {
                     : t("billing.webhooksCount", { count: plan.features.webhooks })}
                 </Badge>
               </div>
-              {plan.key !== "free" ? (
+              {plan.priceMonthlyCents !== 0 ? (
                 <Button onClick={() => handleCheckout(plan.key)}>
                   {t("billing.choosePlan")}
                 </Button>

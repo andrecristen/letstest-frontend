@@ -6,7 +6,7 @@ export type BillingMetricKey =
   | "test_executions";
 
 export type BillingPlan = {
-  key: "free" | "pro" | "enterprise";
+  key: string;
   name: string;
   priceMonthlyCents: number | null;
   limits: Record<BillingMetricKey, number | null>;
@@ -18,7 +18,7 @@ export type BillingPlan = {
 };
 
 export type BillingUsageSummary = {
-  plan: "free" | "pro" | "enterprise";
+  plan: string;
   limits: Record<BillingMetricKey, number | null>;
   usage: Partial<Record<BillingMetricKey, number>>;
 };

@@ -100,7 +100,7 @@ const BillingOverview: React.FC = () => {
                 {t("billing.currentPlan")}
               </p>
               <h3 className="font-display text-xl text-ink">
-                {currentPlan?.name ?? t("billing.planFree")}
+                {currentPlan?.name ?? usage?.plan ?? t("billing.currentPlan")}
               </h3>
             </div>
             <div className="flex flex-wrap items-center gap-2">
