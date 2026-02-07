@@ -255,7 +255,7 @@ const WebhookManagement: React.FC = () => {
                     <div className="flex flex-wrap gap-1">
                       {webhook.events.map((event) => (
                         <Badge key={event} variant="neutral" className="text-xs">
-                          {event}
+                          {t(`webhooks.events.${event}`)}
                         </Badge>
                       ))}
                     </div>
@@ -383,7 +383,7 @@ const WebhookManagement: React.FC = () => {
                           : "border-ink/20 text-ink/60 hover:border-ink/40"
                       }`}
                     >
-                      {event}
+                      {t(`webhooks.events.${event}`)}
                     </button>
                   ))}
                 </div>

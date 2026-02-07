@@ -670,6 +670,15 @@ const pt = {
     noDeliveries: "Nenhuma entrega registrada.",
     deliveriesError: "Erro ao carregar entregas.",
     limit: "{{current}} de {{max}} webhooks",
+    events: {
+      "test_execution.created": "Execucao de teste criada",
+      "test_execution.reported": "Execucao de teste reportada",
+      "report.created": "Relatorio criado",
+      "test_case.created": "Caso de teste criado",
+      "test_case.updated": "Caso de teste atualizado",
+      "test_scenario.created": "Cenario de teste criado",
+      "involvement.accepted": "Convite aceito",
+    },
   },
   dashboard: {
     pageTitle: "Dashboard",
