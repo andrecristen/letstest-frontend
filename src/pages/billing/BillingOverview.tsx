@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import PainelContainer from "../../components/PainelContainer";
 import TitleContainer from "../../components/TitleContainer";
@@ -13,6 +13,7 @@ import notifyProvider from "../../infra/notifyProvider";
 const BillingOverview: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { billingEnabled } = useConfig();
   const [loading, setLoading] = useState(false);
   const [plans, setPlans] = useState<BillingPlan[]>([]);
@@ -63,7 +64,8 @@ const BillingOverview: React.FC = () => {
 
   const handleOpenPortal = async () => {
     try {
-      const response = await createPortal();
+      const returnUrl = `${window.location.origin}${location.pathname}${location.search}${location.hash}`;
+      const response = await createPortal(returnUrl);
       if (response?.data?.url) {
         window.location.assign(response.data.url);
       }
