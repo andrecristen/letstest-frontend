@@ -42,6 +42,7 @@ import BillingOverview from "../pages/billing/BillingOverview";
 import PlanSelection from "../pages/billing/PlanSelection";
 import BillingSuccess from "../pages/billing/BillingSuccess";
 import BillingPlanManagement from "../pages/admin/BillingPlanManagement";
+import SubscriptionManagement from "../pages/admin/SubscriptionManagement";
 import OnboardingOrgSetup from "../pages/onboarding/OnboardingOrgSetup";
 import OnboardingInviteTeam from "../pages/onboarding/OnboardingInviteTeam";
 import OnboardingFirstProject from "../pages/onboarding/OnboardingFirstProject";
@@ -148,6 +149,7 @@ const AppRoutes = () => {
                 <Route path="/billing/success" element={<BillingGuard><BillingSuccess /></BillingGuard>}></Route>
                 {/* Admin */}
                 <Route path="/admin/billing-plans" element={<AdminGuard><BillingPlanManagement /></AdminGuard>}></Route>
+                <Route path="/admin/subscriptions" element={<AdminGuard><SubscriptionManagement /></AdminGuard>}></Route>
             </Routes>
         </Router>
         </PageLoadingProvider>

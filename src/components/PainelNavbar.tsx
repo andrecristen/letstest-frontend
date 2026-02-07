@@ -19,6 +19,7 @@ import {
   FiSun,
   FiMoon,
   FiSettings,
+  FiCreditCard,
 } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -312,7 +313,10 @@ const PainelNavbar: React.FC<PainelNavbarProps> = ({ children }) => {
     ...(billingEnabled && isOwner ? [{ name: t("nav.billing"), route: "/billing", icon: <FiBarChart2 /> }] : []),
     ...(billingEnabled && isOwner ? [{ name: t("nav.apiKeys"), route: "/organization/api-keys", icon: <FiKey /> }] : []),
     ...(billingEnabled && isOwner ? [{ name: t("nav.webhooks"), route: "/organization/webhooks", icon: <FiLink /> }] : []),
-    ...(isSystemAdmin ? [{ name: t("nav.admin"), route: "/admin/billing-plans", icon: <FiSettings /> }] : []),
+    ...(isSystemAdmin ? [
+      { name: t("nav.admin"), route: "/admin/billing-plans", icon: <FiSettings /> },
+      { name: t("nav.adminSubscriptions"), route: "/admin/subscriptions", icon: <FiCreditCard /> },
+    ] : []),
     // { name: t("nav.invitations"), route: "/involvements/invitations", icon: <FiMail /> },
     // { name: t("nav.requests"), route: "/involvements/requests", icon: <FiMail /> },
     { name: t("nav.orgInvites"), route: "/my-invites", icon: <FiMail /> },
