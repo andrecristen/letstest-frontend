@@ -41,6 +41,7 @@ import WebhookManagement from "../pages/organization/WebhookManagement";
 import BillingOverview from "../pages/billing/BillingOverview";
 import PlanSelection from "../pages/billing/PlanSelection";
 import BillingSuccess from "../pages/billing/BillingSuccess";
+import BillingPlanManagement from "../pages/admin/BillingPlanManagement";
 import OnboardingOrgSetup from "../pages/onboarding/OnboardingOrgSetup";
 import OnboardingInviteTeam from "../pages/onboarding/OnboardingInviteTeam";
 import OnboardingFirstProject from "../pages/onboarding/OnboardingFirstProject";
@@ -53,6 +54,15 @@ import { PageLoadingProvider } from "../contexts/PageLoadingContext";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import PageLoadingOverlay from "./PageLoadingOverlay";
 import ConfirmOverlay from "./ConfirmOverlay";
+import tokenProvider from "../infra/tokenProvider";
+
+const AdminGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const accessLevel = tokenProvider.getAccessLevel();
+    if (!accessLevel || accessLevel < 99) {
+        return <Navigate to="/dashboard" replace />;
+    }
+    return <>{children}</>;
+};
 
 const BillingGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isOwner } = useOrganization();
@@ -136,6 +146,8 @@ const AppRoutes = () => {
                 <Route path="/billing" element={<BillingGuard><BillingOverview /></BillingGuard>}></Route>
                 <Route path="/billing/plans" element={<BillingGuard><PlanSelection /></BillingGuard>}></Route>
                 <Route path="/billing/success" element={<BillingGuard><BillingSuccess /></BillingGuard>}></Route>
+                {/* Admin */}
+                <Route path="/admin/billing-plans" element={<AdminGuard><BillingPlanManagement /></AdminGuard>}></Route>
             </Routes>
         </Router>
         </PageLoadingProvider>

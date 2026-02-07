@@ -135,6 +135,19 @@ const tokenProvider = {
 
     removeSession() {
         localStorage.removeItem('session');
+    },
+
+    getAccessLevel(): number | null {
+        const token = this.getSessionToken();
+        if (!token) return null;
+        try {
+            const payload = token.split('.')[1];
+            if (!payload) return null;
+            const decoded = JSON.parse(atob(payload));
+            return typeof decoded.access === 'number' ? decoded.access : null;
+        } catch {
+            return null;
+        }
     }
 };
 

@@ -133,6 +133,28 @@ const apiTokenProvider = {
         }
     },
 
+    patch: async (path: string, body: any) => {
+        try {
+            return await api.patch(path, body, getExtraConfigs());
+        } catch (err) {
+            if (axios.isAxiosError(err) && err.response) {
+                if (err.response.status === 401) {
+                    const refreshed = await refreshSession();
+                    if (refreshed) {
+                        return await api.patch(path, body, getExtraConfigs());
+                    }
+                    validateToken(err, useNavigate);
+                    return err.response;
+                }
+                if (err.response.status === 402) {
+                    window.dispatchEvent(new CustomEvent("billing:limit", { detail: err.response.data }));
+                }
+                return err.response;
+            }
+            return null;
+        }
+    },
+
     delete: async (path: string) => {
         try {
             return await api.delete(path, getExtraConfigs());
